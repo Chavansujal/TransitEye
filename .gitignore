@@ -35,3 +35,7 @@ yarn-debug.log*
 .idea/
 .DS_Store
 Thumbs.db
+
+# Raw media uploads in root and frontend root (public/videos is tracked)
+/*.mp4
+frontend/*.mp4

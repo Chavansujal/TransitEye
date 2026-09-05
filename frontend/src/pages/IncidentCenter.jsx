@@ -10,12 +10,15 @@ import {
   Lock, 
   Route, 
   Activity,
-  FileCheck
+  FileCheck,
+  Play,
+  Film
 } from "lucide-react";
 import { updateIncidentStatus } from "../services/api";
 
 export default function IncidentCenter({ incidents = [], onIncidentUpdated }) {
   const [updatingId, setUpdatingId] = useState(null);
+  const [activeVideoId, setActiveVideoId] = useState(null);
 
   const handleStatusChange = async (incidentId, newStatus) => {
     setUpdatingId(incidentId);
@@ -56,17 +59,42 @@ export default function IncidentCenter({ incidents = [], onIncidentUpdated }) {
             key={inc.id} 
             className="glass-panel p-6 border-slate-800 hover:border-slate-700 transition flex flex-col lg:flex-row gap-6 shadow-xl"
           >
-            {/* Left: Camera Evidence Image Frame */}
+            {/* Left: Camera Evidence Image Frame / 360 Video Player */}
             <div className="w-full lg:w-80 rounded-2xl bg-slate-950 border border-slate-800 overflow-hidden relative group shrink-0 shadow-inner flex flex-col justify-between">
-              <div className="h-52 relative overflow-hidden">
-                <img 
-                  src={inc.evidenceImage || "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?w=600&auto=format&fit=crop&q=80"} 
-                  alt="Camera Evidence Frame"
-                  className="w-full h-full object-cover opacity-85 group-hover:scale-105 transition duration-500"
-                />
+              <div className="h-52 relative overflow-hidden bg-slate-950">
+                {activeVideoId === inc.id ? (
+                  <video
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    className="w-full h-full object-cover"
+                  >
+                    <source src="/videos/bus-cockpit-dashcam.mp4" type="video/mp4" />
+                    <source src="/videos/firefly-360-road.mp4" type="video/mp4" />
+                    <source src="/videos/gemini-pothole-bus.mp4" type="video/mp4" />
+                  </video>
+                ) : (
+                  <img 
+                    src={inc.evidenceImage || "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?w=600&auto=format&fit=crop&q=80"} 
+                    alt="Camera Evidence Frame"
+                    className="w-full h-full object-cover opacity-85 group-hover:scale-105 transition duration-500"
+                  />
+                )}
+
                 <div className="absolute top-3 left-3 bg-slate-950/90 px-2.5 py-1 rounded-lg text-[10px] font-mono text-cyan-400 border border-cyan-800 flex items-center gap-1.5 shadow-md">
-                  <Camera className="w-3 h-3" /> BUS CAMERA EVIDENCE SNAPSHOT
+                  <Camera className="w-3 h-3" /> {activeVideoId === inc.id ? "CONTINUOUS 360° FEED" : "EVIDENCE SNAPSHOT"}
                 </div>
+
+                {/* Toggle Video/Snapshot Button */}
+                <button
+                  onClick={() => setActiveVideoId(activeVideoId === inc.id ? null : inc.id)}
+                  className="absolute top-3 right-3 bg-slate-950/90 hover:bg-slate-900 px-2 py-1 rounded-lg text-[10px] font-mono text-amber-300 border border-amber-500/50 flex items-center gap-1 shadow-md transition z-10"
+                >
+                  <Film className="w-3 h-3 text-amber-400" />
+                  <span>{activeVideoId === inc.id ? "SNAPSHOT" : "360° VIDEO"}</span>
+                </button>
+
                 <div className="absolute bottom-3 left-3 right-3 bg-slate-950/95 p-2 rounded-xl text-xs font-mono text-amber-300 border border-amber-500/40 text-center font-bold shadow-2xl">
                   PLATE: {inc.registrationNumber || "MH12 AB 1234"} ({((inc.anprConfidence || 0.91) * 100).toFixed(0)}% Match)
                 </div>

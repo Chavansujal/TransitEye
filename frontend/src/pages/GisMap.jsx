@@ -120,14 +120,14 @@ export default function GisMap({ buses = [], events = [], roadIssues = [], incid
   });
 
   return (
-    <div className="p-6 space-y-4 max-w-7xl mx-auto h-[calc(100vh-5rem)] flex flex-col">
+    <div className="p-3 sm:p-6 space-y-3 sm:space-y-4 max-w-7xl mx-auto flex flex-col min-h-0 flex-1">
       {/* Top Header & Filter Bar */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 glass-panel p-5 shrink-0 border-cyan-500/20">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 sm:gap-4 glass-panel p-4 sm:p-5 shrink-0 border-cyan-500/20">
         <div>
-          <h2 className="text-xl font-black text-white flex items-center gap-2 tracking-tight">
-            <MapPin className="w-5 h-5 text-cyan-400" /> Pune City GIS Spatial Intelligence Map
+          <h2 className="text-lg sm:text-xl font-black text-white flex items-center gap-2 tracking-tight">
+            <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-400 shrink-0" /> Pune City GIS Spatial Intelligence Map
           </h2>
-          <p className="text-xs text-slate-400 mt-0.5">
+          <p className="text-[11px] sm:text-xs text-slate-400 mt-0.5">
             Fleet tracking, multi-bus corroborated road defects & real-time congestion heat corridors.
           </p>
         </div>
@@ -143,17 +143,17 @@ export default function GisMap({ buses = [], events = [], roadIssues = [], incid
                 : "bg-slate-900 border-slate-800 text-slate-400 hover:text-white"
             }`}
           >
-            <Flame className={`w-4 h-4 ${showHeatmap ? "text-rose-400 animate-pulse" : ""}`} />
-            Congestion Heatmap: {showHeatmap ? "ON" : "OFF"}
+            <Flame className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${showHeatmap ? "text-rose-400 animate-pulse" : ""}`} />
+            <span>Heatmap: {showHeatmap ? "ON" : "OFF"}</span>
           </button>
 
           {/* Filter Buttons */}
-          <div className="flex items-center gap-1 bg-slate-950/80 p-1 rounded-xl border border-slate-800 text-xs font-mono">
+          <div className="flex items-center gap-1 bg-slate-950/80 p-1 rounded-xl border border-slate-800 text-[11px] sm:text-xs font-mono overflow-x-auto no-scrollbar max-w-full">
             {["ALL", "BUSES", "POTHOLES", "CONGESTION", "INCIDENTS"].map(type => (
               <button
                 key={type}
                 onClick={() => setFilterType(type)}
-                className={`px-3 py-1.5 rounded-lg font-bold transition duration-200 ${
+                className={`px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg font-bold transition duration-200 shrink-0 ${
                   filterType === type 
                     ? "bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 shadow-md shadow-cyan-500/20" 
                     : "text-slate-400 hover:text-white"
@@ -167,12 +167,12 @@ export default function GisMap({ buses = [], events = [], roadIssues = [], incid
       </div>
 
       {/* Map Viewport Container */}
-      <div className="flex-1 glass-panel p-2 relative rounded-3xl overflow-hidden border-slate-800/80 shadow-2xl">
+      <div className="h-[380px] sm:h-[480px] lg:h-[580px] flex-1 glass-panel p-1.5 sm:p-2 relative rounded-2xl sm:rounded-3xl overflow-hidden border-slate-800/80 shadow-2xl">
         <MapContainer 
           center={PUNE_CENTER} 
           zoom={13} 
           scrollWheelZoom={true} 
-          style={{ height: "100%", width: "100%", borderRadius: "18px" }}
+          style={{ height: "100%", width: "100%", borderRadius: "16px" }}
         >
           {/* OpenStreetMap Map Tiles */}
           <TileLayer
@@ -249,7 +249,7 @@ export default function GisMap({ buses = [], events = [], roadIssues = [], incid
                     <div>Route: <strong className="text-white">{bus.route}</strong></div>
                     <div>Speed: <strong className="text-emerald-400">{bus.speed} km/h</strong></div>
                     <div>Driver: {bus.driver}</div>
-                    <div>Cameras: <span className="text-emerald-400 font-bold">4 Cams Active (Front/Sides/Cabin)</span></div>
+                    <div>Cameras: <span className="text-emerald-400 font-bold">4 Cams Active</span></div>
                   </div>
                 </div>
               </Popup>
@@ -298,7 +298,7 @@ export default function GisMap({ buses = [], events = [], roadIssues = [], incid
                     {/* Multi-Bus Corroboration Badge */}
                     <div className="flex items-center gap-1.5 px-2 py-1 bg-cyan-950/80 border border-cyan-700 rounded-lg text-[10px] text-cyan-300 font-mono font-bold">
                       <ShieldCheck className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
-                      Verified by {corroborationCount} Independent Buses
+                      Verified by {corroborationCount} Buses
                     </div>
 
                     <div className="text-xs text-slate-300 space-y-1">
@@ -319,34 +319,34 @@ export default function GisMap({ buses = [], events = [], roadIssues = [], incid
         </MapContainer>
 
         {/* Map Legend Overlay */}
-        <div className="absolute bottom-6 right-6 z-[1000] glass-panel p-4 text-xs space-y-2.5 border-slate-800 shadow-2xl backdrop-blur-xl max-w-xs">
-          <div className="font-bold text-white text-[10px] uppercase tracking-widest border-b border-slate-800 pb-1.5 flex items-center justify-between font-mono">
+        <div className="absolute bottom-3 right-3 sm:bottom-6 sm:right-6 z-[1000] glass-panel p-3 sm:p-4 text-[11px] sm:text-xs space-y-2 border-slate-800 shadow-2xl backdrop-blur-xl max-w-[240px] sm:max-w-xs">
+          <div className="font-bold text-white text-[9px] sm:text-[10px] uppercase tracking-widest border-b border-slate-800 pb-1 flex items-center justify-between font-mono">
             <span className="flex items-center gap-1.5">
               <Layers className="w-3.5 h-3.5 text-cyan-400" /> GIS Spatial Layers
             </span>
-            <span className="text-cyan-400">SIH 26124</span>
+            <span className="text-cyan-400 hidden sm:inline">SIH 26124</span>
           </div>
-          <div className="space-y-2 font-mono text-[11px]">
-            <div className="flex items-center gap-2.5">
-              <span className="w-3 h-3 rounded-full bg-cyan-400 shadow-sm shadow-cyan-400"></span>
-              <span className="text-slate-300">Active Bus Mobile Sensors (12)</span>
+          <div className="space-y-1.5 font-mono text-[10px] sm:text-[11px]">
+            <div className="flex items-center gap-2">
+              <span className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-cyan-400 shrink-0"></span>
+              <span className="text-slate-300">Active Bus Sensors (12)</span>
             </div>
-            <div className="flex items-center gap-2.5">
-              <span className="w-3 h-3 rounded-full bg-rose-500 shadow-sm shadow-rose-500"></span>
-              <span className="text-slate-300">Potholes & Missing Dividers</span>
+            <div className="flex items-center gap-2">
+              <span className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-rose-500 shrink-0"></span>
+              <span className="text-slate-300">Potholes & Defects</span>
             </div>
-            <div className="flex items-center gap-2.5">
-              <span className="w-3 h-3 rounded-full bg-purple-500 shadow-sm shadow-purple-500"></span>
-              <span className="text-slate-300">Faded Zebra Crossings & Pedestrians</span>
+            <div className="flex items-center gap-2">
+              <span className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-purple-500 shrink-0"></span>
+              <span className="text-slate-300">Zebra & Pedestrians</span>
             </div>
-            <div className="flex items-center gap-2.5">
-              <span className="w-3 h-3 rounded-full bg-blue-500 shadow-sm shadow-blue-500"></span>
-              <span className="text-slate-300">Waterlogging / Submerged Lanes</span>
+            <div className="flex items-center gap-2">
+              <span className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-blue-500 shrink-0"></span>
+              <span className="text-slate-300">Waterlogging</span>
             </div>
             {showHeatmap && (
-              <div className="pt-1 border-t border-slate-800 flex items-center gap-2 text-rose-400 text-[10px]">
-                <Flame className="w-3 h-3 animate-pulse" />
-                <span>Congestion Heat Corridors Active</span>
+              <div className="pt-1 border-t border-slate-800 flex items-center gap-1.5 text-rose-400 text-[9px] sm:text-[10px]">
+                <Flame className="w-3 h-3 animate-pulse shrink-0" />
+                <span>Congestion Heat Active</span>
               </div>
             )}
           </div>

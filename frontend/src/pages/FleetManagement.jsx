@@ -14,28 +14,28 @@ export default function FleetManagement({ buses = [] }) {
   });
 
   return (
-    <div className="p-6 space-y-6 max-w-7xl mx-auto">
+    <div className="p-3 sm:p-6 space-y-4 sm:space-y-6 max-w-7xl mx-auto">
       {/* Title & Filter Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 glass-panel p-6 border-cyan-500/25">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 glass-panel p-4 sm:p-6 border-cyan-500/25">
         <div>
-          <h2 className="text-2xl font-black text-white tracking-tight flex items-center gap-2.5">
-            <Bus className="w-6 h-6 text-cyan-400" /> Public Transport Bus Sensing Fleet
+          <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight flex items-center gap-2.5">
+            <Bus className="w-5 h-5 sm:w-6 sm:h-6 text-cyan-400 shrink-0" /> Public Transport Bus Sensing Fleet
           </h2>
-          <p className="text-sm text-slate-400 mt-1">
+          <p className="text-xs sm:text-sm text-slate-400 mt-1">
             Real-time operational status, GPS positions & Edge AI health metrics for 12 Pune mobile sensing buses.
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0">
           {/* Search Bar */}
-          <div className="relative font-mono text-xs">
+          <div className="relative font-mono text-xs w-full sm:w-64">
             <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               placeholder="Search bus, route, driver..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="bg-slate-950/80 border border-slate-800 rounded-2xl pl-10 pr-4 py-2.5 text-white focus:outline-none focus:border-cyan-500 w-64 shadow-inner"
+              className="bg-slate-950/80 border border-slate-800 rounded-2xl pl-10 pr-4 py-2.5 text-white focus:outline-none focus:border-cyan-500 w-full shadow-inner"
             />
           </div>
 
@@ -43,7 +43,7 @@ export default function FleetManagement({ buses = [] }) {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="bg-slate-950/80 border border-slate-800 rounded-2xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-cyan-500 font-mono"
+            className="bg-slate-950/80 border border-slate-800 rounded-2xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-cyan-500 font-mono w-full sm:w-auto"
           >
             <option value="ALL">All Statuses</option>
             <option value="ONLINE">ONLINE</option>
@@ -55,8 +55,8 @@ export default function FleetManagement({ buses = [] }) {
       </div>
 
       {/* Table Panel */}
-      <div className="glass-panel p-6 overflow-x-auto border-slate-800">
-        <table className="w-full text-left text-xs">
+      <div className="glass-panel p-4 sm:p-6 overflow-x-auto no-scrollbar border-slate-800">
+        <table className="w-full text-left text-xs min-w-[750px]">
           <thead className="bg-slate-950 text-slate-400 border-b border-slate-800 uppercase tracking-wider font-mono">
             <tr>
               <th className="p-3.5">Bus ID</th>

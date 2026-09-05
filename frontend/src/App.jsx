@@ -19,6 +19,7 @@ import {
 
 export default function App() {
   const [activeTab, setActiveTab] = useState("overview");
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // App Level State
   const [buses, setBuses] = useState([
@@ -95,18 +96,25 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0b0f19] text-white flex flex-col font-sans">
+    <div className="min-h-screen bg-[#0b0f19] text-white flex flex-col font-sans max-w-full overflow-x-hidden">
       {/* Fixed Top Header */}
       <Header 
         activeBusesCount={buses.filter(b => b.status === "ONLINE" || b.status === "INCIDENT").length}
         totalBusesCount={buses.length}
+        isMobileMenuOpen={isMobileMenuOpen}
+        onToggleMobileMenu={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
       />
 
       {/* Main Body Layout with Sidebar */}
-      <div className="flex-1 flex overflow-hidden">
-        <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+      <div className="flex-1 flex overflow-hidden relative">
+        <Sidebar 
+          activeTab={activeTab} 
+          setActiveTab={setActiveTab} 
+          isMobileMenuOpen={isMobileMenuOpen}
+          setIsMobileMenuOpen={setIsMobileMenuOpen}
+        />
 
-        <main className="flex-1 overflow-y-auto bg-[#0b0f19]">
+        <main className="flex-1 overflow-y-auto bg-[#0b0f19] min-w-0">
           {activeTab === "overview" && (
             <Overview 
               buses={buses} 

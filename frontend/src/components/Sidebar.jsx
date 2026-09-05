@@ -8,10 +8,16 @@ import {
   ShieldAlert, 
   BarChart3,
   Cpu,
-  Radio
+  Radio,
+  X
 } from "lucide-react";
 
-export default function Sidebar({ activeTab, setActiveTab }) {
+export default function Sidebar({ 
+  activeTab, 
+  setActiveTab, 
+  isMobileMenuOpen = false, 
+  setIsMobileMenuOpen 
+}) {
   const menuItems = [
     { id: "overview", label: "Command Center", icon: LayoutDashboard, badge: "Live" },
     { id: "live", label: "Live AI Feed", icon: Video, badge: "Edge AI" },
@@ -22,11 +28,26 @@ export default function Sidebar({ activeTab, setActiveTab }) {
     { id: "analytics", label: "Analytics & OD", icon: BarChart3 }
   ];
 
-  return (
-    <aside className="w-64 bg-[#070a12]/95 border-r border-slate-800/80 flex flex-col justify-between h-[calc(100vh-4rem)] p-4 shrink-0 backdrop-blur-xl">
+  const handleSelectTab = (id) => {
+    setActiveTab(id);
+    if (setIsMobileMenuOpen) {
+      setIsMobileMenuOpen(false);
+    }
+  };
+
+  const renderContent = () => (
+    <>
       <div className="space-y-1.5">
-        <div className="px-3 py-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest font-mono">
-          OPERATIONS CONSOLE
+        <div className="px-3 py-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest font-mono flex items-center justify-between">
+          <span>OPERATIONS CONSOLE</span>
+          {isMobileMenuOpen && (
+            <button 
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="lg:hidden p-1 rounded-lg hover:bg-slate-900 text-slate-400 hover:text-white"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
         </div>
         {menuItems.map((item) => {
           const Icon = item.icon;
@@ -34,7 +55,7 @@ export default function Sidebar({ activeTab, setActiveTab }) {
           return (
             <button
               key={item.id}
-              onClick={() => setActiveTab(item.id)}
+              onClick={() => handleSelectTab(item.id)}
               className={`w-full flex items-center justify-between px-3.5 py-3 rounded-xl text-xs font-semibold transition-all duration-200 group relative ${
                 isActive
                   ? "bg-slate-900/90 text-cyan-400 border border-cyan-500/30 shadow-lg shadow-cyan-500/10"
@@ -68,7 +89,7 @@ export default function Sidebar({ activeTab, setActiveTab }) {
       </div>
 
       {/* System Telemetry Box at Sidebar Bottom */}
-      <div className="glass-panel p-4 text-xs space-y-2.5 border-slate-800/80 bg-slate-950/60 relative overflow-hidden">
+      <div className="glass-panel p-4 text-xs space-y-2.5 border-slate-800/80 bg-slate-950/60 relative overflow-hidden mt-auto">
         <div className="flex items-center justify-between font-mono">
           <span className="flex items-center gap-1.5 font-bold text-slate-200">
             <Radio className="w-3.5 h-3.5 text-cyan-400 animate-pulse" /> Edge Telemetry
@@ -92,6 +113,30 @@ export default function Sidebar({ activeTab, setActiveTab }) {
           </div>
         </div>
       </div>
-    </aside>
+    </>
+  );
+
+  return (
+    <>
+      {/* Desktop Static Sidebar */}
+      <aside className="hidden lg:flex w-64 bg-[#070a12]/95 border-r border-slate-800/80 flex-col justify-between h-[calc(100vh-4rem)] p-4 shrink-0 backdrop-blur-xl">
+        {renderContent()}
+      </aside>
+
+      {/* Mobile Drawer Overlay */}
+      {isMobileMenuOpen && (
+        <div className="lg:hidden">
+          {/* Dark Backdrop */}
+          <div 
+            className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-40"
+            onClick={() => setIsMobileMenuOpen && setIsMobileMenuOpen(false)}
+          />
+          {/* Sliding Panel */}
+          <aside className="fixed top-16 left-0 bottom-0 w-72 max-w-[85vw] bg-[#070a12] border-r border-slate-800/90 flex flex-col justify-between p-4 z-50 overflow-y-auto shadow-2xl animate-in slide-in-from-left duration-200">
+            {renderContent()}
+          </aside>
+        </div>
+      )}
+    </>
   );
 }

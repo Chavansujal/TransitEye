@@ -1,7 +1,20 @@
-import React, { useState } from "react";
-import { MapContainer, TileLayer, Marker, Popup, Polyline, Circle } from "react-leaflet";
+import React, { useState, useEffect } from "react";
+import { MapContainer, TileLayer, Marker, Popup, Polyline, Circle, useMap } from "react-leaflet";
 import L from "leaflet";
-import { MapPin, Filter, Layers, Info, Flame, ShieldCheck, AlertTriangle } from "lucide-react";
+import "leaflet/dist/leaflet.css";
+import { MapPin, Filter, Layers, Info, Flame, ShieldCheck, AlertTriangle, Shield, Cpu, Activity } from "lucide-react";
+
+// Helper component to fix Leaflet map tile rendering in tabbed layouts
+function MapController() {
+  const map = useMap();
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      map.invalidateSize();
+    }, 200);
+    return () => clearTimeout(timer);
+  }, [map]);
+  return null;
+}
 
 // Custom Leaflet Markers
 const createCustomIcon = (color) => {
@@ -120,9 +133,9 @@ export default function GisMap({ buses = [], events = [], roadIssues = [], incid
   });
 
   return (
-    <div className="p-3 sm:p-6 space-y-3 sm:space-y-4 max-w-7xl mx-auto flex flex-col min-h-0 flex-1">
+    <div className="p-3 sm:p-6 space-y-4 max-w-7xl mx-auto">
       {/* Top Header & Filter Bar */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 sm:gap-4 glass-panel p-4 sm:p-5 shrink-0 border-cyan-500/20">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 sm:gap-4 glass-panel p-4 sm:p-5 border-cyan-500/20">
         <div>
           <h2 className="text-lg sm:text-xl font-black text-white flex items-center gap-2 tracking-tight">
             <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-400 shrink-0" /> Pune City GIS Spatial Intelligence Map
@@ -167,17 +180,19 @@ export default function GisMap({ buses = [], events = [], roadIssues = [], incid
       </div>
 
       {/* Map Viewport Container */}
-      <div className="h-[380px] sm:h-[480px] lg:h-[580px] flex-1 glass-panel p-1.5 sm:p-2 relative rounded-2xl sm:rounded-3xl overflow-hidden border-slate-800/80 shadow-2xl">
+      <div className="h-[450px] sm:h-[520px] lg:h-[600px] glass-panel p-1.5 sm:p-2 relative rounded-2xl sm:rounded-3xl overflow-hidden border-slate-800/80 shadow-2xl">
         <MapContainer 
           center={PUNE_CENTER} 
           zoom={13} 
           scrollWheelZoom={true} 
           style={{ height: "100%", width: "100%", borderRadius: "16px" }}
         >
-          {/* OpenStreetMap Map Tiles */}
+          <MapController />
+          {/* OpenStreetMap Standard Map Tiles */}
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            maxZoom={19}
           />
 
           {/* Congestion Heatmap Corridor Polylines */}
@@ -329,19 +344,19 @@ export default function GisMap({ buses = [], events = [], roadIssues = [], incid
           <div className="space-y-1.5 font-mono text-[10px] sm:text-[11px]">
             <div className="flex items-center gap-2">
               <span className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-cyan-400 shrink-0"></span>
-              <span className="text-slate-300">Active Bus Sensors (12)</span>
+              <span className="text-slate-300">Active Bus Mobile Sensors (12)</span>
             </div>
             <div className="flex items-center gap-2">
               <span className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-rose-500 shrink-0"></span>
-              <span className="text-slate-300">Potholes & Defects</span>
+              <span className="text-slate-300">Potholes & Missing Dividers</span>
             </div>
             <div className="flex items-center gap-2">
               <span className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-purple-500 shrink-0"></span>
-              <span className="text-slate-300">Zebra & Pedestrians</span>
+              <span className="text-slate-300">Faded Zebra Crossings & Pedestrians</span>
             </div>
             <div className="flex items-center gap-2">
               <span className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-blue-500 shrink-0"></span>
-              <span className="text-slate-300">Waterlogging</span>
+              <span className="text-slate-300">Waterlogging / Submerged Lanes</span>
             </div>
             {showHeatmap && (
               <div className="pt-1 border-t border-slate-800 flex items-center gap-1.5 text-rose-400 text-[9px] sm:text-[10px]">
@@ -349,6 +364,62 @@ export default function GisMap({ buses = [], events = [], roadIssues = [], incid
                 <span>Congestion Heat Active</span>
               </div>
             )}
+          </div>
+        </div>
+      </div>
+
+      {/* Telemetry & Spec Footer matching Image 2 */}
+      <div className="glass-panel p-4 sm:p-5 border-slate-800/80 rounded-2xl grid grid-cols-1 md:grid-cols-3 gap-4 text-xs font-sans">
+        {/* Left Column: Brand & Tagline */}
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <div className="p-1 rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+              <Shield className="w-4 h-4 sm:w-5 sm:h-5" />
+            </div>
+            <span className="font-black text-sm sm:text-base tracking-wider text-white font-mono">TRANSITEYE</span>
+          </div>
+          <p className="text-[11px] sm:text-xs text-slate-400 leading-relaxed">
+            AI-powered edge computing platform transforming public transport buses into real-time mobile urban sensing nodes across Pune City.
+          </p>
+        </div>
+
+        {/* Middle Column: Edge Infrastructure Specs */}
+        <div className="space-y-2 font-mono">
+          <div className="text-[11px] font-bold text-cyan-400 uppercase tracking-wider flex items-center gap-1.5 border-b border-slate-800 pb-1">
+            <Cpu className="w-3.5 h-3.5" /> Edge Infrastructure Specs
+          </div>
+          <div className="space-y-1 text-[11px] sm:text-xs">
+            <div className="flex justify-between">
+              <span className="text-slate-400">Onboard Accelerator:</span>
+              <span className="text-white font-semibold">NVIDIA Jetson Orin Nano</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-slate-400">Computer Vision:</span>
+              <span className="text-cyan-400 font-semibold">YOLOv8 + ANPR Reader</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-slate-400">Edge Bandwidth Filtering:</span>
+              <span className="text-emerald-400 font-semibold">97.4% Local Reduction</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Column: Pune Command Center */}
+        <div className="space-y-2 font-mono">
+          <div className="text-[11px] font-bold text-cyan-400 uppercase tracking-wider flex items-center gap-1.5 border-b border-slate-800 pb-1">
+            <Activity className="w-3.5 h-3.5" /> Pune Command Center
+          </div>
+          <div className="space-y-1 text-[11px] sm:text-xs">
+            <div className="flex justify-between items-center">
+              <span className="text-slate-400">System Telemetry:</span>
+              <span className="text-emerald-400 font-semibold flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> OPERATIONAL
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-slate-400">Coverage Routes:</span>
+              <span className="text-white font-semibold">Pune Metropolitan (PMPML)</span>
+            </div>
           </div>
         </div>
       </div>

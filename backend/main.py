@@ -64,8 +64,9 @@ manager = ConnectionManager()
 
 # Request Models
 class DemoTriggerRequest(BaseModel):
-    scenario: str # "normal", "congestion", "pothole", "pedestrian", "rash_driving"
+    scenario: str # "normal", "congestion", "pothole", "pedestrian", "rash_driving", "zebra_crossing", "signboard_defect", "missing_divider", "waterlogging", "cabin_crowd"
     busId: Optional[str] = "BUS-104"
+    cameraAngle: Optional[str] = "front" # "front", "side_left", "side_right", "rear", "cabin"
 
 class EventCreateRequest(BaseModel):
     type: str
@@ -139,7 +140,7 @@ async def trigger_demo_scenario(req: DemoTriggerRequest):
     gps = {"lat": bus["latitude"], "lng": bus["longitude"], "location": f"Route: {bus['route']}"}
     
     # Process scenario through Edge AI engine
-    result = ai_detector.run_inference(req.scenario, bus["id"], gps)
+    result = ai_detector.run_inference(req.scenario, bus["id"], gps, req.cameraAngle or "front")
     
     # Update bus state based on scenario
     bus["lastEvent"] = req.scenario.replace("_", " ").title()

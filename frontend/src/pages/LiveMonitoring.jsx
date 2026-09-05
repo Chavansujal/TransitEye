@@ -12,16 +12,23 @@ import {
   Radio, 
   Camera,
   Layers,
-  Sparkles
+  Sparkles,
+  Eye,
+  Crosshair,
+  Maximize2,
+  Compass,
+  AlertCircle
 } from "lucide-react";
 import { triggerDemoScenario } from "../services/api";
 
 export default function LiveMonitoring({ buses = [], onEventTriggered }) {
   const [selectedBusId, setSelectedBusId] = useState("BUS-104");
+  const [activeCamera, setActiveCamera] = useState("front"); // "front", "side_left", "side_right", "rear", "cabin"
   const [currentScenario, setCurrentScenario] = useState("normal");
   const [loadingScenario, setLoadingScenario] = useState(false);
   const [detectionState, setDetectionState] = useState({
     scenario: "normal",
+    camera_angle: "front",
     traffic_density: "MEDIUM",
     vehicle_count: 7,
     people_count: 2,
@@ -44,10 +51,32 @@ export default function LiveMonitoring({ buses = [], onEventTriggered }) {
     driver: "Vikas Shinde"
   };
 
-  const handleTriggerScenario = async (scenario) => {
+  const cameraAngles = [
+    { id: "front", label: "Front Cam", desc: "Road Defects & Traffic", angle: "0° Forward", icon: Eye },
+    { id: "side_left", label: "Left Cam", desc: "Pedestrians & Zebra", angle: "90° Port", icon: Crosshair },
+    { id: "side_right", label: "Right Cam", desc: "Dividers & Medians", angle: "90° Starboard", icon: Crosshair },
+    { id: "rear", label: "Rear Cam", desc: "Tailgating & Hit-and-Run", angle: "180° Aft", icon: Compass },
+    { id: "cabin", label: "Cabin Cam", desc: "Passenger Safety & Crowd", angle: "Interior Dome", icon: Users },
+  ];
+
+  const handleCameraChange = async (camId) => {
+    setActiveCamera(camId);
+    setLoadingScenario(true);
+    const res = await triggerDemoScenario(currentScenario, selectedBus.id, camId);
+    setLoadingScenario(false);
+    if (res && res.scenarioResult) {
+      setDetectionState(res.scenarioResult);
+    }
+  };
+
+  const handleTriggerScenario = async (scenario, defaultCam = null) => {
+    const camToUse = defaultCam || activeCamera;
+    if (defaultCam && defaultCam !== activeCamera) {
+      setActiveCamera(defaultCam);
+    }
     setCurrentScenario(scenario);
     setLoadingScenario(true);
-    const res = await triggerDemoScenario(scenario, selectedBus.id);
+    const res = await triggerDemoScenario(scenario, selectedBus.id, camToUse);
     setLoadingScenario(false);
     if (res && res.scenarioResult) {
       setDetectionState(res.scenarioResult);
@@ -55,6 +84,32 @@ export default function LiveMonitoring({ buses = [], onEventTriggered }) {
         onEventTriggered(res.scenarioResult.event);
       }
     }
+  };
+
+  // Helper background image generator based on camera angle & scenario
+  const getCameraBg = () => {
+    if (activeCamera === "cabin" || currentScenario === "cabin_crowd") {
+      return "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=1200&auto=format&fit=crop&q=80";
+    }
+    if (currentScenario === "pothole") {
+      return "https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?w=1200&auto=format&fit=crop&q=80";
+    }
+    if (currentScenario === "rash_driving") {
+      return "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?w=1200&auto=format&fit=crop&q=80";
+    }
+    if (currentScenario === "congestion") {
+      return "https://images.unsplash.com/photo-1506521781263-d8422e82f27a?w=1200&auto=format&fit=crop&q=80";
+    }
+    if (currentScenario === "waterlogging") {
+      return "https://images.unsplash.com/photo-1514565131-fce0801e5785?w=1200&auto=format&fit=crop&q=80";
+    }
+    if (currentScenario === "zebra_crossing" || activeCamera === "side_left") {
+      return "https://images.unsplash.com/photo-1508873696983-2df5703bc20d?w=1200&auto=format&fit=crop&q=80";
+    }
+    if (activeCamera === "rear") {
+      return "https://images.unsplash.com/photo-1558981806-ec527fa84c39?w=1200&auto=format&fit=crop&q=80";
+    }
+    return "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=1200&auto=format&fit=crop&q=80";
   };
 
   return (
@@ -66,10 +121,10 @@ export default function LiveMonitoring({ buses = [], onEventTriggered }) {
             <Radio className="w-3.5 h-3.5 animate-pulse" /> LIVE CAMERA FEED & REAL-TIME EDGE INFERENCE
           </div>
           <h2 className="text-2xl font-black text-white tracking-tight">
-            Bus Edge AI Telemetry & Object Detection
+            Multi-Camera Edge AI Telemetry
           </h2>
           <p className="text-sm text-slate-400 mt-1">
-            Simulated camera feed running YOLOv8 + ANPR local edge inference on NVIDIA Jetson bus hardware.
+            Transforming public transit buses into 360° mobile sensing units (Front, Sides, Rear & Cabin).
           </p>
         </div>
 
@@ -79,7 +134,7 @@ export default function LiveMonitoring({ buses = [], onEventTriggered }) {
             <Camera className="w-5 h-5" />
           </div>
           <div className="text-left font-mono">
-            <label className="text-[9px] text-slate-400 uppercase tracking-widest block font-bold">Select Mobile Sensor</label>
+            <label className="text-[9px] text-slate-400 uppercase tracking-widest block font-bold">Active Bus Node</label>
             <select
               value={selectedBusId}
               onChange={(e) => setSelectedBusId(e.target.value)}
@@ -95,6 +150,69 @@ export default function LiveMonitoring({ buses = [], onEventTriggered }) {
         </div>
       </div>
 
+      {/* Multi-Camera Switcher Bar & Bus Schematic */}
+      <div className="glass-panel p-4 border-slate-800/80 bg-slate-950/90 rounded-2xl">
+        <div className="flex flex-col lg:flex-row items-center justify-between gap-4">
+          {/* Camera Buttons */}
+          <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto">
+            <span className="text-[11px] font-mono text-slate-400 font-bold uppercase tracking-wider mr-2 hidden sm:inline">
+              Camera Feeds:
+            </span>
+            {cameraAngles.map(cam => {
+              const Icon = cam.icon;
+              const isActive = activeCamera === cam.id;
+              return (
+                <button
+                  key={cam.id}
+                  onClick={() => handleCameraChange(cam.id)}
+                  className={`flex items-center gap-2 px-3.5 py-2 rounded-xl border font-mono text-xs transition duration-200 ${
+                    isActive 
+                      ? "bg-cyan-950/80 border-cyan-400 text-cyan-300 shadow-lg shadow-cyan-500/20"
+                      : "bg-slate-900/60 border-slate-800 text-slate-400 hover:text-white hover:bg-slate-850"
+                  }`}
+                >
+                  <Icon className={`w-3.5 h-3.5 ${isActive ? "text-cyan-400 animate-pulse" : ""}`} />
+                  <div className="text-left">
+                    <span className="font-bold">{cam.label}</span>
+                    <span className="text-[10px] text-slate-500 block leading-tight">{cam.desc}</span>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Interactive Bus Schematic */}
+          <div className="flex items-center gap-3 bg-slate-900/90 px-4 py-2 rounded-xl border border-slate-800 font-mono text-xs">
+            <div className="text-[10px] text-slate-400 font-bold uppercase">Bus Anatomy:</div>
+            <div className="relative flex items-center gap-1.5 px-3 py-1 bg-slate-950 rounded-lg border border-slate-800 text-[10px]">
+              {/* Rear */}
+              <span className={`w-2.5 h-2.5 rounded-full border transition-all ${
+                activeCamera === "rear" ? "bg-cyan-400 border-white shadow-md shadow-cyan-400 scale-125" : "bg-slate-700 border-slate-600"
+              }`} title="Rear Camera" />
+              {/* Left */}
+              <span className={`w-2.5 h-2.5 rounded-full border transition-all ${
+                activeCamera === "side_left" ? "bg-cyan-400 border-white shadow-md shadow-cyan-400 scale-125" : "bg-slate-700 border-slate-600"
+              }`} title="Left Mirror Camera" />
+              {/* Cabin */}
+              <span className={`w-3 h-3 rounded-sm border transition-all flex items-center justify-center text-[8px] font-bold ${
+                activeCamera === "cabin" ? "bg-cyan-400 text-slate-950 border-white scale-125" : "bg-slate-800 text-slate-500 border-slate-700"
+              }`} title="Cabin Camera">C</span>
+              {/* Right */}
+              <span className={`w-2.5 h-2.5 rounded-full border transition-all ${
+                activeCamera === "side_right" ? "bg-cyan-400 border-white shadow-md shadow-cyan-400 scale-125" : "bg-slate-700 border-slate-600"
+              }`} title="Right Mirror Camera" />
+              {/* Front */}
+              <span className={`w-2.5 h-2.5 rounded-full border transition-all ${
+                activeCamera === "front" ? "bg-cyan-400 border-white shadow-md shadow-cyan-400 scale-125" : "bg-slate-700 border-slate-600"
+              }`} title="Front Windshield Camera" />
+            </div>
+            <span className="text-cyan-400 font-bold text-[11px]">
+              {cameraAngles.find(c => c.id === activeCamera)?.angle}
+            </span>
+          </div>
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main Camera View Area */}
         <div className="lg:col-span-2 space-y-4">
@@ -103,14 +221,14 @@ export default function LiveMonitoring({ buses = [], onEventTriggered }) {
             <div className="flex flex-wrap items-center justify-between gap-2 px-3.5 py-2.5 bg-slate-900/90 rounded-xl mb-4 border border-slate-800 text-xs font-mono">
               <div className="flex items-center gap-2.5 text-emerald-400">
                 <span className="live-dot"></span>
-                <span className="font-bold">{selectedBus.id} LIVE EDGE CAMERA</span>
+                <span className="font-bold uppercase">{selectedBus.id} • {cameraAngles.find(c => c.id === activeCamera)?.label}</span>
                 <span className="text-slate-600">|</span>
                 <span className="text-slate-300">1080p @ 30 FPS</span>
               </div>
               <div className="flex items-center gap-3 text-slate-400">
-                <span>Model: <strong className="text-cyan-400 font-bold">YOLOv8 + EasyOCR</strong></span>
+                <span>Edge Model: <strong className="text-cyan-400 font-bold">YOLOv8 + OCR</strong></span>
                 <span className="text-emerald-400 bg-emerald-950/80 px-2 py-0.5 rounded-full border border-emerald-800 text-[10px] font-bold">
-                  97.4% Bandwidth Saved
+                  97.4% Local Edge Filtered
                 </span>
               </div>
             </div>
@@ -120,15 +238,7 @@ export default function LiveMonitoring({ buses = [], onEventTriggered }) {
               {/* Background Video Simulation Frame */}
               <div 
                 className="absolute inset-0 bg-cover bg-center opacity-45 mix-blend-luminosity scale-105 transition-all duration-700"
-                style={{
-                  backgroundImage: currentScenario === "pothole"
-                    ? "url('https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?w=1200&auto=format&fit=crop&q=80')"
-                    : currentScenario === "rash_driving"
-                    ? "url('https://images.unsplash.com/photo-1549399542-7e3f8b79c341?w=1200&auto=format&fit=crop&q=80')"
-                    : currentScenario === "congestion"
-                    ? "url('https://images.unsplash.com/photo-1506521781263-d8422e82f27a?w=1200&auto=format&fit=crop&q=80')"
-                    : "url('https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=1200&auto=format&fit=crop&q=80')"
-                }}
+                style={{ backgroundImage: `url('${getCameraBg()}')` }}
               />
 
               {/* Scanlines Effect */}
@@ -137,25 +247,26 @@ export default function LiveMonitoring({ buses = [], onEventTriggered }) {
               {/* Top-Left HUD Telemetry Overlay */}
               <div className="absolute top-4 left-4 font-mono text-[11px] text-cyan-400 space-y-1 bg-slate-950/90 p-3 rounded-xl border border-cyan-900/60 backdrop-blur shadow-xl">
                 <div>GPS: {selectedBus.latitude.toFixed(4)}°N, {selectedBus.longitude.toFixed(4)}°E</div>
-                <div>SPD: {selectedBus.speed} KM/H • DIR: 240° SW</div>
-                <div>LATENCY: 12ms (Edge Inferencing)</div>
+                <div>SPD: {selectedBus.speed} KM/H • CAM: {activeCamera.toUpperCase()}</div>
+                <div>LATENCY: 14ms (NVIDIA Jetson Edge)</div>
               </div>
 
               {/* Top-Right HUD Scenario Identifier */}
               <div className="absolute top-4 right-4 font-mono text-[11px] text-emerald-400 bg-slate-950/90 p-3 rounded-xl border border-emerald-900/60 backdrop-blur shadow-xl">
                 <div>SCENARIO: <span className="uppercase text-white font-bold">{currentScenario.replace("_", " ")}</span></div>
-                <div>OBJECTS DETECTED: {detectionState.detections ? detectionState.detections.length : 3}</div>
+                <div>OBJECTS: {detectionState.detections ? detectionState.detections.length : 3} TRACKED</div>
               </div>
 
               {/* Bounding Boxes Overlays */}
               <div className="absolute inset-0 pointer-events-none">
                 {detectionState.detections && detectionState.detections.map((det, idx) => {
                   const [x, y, w, h] = det.box || [100 + idx * 100, 150 + idx * 50, 180, 120];
-                  const isCritical = det.class === "pothole" || det.class === "anpr" || currentScenario === "rash_driving";
-                  const isPerson = det.class === "person";
+                  const isCritical = det.class === "pothole" || det.class === "anpr" || det.class === "waterlogging" || det.class === "divider" || currentScenario === "rash_driving";
+                  const isPerson = det.class === "person" || det.class === "passenger";
+                  const isZebra = det.class === "zebra";
                   
-                  const borderColor = isCritical ? "#f43f5e" : isPerson ? "#f59e0b" : "#06b6d4";
-                  const bgColor = isCritical ? "rgba(244, 63, 94, 0.2)" : isPerson ? "rgba(245, 158, 11, 0.2)" : "rgba(6, 182, 212, 0.2)";
+                  const borderColor = isCritical ? "#f43f5e" : isZebra ? "#a855f7" : isPerson ? "#f59e0b" : "#06b6d4";
+                  const bgColor = isCritical ? "rgba(244, 63, 94, 0.2)" : isZebra ? "rgba(168, 85, 247, 0.2)" : isPerson ? "rgba(245, 158, 11, 0.2)" : "rgba(6, 182, 212, 0.2)";
                   
                   return (
                     <div
@@ -200,14 +311,14 @@ export default function LiveMonitoring({ buses = [], onEventTriggered }) {
               <div className="p-3.5 rounded-2xl bg-slate-900/80 border border-slate-800">
                 <div className="text-slate-400 text-[10px] uppercase tracking-wider">Vehicles Count</div>
                 <div className="text-xl font-black text-white flex items-center gap-2 mt-0.5">
-                  <Car className="w-5 h-5 text-cyan-400" /> {detectionState.vehicle_count || 7}
+                  <Car className="w-5 h-5 text-cyan-400" /> {detectionState.vehicle_count ?? 7}
                 </div>
               </div>
 
               <div className="p-3.5 rounded-2xl bg-slate-900/80 border border-slate-800">
-                <div className="text-slate-400 text-[10px] uppercase tracking-wider">Pedestrians</div>
+                <div className="text-slate-400 text-[10px] uppercase tracking-wider">People / Passengers</div>
                 <div className="text-xl font-black text-white flex items-center gap-2 mt-0.5">
-                  <Users className="w-5 h-5 text-amber-400" /> {detectionState.people_count || 2}
+                  <Users className="w-5 h-5 text-amber-400" /> {detectionState.people_count ?? 2}
                 </div>
               </div>
 
@@ -234,129 +345,223 @@ export default function LiveMonitoring({ buses = [], onEventTriggered }) {
 
         {/* Demo Scenario Control Triggers (Right Column) */}
         <div className="space-y-4">
-          <div className="glass-panel p-6 space-y-4 border-cyan-500/30">
+          <div className="glass-panel p-5 space-y-4 border-cyan-500/30">
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-              <h3 className="text-base font-bold text-white flex items-center gap-2">
-                <Sliders className="w-5 h-5 text-cyan-400" /> Demo Scenario Triggers
+              <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                <Sliders className="w-4 h-4 text-cyan-400" /> Problem Statement 26124 Scenarios
               </h3>
-              <span className="text-[10px] bg-cyan-950 text-cyan-300 border border-cyan-800 px-2.5 py-0.5 rounded-full font-mono font-bold">
-                SIH DEMO MODE
+              <span className="text-[10px] bg-cyan-950 text-cyan-300 border border-cyan-800 px-2 py-0.5 rounded-full font-mono font-bold">
+                SIH TRIGGERS
               </span>
             </div>
 
-            <p className="text-xs text-slate-400 leading-relaxed">
-              Inject edge camera event triggers to demonstrate live synchronization across GIS Map, Road Priorities & ANPR Triage.
-            </p>
+            <div className="space-y-2.5 max-h-[580px] overflow-y-auto pr-1">
+              {/* Category: Traffic & Road Hazards */}
+              <div className="text-[10px] font-mono text-slate-400 font-bold uppercase tracking-wider pt-1">
+                Road Defect Sensing (Onboard AI):
+              </div>
 
-            <div className="space-y-3">
-              {/* Normal Traffic */}
+              {/* Pothole */}
               <button
-                onClick={() => handleTriggerScenario("normal")}
+                onClick={() => handleTriggerScenario("pothole", "front")}
                 disabled={loadingScenario}
-                className={`w-full p-4 rounded-2xl border text-left font-semibold text-xs transition duration-300 flex items-center justify-between group ${
-                  currentScenario === "normal"
-                    ? "bg-slate-800/90 border-cyan-500 text-white shadow-xl shadow-cyan-500/10"
-                    : "bg-slate-950/60 border-slate-800 text-slate-300 hover:bg-slate-900"
-                }`}
-              >
-                <div className="flex items-center gap-3.5">
-                  <div className="w-9 h-9 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 border border-emerald-500/20">
-                    <Car className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <div className="text-white font-bold">1. Normal Traffic Flow</div>
-                    <div className="text-[11px] text-slate-400 font-normal">Routine vehicle detection</div>
-                  </div>
-                </div>
-                <Play className="w-4 h-4 text-slate-400 group-hover:text-cyan-400 transition" />
-              </button>
-
-              {/* Heavy Congestion */}
-              <button
-                onClick={() => handleTriggerScenario("congestion")}
-                disabled={loadingScenario}
-                className={`w-full p-4 rounded-2xl border text-left font-semibold text-xs transition duration-300 flex items-center justify-between group ${
-                  currentScenario === "congestion"
-                    ? "bg-amber-950/50 border-amber-500 text-white shadow-xl shadow-amber-500/10"
-                    : "bg-slate-950/60 border-slate-800 text-slate-300 hover:bg-slate-900"
-                }`}
-              >
-                <div className="flex items-center gap-3.5">
-                  <div className="w-9 h-9 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-400 border border-amber-500/20">
-                    <AlertTriangle className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <div className="text-amber-300 font-bold">2. Heavy Congestion Bottleneck</div>
-                    <div className="text-[11px] text-slate-400 font-normal">Flag 34+ stationary vehicles</div>
-                  </div>
-                </div>
-                <Play className="w-4 h-4 text-amber-400" />
-              </button>
-
-              {/* Pothole Detected */}
-              <button
-                onClick={() => handleTriggerScenario("pothole")}
-                disabled={loadingScenario}
-                className={`w-full p-4 rounded-2xl border text-left font-semibold text-xs transition duration-300 flex items-center justify-between group ${
+                className={`w-full p-3 rounded-xl border text-left font-semibold text-xs transition duration-200 flex items-center justify-between group ${
                   currentScenario === "pothole"
-                    ? "bg-rose-950/50 border-rose-500 text-white shadow-xl shadow-rose-500/10"
+                    ? "bg-rose-950/50 border-rose-500 text-white shadow-md shadow-rose-500/10"
                     : "bg-slate-950/60 border-slate-800 text-slate-300 hover:bg-slate-900"
                 }`}
               >
-                <div className="flex items-center gap-3.5">
-                  <div className="w-9 h-9 rounded-xl bg-rose-500/10 flex items-center justify-center text-rose-400 border border-rose-500/20">
-                    <AlertTriangle className="w-4 h-4" />
+                <div className="flex items-center gap-3">
+                  <div className="w-7 h-7 rounded-lg bg-rose-500/10 flex items-center justify-center text-rose-400 border border-rose-500/20 shrink-0">
+                    <AlertTriangle className="w-3.5 h-3.5" />
                   </div>
                   <div>
-                    <div className="text-rose-300 font-bold">3. Pothole Road Defect (93%)</div>
-                    <div className="text-[11px] text-slate-400 font-normal">Log defect with GPS + timestamp</div>
+                    <div className="text-rose-300 font-bold text-xs">Pothole Defect (Front)</div>
+                    <div className="text-[10px] text-slate-400 font-normal">Deep asphalt crater detection</div>
                   </div>
                 </div>
-                <Play className="w-4 h-4 text-rose-400" />
+                <Play className="w-3.5 h-3.5 text-rose-400" />
               </button>
 
-              {/* Pedestrian Safety Alert */}
+              {/* Missing Zebra Crossing */}
               <button
-                onClick={() => handleTriggerScenario("pedestrian")}
+                onClick={() => handleTriggerScenario("zebra_crossing", "side_left")}
                 disabled={loadingScenario}
-                className={`w-full p-4 rounded-2xl border text-left font-semibold text-xs transition duration-300 flex items-center justify-between group ${
-                  currentScenario === "pedestrian"
-                    ? "bg-amber-950/50 border-amber-500 text-white shadow-xl shadow-amber-500/10"
+                className={`w-full p-3 rounded-xl border text-left font-semibold text-xs transition duration-200 flex items-center justify-between group ${
+                  currentScenario === "zebra_crossing"
+                    ? "bg-purple-950/50 border-purple-500 text-white shadow-md shadow-purple-500/10"
                     : "bg-slate-950/60 border-slate-800 text-slate-300 hover:bg-slate-900"
                 }`}
               >
-                <div className="flex items-center gap-3.5">
-                  <div className="w-9 h-9 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-400 border border-amber-500/20">
-                    <Users className="w-4 h-4" />
+                <div className="flex items-center gap-3">
+                  <div className="w-7 h-7 rounded-lg bg-purple-500/10 flex items-center justify-center text-purple-400 border border-purple-500/20 shrink-0">
+                    <AlertCircle className="w-3.5 h-3.5" />
                   </div>
                   <div>
-                    <div className="text-amber-300 font-bold">4. Pedestrian Safety Hazard</div>
-                    <div className="text-[11px] text-slate-400 font-normal">Detect school children near road</div>
+                    <div className="text-purple-300 font-bold text-xs">Faded Zebra Crossing (Side)</div>
+                    <div className="text-[10px] text-slate-400 font-normal">Missing road markings in school zone</div>
                   </div>
                 </div>
-                <Play className="w-4 h-4 text-amber-400" />
+                <Play className="w-3.5 h-3.5 text-purple-400" />
               </button>
 
-              {/* Rash Driving Incident */}
+              {/* Broken Divider */}
               <button
-                onClick={() => handleTriggerScenario("rash_driving")}
+                onClick={() => handleTriggerScenario("missing_divider", "side_right")}
                 disabled={loadingScenario}
-                className={`w-full p-4 rounded-2xl border text-left font-semibold text-xs transition duration-300 flex items-center justify-between group ${
+                className={`w-full p-3 rounded-xl border text-left font-semibold text-xs transition duration-200 flex items-center justify-between group ${
+                  currentScenario === "missing_divider"
+                    ? "bg-amber-950/50 border-amber-500 text-white shadow-md shadow-amber-500/10"
+                    : "bg-slate-950/60 border-slate-800 text-slate-300 hover:bg-slate-900"
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-7 h-7 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-400 border border-amber-500/20 shrink-0">
+                    <AlertTriangle className="w-3.5 h-3.5" />
+                  </div>
+                  <div>
+                    <div className="text-amber-300 font-bold text-xs">Missing Road Divider</div>
+                    <div className="text-[10px] text-slate-400 font-normal">Median gap & illegal U-turn hazard</div>
+                  </div>
+                </div>
+                <Play className="w-3.5 h-3.5 text-amber-400" />
+              </button>
+
+              {/* Damaged Signboard */}
+              <button
+                onClick={() => handleTriggerScenario("signboard_defect", "front")}
+                disabled={loadingScenario}
+                className={`w-full p-3 rounded-xl border text-left font-semibold text-xs transition duration-200 flex items-center justify-between group ${
+                  currentScenario === "signboard_defect"
+                    ? "bg-cyan-950/50 border-cyan-500 text-white shadow-md shadow-cyan-500/10"
+                    : "bg-slate-950/60 border-slate-800 text-slate-300 hover:bg-slate-900"
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-7 h-7 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400 border border-cyan-500/20 shrink-0">
+                    <Layers className="w-3.5 h-3.5" />
+                  </div>
+                  <div>
+                    <div className="text-cyan-300 font-bold text-xs">Damaged Signboard</div>
+                    <div className="text-[10px] text-slate-400 font-normal">Twisted 40 km/h speed limit sign</div>
+                  </div>
+                </div>
+                <Play className="w-3.5 h-3.5 text-cyan-400" />
+              </button>
+
+              {/* Waterlogging */}
+              <button
+                onClick={() => handleTriggerScenario("waterlogging", "front")}
+                disabled={loadingScenario}
+                className={`w-full p-3 rounded-xl border text-left font-semibold text-xs transition duration-200 flex items-center justify-between group ${
+                  currentScenario === "waterlogging"
+                    ? "bg-blue-950/50 border-blue-500 text-white shadow-md shadow-blue-500/10"
+                    : "bg-slate-950/60 border-slate-800 text-slate-300 hover:bg-slate-900"
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-7 h-7 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-400 border border-blue-500/20 shrink-0">
+                    <Radio className="w-3.5 h-3.5" />
+                  </div>
+                  <div>
+                    <div className="text-blue-300 font-bold text-xs">Severe Waterlogging</div>
+                    <div className="text-[10px] text-slate-400 font-normal">Submerged lane at underpass</div>
+                  </div>
+                </div>
+                <Play className="w-3.5 h-3.5 text-blue-400" />
+              </button>
+
+              {/* Category: Traffic Management & Incidents */}
+              <div className="text-[10px] font-mono text-slate-400 font-bold uppercase tracking-wider pt-2">
+                Enforcement & Safety:
+              </div>
+
+              {/* Rash Driving + ANPR */}
+              <button
+                onClick={() => handleTriggerScenario("rash_driving", "rear")}
+                disabled={loadingScenario}
+                className={`w-full p-3 rounded-xl border text-left font-semibold text-xs transition duration-200 flex items-center justify-between group ${
                   currentScenario === "rash_driving"
-                    ? "bg-purple-950/50 border-purple-500 text-white shadow-xl shadow-purple-500/10"
+                    ? "bg-rose-950/50 border-rose-500 text-white shadow-md shadow-rose-500/10"
                     : "bg-slate-950/60 border-slate-800 text-slate-300 hover:bg-slate-900"
                 }`}
               >
-                <div className="flex items-center gap-3.5">
-                  <div className="w-9 h-9 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400 border border-purple-500/20">
-                    <ShieldAlert className="w-4 h-4" />
+                <div className="flex items-center gap-3">
+                  <div className="w-7 h-7 rounded-lg bg-rose-500/10 flex items-center justify-center text-rose-400 border border-rose-500/20 shrink-0">
+                    <ShieldAlert className="w-3.5 h-3.5" />
                   </div>
                   <div>
-                    <div className="text-purple-300 font-bold">5. Rash Driving + ANPR Extractor</div>
-                    <div className="text-[11px] text-slate-400 font-normal">Extract plate: MH12 AB 1234</div>
+                    <div className="text-rose-300 font-bold text-xs">Rash Driving & ANPR</div>
+                    <div className="text-[10px] text-slate-400 font-normal">Plate extraction: MH12 AB 1234</div>
                   </div>
                 </div>
-                <Play className="w-4 h-4 text-purple-400" />
+                <Play className="w-3.5 h-3.5 text-rose-400" />
+              </button>
+
+              {/* Pedestrian */}
+              <button
+                onClick={() => handleTriggerScenario("pedestrian", "front")}
+                disabled={loadingScenario}
+                className={`w-full p-3 rounded-xl border text-left font-semibold text-xs transition duration-200 flex items-center justify-between group ${
+                  currentScenario === "pedestrian"
+                    ? "bg-amber-950/50 border-amber-500 text-white shadow-md shadow-amber-500/10"
+                    : "bg-slate-950/60 border-slate-800 text-slate-300 hover:bg-slate-900"
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-7 h-7 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-400 border border-amber-500/20 shrink-0">
+                    <Users className="w-3.5 h-3.5" />
+                  </div>
+                  <div>
+                    <div className="text-amber-300 font-bold text-xs">Pedestrian Hazard</div>
+                    <div className="text-[10px] text-slate-400 font-normal">School children crossing roadway</div>
+                  </div>
+                </div>
+                <Play className="w-3.5 h-3.5 text-amber-400" />
+              </button>
+
+              {/* Cabin Overcrowding */}
+              <button
+                onClick={() => handleTriggerScenario("cabin_crowd", "cabin")}
+                disabled={loadingScenario}
+                className={`w-full p-3 rounded-xl border text-left font-semibold text-xs transition duration-200 flex items-center justify-between group ${
+                  currentScenario === "cabin_crowd"
+                    ? "bg-cyan-950/50 border-cyan-500 text-white shadow-md shadow-cyan-500/10"
+                    : "bg-slate-950/60 border-slate-800 text-slate-300 hover:bg-slate-900"
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-7 h-7 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400 border border-cyan-500/20 shrink-0">
+                    <Users className="w-3.5 h-3.5" />
+                  </div>
+                  <div>
+                    <div className="text-cyan-300 font-bold text-xs">Cabin Overcrowding</div>
+                    <div className="text-[10px] text-slate-400 font-normal">Footboard & door safety alert</div>
+                  </div>
+                </div>
+                <Play className="w-3.5 h-3.5 text-cyan-400" />
+              </button>
+
+              {/* Reset to Normal */}
+              <button
+                onClick={() => handleTriggerScenario("normal", "front")}
+                disabled={loadingScenario}
+                className={`w-full p-3 rounded-xl border text-left font-semibold text-xs transition duration-200 flex items-center justify-between group ${
+                  currentScenario === "normal"
+                    ? "bg-slate-800/90 border-cyan-500 text-white"
+                    : "bg-slate-950/60 border-slate-800 text-slate-400 hover:bg-slate-900"
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-7 h-7 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-400 border border-emerald-500/20 shrink-0">
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                  </div>
+                  <div>
+                    <div className="text-white font-bold text-xs">Normal Traffic Routine</div>
+                    <div className="text-[10px] text-slate-400 font-normal">Clear edge telemetry</div>
+                  </div>
+                </div>
+                <Play className="w-3.5 h-3.5 text-slate-400" />
               </button>
             </div>
           </div>

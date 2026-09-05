@@ -283,7 +283,9 @@ class DataStore:
         self.road_issues = [
             {
                 "id": "RD-301",
+                "category": "pothole",
                 "location": "Sinhagad Road Corridor (Mitra Mandal to Hingne)",
+                "ward": "Ward 11 - Sinhagad Road Division (PMC)",
                 "issueType": "Severe Surface Potholes & Cracks",
                 "reports": 17,
                 "busesReporting": 6,
@@ -297,42 +299,80 @@ class DataStore:
             },
             {
                 "id": "RD-302",
-                "location": "Fergusson College (FC) Road",
-                "issueType": "Damaged Storm Drain & Pedestrian Encroachment",
-                "reports": 9,
+                "category": "zebra_crossing",
+                "location": "Fergusson College (FC) Road Main Gate",
+                "ward": "Ward 8 - Shivajinagar / Deccan Division (PMC)",
+                "issueType": "Faded / Missing Zebra Crossing Paint",
+                "reports": 11,
                 "busesReporting": 4,
                 "severity": "HIGH",
-                "priorityScore": 78,
+                "priorityScore": 84,
                 "status": "IN_REVIEW",
-                "recommendation": "Repair broken drain cover near Goodluck Chowk to prevent pedestrian trip hazards.",
-                "lastReported": "35 mins ago",
+                "recommendation": "Thermoplastic re-striping of pedestrian crosswalk outside college campus gate.",
+                "lastReported": "24 mins ago",
                 "latitude": 18.5221,
                 "longitude": 73.8415
             },
             {
                 "id": "RD-303",
-                "location": "Paud Road Flyover Ramp",
-                "issueType": "Waterlogging & Reduced Speed Zone",
-                "reports": 6,
+                "category": "divider",
+                "location": "Sinhagad Road near Hingne Khurd Median",
+                "ward": "Ward 11 - Sinhagad Road Division (PMC)",
+                "issueType": "Missing Road Divider & Broken Barrier Gap",
+                "reports": 14,
+                "busesReporting": 5,
+                "severity": "CRITICAL",
+                "priorityScore": 89,
+                "status": "NEEDS_ATTENTION",
+                "recommendation": "Install precast concrete median barriers to eliminate illegal U-turns across active bus lanes.",
+                "lastReported": "18 mins ago",
+                "latitude": 18.4981,
+                "longitude": 73.8365
+            },
+            {
+                "id": "RD-304",
+                "category": "signboard",
+                "location": "Karve Road near Nal Stop Junction",
+                "ward": "Ward 14 - Kothrud Transit Division (PMC)",
+                "issueType": "Damaged Mandatory Speed Signboard (Twisted 45°)",
+                "reports": 8,
                 "busesReporting": 3,
                 "severity": "MEDIUM",
-                "priorityScore": 64,
-                "status": "MONITORING",
-                "recommendation": "Clear blocked storm water outlet prior to evening monsoon showers.",
-                "lastReported": "1 hour ago",
+                "priorityScore": 72,
+                "status": "SCHEDULED",
+                "recommendation": "Re-align and secure retro-reflective 40 km/h regulatory speed signboard.",
+                "lastReported": "40 mins ago",
+                "latitude": 18.5082,
+                "longitude": 73.8361
+            },
+            {
+                "id": "RD-305",
+                "category": "waterlogging",
+                "location": "Paud Road Flyover Underpass",
+                "ward": "Ward 14 - Kothrud Transit Division (PMC)",
+                "issueType": "Severe Waterlogging (Submerged Left Lane)",
+                "reports": 19,
+                "busesReporting": 7,
+                "severity": "HIGH",
+                "priorityScore": 87,
+                "status": "NEEDS_ATTENTION",
+                "recommendation": "Deploy mobile high-capacity dewatering pump & unblock clogged storm drain inlet.",
+                "lastReported": "8 mins ago",
                 "latitude": 18.5112,
                 "longitude": 73.8194
             },
             {
-                "id": "RD-304",
+                "id": "RD-306",
+                "category": "signboard",
                 "location": "Swargate Bus Terminal Approach",
-                "issueType": "Missing Street Divider Reflectors",
-                "reports": 4,
+                "ward": "Ward 9 - Swargate Transit Hub (PMC)",
+                "issueType": "Missing Street Divider Reflectors & Cat-Eyes",
+                "reports": 5,
                 "busesReporting": 2,
                 "severity": "LOW",
-                "priorityScore": 45,
+                "priorityScore": 48,
                 "status": "SCHEDULED",
-                "recommendation": "Replace worn cat-eye reflectors along night transit corridor.",
+                "recommendation": "Replace missing solar cat-eye studs along BRTS entry corridor.",
                 "lastReported": "2 hours ago",
                 "latitude": 18.5021,
                 "longitude": 73.8638
@@ -408,13 +448,32 @@ class DataStore:
         if len(self.events) > 50:
             self.events = self.events[:50]
         
-        # If it's a pothole event, update or create road defect
-        if "Pothole" in event.get("type", ""):
-            location_name = event.get("locationName", "Sinhagad Road Corridor")
+        # Process road defects (Pothole, Zebra Crossing, Signboard, Divider, Waterlogging)
+        event_type = event.get("type", "")
+        defect_mapping = {
+            "Pothole": ("pothole", "Pothole Surface Defect", "Prioritize urgent asphalt patching and resurfacing."),
+            "Zebra Crossing": ("zebra_crossing", "Faded / Missing Zebra Crossing", "Schedule thermoplastic crosswalk painting for pedestrian safety."),
+            "Signboard": ("signboard", "Damaged Traffic Signboard", "Realign and replace damaged regulatory traffic sign."),
+            "Divider": ("divider", "Broken Road Divider / Barrier", "Erect missing concrete median barrier to prevent illegal crossings."),
+            "Waterlog": ("waterlogging", "Severe Road Waterlogging", "Deploy municipal pump truck and clear clogged stormwater drain.")
+        }
+        
+        detected_category = None
+        for key, val in defect_mapping.items():
+            if key.lower() in event_type.lower():
+                detected_category = val
+                break
+                
+        if detected_category:
+            cat_id, default_title, default_rec = detected_category
+            location_name = event.get("locationName", "Pune Transit Corridor")
             matched = False
             for issue in self.road_issues:
-                if issue["latitude"] == event.get("latitude") or "Sinhagad" in location_name and "Sinhagad" in issue["location"]:
+                if (issue.get("category") == cat_id and 
+                    (abs(issue.get("latitude", 0) - event.get("latitude", 0)) < 0.005 or 
+                     any(loc_word in location_name.lower() for loc_word in issue["location"].lower().split() if len(loc_word) > 4))):
                     issue["reports"] += 1
+                    issue["busesReporting"] = min(12, issue["busesReporting"] + 1)
                     issue["priorityScore"] = min(99, issue["priorityScore"] + 2)
                     issue["lastReported"] = "Just now"
                     matched = True
@@ -422,14 +481,16 @@ class DataStore:
             if not matched:
                 self.road_issues.insert(0, {
                     "id": f"RD-{len(self.road_issues) + 301}",
+                    "category": cat_id,
                     "location": location_name,
-                    "issueType": "Pothole Defect",
+                    "ward": "Pune Municipal Corporation - Central Ward",
+                    "issueType": event_type or default_title,
                     "reports": 1,
                     "busesReporting": 1,
                     "severity": event.get("severity", "HIGH"),
-                    "priorityScore": 75,
+                    "priorityScore": 76,
                     "status": "NEEDS_ATTENTION",
-                    "recommendation": "Inspect road surface defect flagged by bus camera.",
+                    "recommendation": default_rec,
                     "lastReported": "Just now",
                     "latitude": event.get("latitude", 18.5204),
                     "longitude": event.get("longitude", 73.8567)

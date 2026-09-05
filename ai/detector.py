@@ -25,20 +25,20 @@ class ProductionAIDetector:
         except ImportError:
             pass
 
-    def run_inference(self, frame_or_scenario, bus_id="BUS-104", gps=None):
+    def run_inference(self, frame_or_scenario, bus_id="BUS-104", gps=None, camera_angle="front"):
         """
         Runs object detection + ANPR. Automatically delegates to Demo simulation 
         when live hardware video stream is unattached.
         """
         if isinstance(frame_or_scenario, str):
-            return self.demo_fallback.process_demo_scenario(frame_or_scenario, bus_id, gps)
+            return self.demo_fallback.process_demo_scenario(frame_or_scenario, bus_id, gps, camera_angle)
         
         # Real inference skeleton when frame is passed
         if self.has_opencv and self.has_yolo:
             # YOLO model inference code
             pass
             
-        return self.demo_fallback.process_demo_scenario("normal", bus_id, gps)
+        return self.demo_fallback.process_demo_scenario("normal", bus_id, gps, camera_angle)
 
     def get_bandwidth_savings(self):
         return self.demo_fallback.get_edge_stats()

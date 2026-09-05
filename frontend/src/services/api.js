@@ -76,12 +76,12 @@ export async function fetchEdgeStats() {
   }
 }
 
-export async function triggerDemoScenario(scenario, busId = "BUS-104") {
+export async function triggerDemoScenario(scenario, busId = "BUS-104", cameraAngle = "front") {
   try {
     const res = await fetch(`${API_BASE}/api/demo/trigger`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ scenario, busId })
+      body: JSON.stringify({ scenario, busId, cameraAngle })
     });
     if (!res.ok) throw new Error("Trigger failed");
     return await res.json();

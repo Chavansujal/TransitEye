@@ -125,7 +125,7 @@ def build_pdf():
     summary_data = [
         [Paragraph("<b>Key Innovation: Edge AI Bandwidth Optimization (97.4% Savings)</b>", ParagraphStyle('W', parent=body_style, textColor=colors.white, fontName='Helvetica-Bold'))],
         [Paragraph(
-            "• <b>97.4% Local Video Inferencing:</b> Onboard camera video is processed locally inside the bus edge unit (NVIDIA Jetson / OpenCV / YOLOv8). Zero video is continuously uploaded to the cloud!<br/>"
+            "• <b>97.4% Local Video Inferencing:</b> Onboard camera video is processed locally inside the bus edge unit (NVIDIA Jetson / OpenCV / Custom Urban Vision AI). Zero video is continuously uploaded to the cloud!<br/>"
             "• <b>2.6% Transmitted Data:</b> Only when an anomaly occurs (pothole, congestion, rash driver, pedestrian hazard), low-bandwidth metadata + a tiny compressed evidence snapshot are transmitted to the central command server.<br/>"
             "• <b>Bandwidth Saved:</b> Saves approx. <b>48.6 GB of 5G cellular data per day</b> per bus fleet while maintaining strict citizen privacy compliance.",
             body_style
@@ -144,7 +144,7 @@ def build_pdf():
     # System Architecture
     story.append(Paragraph("2. System Architecture & Technical Flow", h1_style))
     arch_code = (
-        "[ Bus HD Camera Feed ] --> [ Edge AI Engine (YOLOv8 + ANPR) ]\n"
+        "[ Bus HD Camera Feed ] --> [ Edge AI Engine (Custom Urban Vision AI + ANPR) ]\n"
         "                                 |\n"
         "        (97.4% Video Processed Locally @ Edge • 0 MB Uploaded)\n"
         "                                 |\n"
@@ -164,7 +164,7 @@ def build_pdf():
     
     fe_features = [
         "<b>Command Center Overview:</b> Real-time city KPI cards (Active Fleet 11/12, Logged Events, Defect Priority Corridors, ANPR Incidents), city health gauge, Edge AI bandwidth optimization savings widget.",
-        "<b>Live AI Camera Monitoring:</b> Simulated 1080p camera feed with live HUD telemetry overlay (GPS 18.4862°N, 73.8324°E, Speed 14 KM/H, Latency 12ms), real-time YOLO bounding boxes, ANPR license plate extractor (MH12 AB 1234), and <b>5 Interactive Demo Scenario Triggers</b>.",
+        "<b>Live AI Camera Monitoring:</b> Simulated 1080p camera feed with live HUD telemetry overlay (GPS 18.4862°N, 73.8324°E, Speed 14 KM/H, Latency 12ms), real-time Custom Urban Vision AI bounding boxes, ANPR license plate extractor (MH12 AB 1234), and <b>5 Interactive Demo Scenario Triggers</b>.",
         "<b>Pune GIS Spatial Intelligence Map:</b> Interactive Leaflet map displaying 12 active buses moving live along real Pune transport corridors (Sinhagad Rd, FC Rd, Karve Rd, Swargate, Hinjewadi) alongside color-coded pothole, congestion & ANPR alert markers.",
         "<b>Fleet Telemetry Management:</b> Status table for 12 Pune buses (BUS-101 to BUS-112) with operational status badges (ONLINE, INCIDENT, LOW NETWORK, OFFLINE), speed, camera health, driver info, and live GPS coordinates.",
         "<b>Actionable Road Condition Intelligence:</b> Multi-bus corroboration scoring algorithm (Priority Score 0-100) aggregating repeated pothole reports into municipal repair priority cards (e.g. Sinhagad Road Priority Score 92/100, CRITICAL).",
@@ -203,7 +203,7 @@ def build_pdf():
     # AI Module Specifications
     story.append(Paragraph("5. AI Module & Edge Inferencing Pipeline", h1_style))
     story.append(Paragraph(
-        "The AI module (<code>ai/demo_detector.py</code> and <code>ai/detector.py</code>) implements an OpenCV / Ultralytics YOLOv8 / EasyOCR abstraction layer. "
+        "The AI module (<code>ai/demo_detector.py</code>, <code>ai/detector.py</code>, and <code>ai/inference.py</code>) implements a Custom Urban Vision AI (trained/fine-tuned on RDD2022 & IDD) / EasyOCR abstraction layer. "
         "It supports 5 interactive demo triggers for SIH judges:<br/>"
         "1. <b>Normal Traffic Flow:</b> Routine vehicle tracking.<br/>"
         "2. <b>Heavy Congestion Bottleneck:</b> Flags 34+ stationary vehicles.<br/>"

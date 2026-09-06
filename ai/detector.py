@@ -1,42 +1,35 @@
 """
-Production AI Detection Module Interface for UrbanSentinel AI.
-In production hardware deployment, this wraps Ultralytics YOLOv8/v9, EasyOCR/PaddleOCR,
-and OpenCV CUDA pipelines running on NVIDIA Jetson / Edge AI acceleration modules inside buses.
+Production AI Detection Module Interface for TransitEye.
+Wraps Custom Urban Vision AI engine and OpenCV pipelines running on 
+edge AI acceleration modules inside buses for Indian road conditions.
 """
 
-import os
 from ai.demo_detector import DemoDetector
+from ai.inference import CustomUrbanVisionInference
+
 
 class ProductionAIDetector:
+    """
+    Model-agnostic AI Detection interface supporting Custom Urban Vision AI models 
+    trained on Indian road conditions (RDD2022 & IDD datasets).
+    """
     def __init__(self, model_path: str = None):
-        self.has_yolo = False
-        self.has_opencv = False
         self.demo_fallback = DemoDetector()
-        
-        try:
-            import cv2
-            self.has_opencv = True
-        except ImportError:
-            pass
-
-        try:
-            import ultralytics
-            self.has_yolo = True
-        except ImportError:
-            pass
+        self.custom_inference = CustomUrbanVisionInference()
+        self.is_custom_ai_active = self.custom_inference.is_weights_loaded
 
     def run_inference(self, frame_or_scenario, bus_id="BUS-104", gps=None, camera_angle="front"):
         """
-        Runs object detection + ANPR. Automatically delegates to Demo simulation 
-        when live hardware video stream is unattached.
+        Runs object detection + road damage identification + ANPR. 
+        Automatically delegates to Demo simulation mode when live scenario triggers 
+        or raw stream frame inputs are provided.
         """
         if isinstance(frame_or_scenario, str):
             return self.demo_fallback.process_demo_scenario(frame_or_scenario, bus_id, gps, camera_angle)
         
-        # Real inference skeleton when frame is passed
-        if self.has_opencv and self.has_yolo:
-            # YOLO model inference code
-            pass
+        # Real inference on input video frame
+        if self.custom_inference.is_weights_loaded:
+            return self.custom_inference.predict_frame(frame_or_scenario, bus_id, gps, camera_angle)
             
         return self.demo_fallback.process_demo_scenario("normal", bus_id, gps, camera_angle)
 

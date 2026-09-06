@@ -737,7 +737,7 @@ export default function LiveMonitoring({ buses = [], onEventTriggered }) {
           ctx.fillStyle = track.isHazard ? "rgba(244, 63, 94, 0.16)" : "rgba(6, 182, 212, 0.10)";
           ctx.fillRect(px, py, pw, ph);
 
-          // Draw Corner Brackets (YOLO DeepSORT style)
+          // Draw Corner Brackets (Custom Urban Vision AI style)
           const bracketLen = Math.min(14, pw * 0.25, ph * 0.25);
           ctx.strokeStyle = track.color;
           ctx.lineWidth = track.isHazard ? 2.5 : 2;
@@ -946,7 +946,7 @@ export default function LiveMonitoring({ buses = [], onEventTriggered }) {
             Multi-Camera Edge AI Telemetry
           </h2>
           <p className="text-xs sm:text-sm text-slate-400 mt-1">
-            Real-time Computer Vision (YOLOv8 + ByteTrack) running live across public transit bus sensor feeds.
+            Real-time Computer Vision (Custom Urban Vision AI + Multi-Object Tracking) running live across public transit bus sensor feeds.
           </p>
         </div>
 
@@ -1182,7 +1182,7 @@ export default function LiveMonitoring({ buses = [], onEventTriggered }) {
 
               {/* Top-Right Sleek Model Pill */}
               <div className="absolute top-2.5 right-2.5 font-mono text-[9px] sm:text-[10px] bg-slate-950/80 px-2.5 py-1 rounded-xl border border-slate-800 backdrop-blur shadow-lg flex items-center gap-1.5 z-20">
-                <span className="text-slate-400 hidden sm:inline">YOLOv8</span>
+                <span className="text-slate-400 hidden sm:inline">Custom Urban Vision AI</span>
                 <span className="text-slate-600 hidden sm:inline">•</span>
                 <span className="text-cyan-400 font-bold uppercase">{currentScenario.replace("_", " ")}</span>
               </div>

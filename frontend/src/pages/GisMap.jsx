@@ -395,7 +395,7 @@ export default function GisMap({ buses = [], events = [], roadIssues = [], incid
             </div>
             <div className="flex justify-between">
               <span className="text-slate-400">Computer Vision:</span>
-              <span className="text-cyan-400 font-semibold">YOLOv8 + ANPR Reader</span>
+              <span className="text-cyan-400 font-semibold">Custom Urban Vision AI + ANPR Reader</span>
             </div>
             <div className="flex justify-between">
               <span className="text-slate-400">Edge Bandwidth Filtering:</span>

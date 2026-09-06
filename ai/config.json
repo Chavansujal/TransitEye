@@ -1,0 +1,27 @@
+{
+  "model_name": "Custom Urban Vision AI",
+  "version": "1.0.0",
+  "weights_path": "ai/weights/custom_urban_vision.pt",
+  "use_demo_fallback_if_no_weights": true,
+  "confidence_threshold": 0.5,
+  "nms_iou_threshold": 0.45,
+  "supported_datasets": [
+    "RDD2022",
+    "IDD"
+  ],
+  "classes": [
+    "car",
+    "bike",
+    "auto_rickshaw",
+    "bus",
+    "truck",
+    "person",
+    "pothole",
+    "road_defect"
+  ],
+  "dataset_config": {
+    "rdd2022_root": "datasets/RDD2022",
+    "idd_root": "datasets/IDD",
+    "image_size": [640, 640]
+  }
+}

@@ -2,20 +2,72 @@
 @import "leaflet/dist/leaflet.css";
 
 :root {
-  --bg-dark: #070a12;
-  --bg-card: #0e1526;
-  --bg-card-hover: #162036;
-  --border-color: rgba(255, 255, 255, 0.07);
-  --border-glow: rgba(6, 182, 212, 0.3);
-  
-  --accent-cyan: #06b6d4;
-  --accent-blue: #3b82f6;
-  --accent-emerald: #10b981;
-  --accent-amber: #f59e0b;
-  --accent-rose: #f43f5e;
-  --accent-purple: #a855f7;
+  --gov-navy: #123B5D;
+  --gov-blue: #1E5AA8;
+  --gov-saffron: #F28C28;
+  --gov-green: #198754;
+  --gov-bg: #F5F7FA;
+  --gov-surface: #FFFFFF;
+  --gov-border: #D9E2EC;
+  --gov-text: #1F2937;
+  --gov-muted: #64748B;
+  --gov-warning: #F59E0B;
+  --gov-critical: #DC3545;
+  --gov-subtle: #F8FAFC;
+  --gov-soft-blue: #EAF2FC;
+  --gov-soft-green: #EAF7F0;
+  --gov-soft-amber: #FFF5E5;
+  --gov-soft-red: #FDECEF;
+  --gov-soft-purple: #F2EEFA;
+  --gov-header: #FFFFFF;
+  --gov-sidebar: #123B5D;
+  --gov-sidebar-border: #0D2D48;
+  --gov-sidebar-muted: rgba(219, 234, 254, 0.82);
+  --gov-sidebar-chip: #0D2D48;
+  --gov-shadow: rgba(18, 59, 93, 0.07);
+  --gov-shadow-strong: rgba(18, 59, 93, 0.12);
 
-  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --bg-dark: var(--gov-bg);
+  --bg-card: var(--gov-surface);
+  --bg-card-hover: #F8FAFC;
+  --border-color: var(--gov-border);
+  --border-glow: rgba(30, 90, 168, 0.18);
+
+  --accent-cyan: var(--gov-blue);
+  --accent-blue: var(--gov-blue);
+  --accent-emerald: var(--gov-green);
+  --accent-amber: var(--gov-warning);
+  --accent-rose: var(--gov-critical);
+  --accent-purple: #6B4EA0;
+
+  font-family: Inter, "IBM Plex Sans", "Source Sans 3", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+[data-theme="dark"] {
+  --gov-navy: #F8FAFC;
+  --gov-blue: #3B82F6;
+  --gov-saffron: #F28C28;
+  --gov-green: #22C55E;
+  --gov-bg: #0B1220;
+  --gov-surface: #172033;
+  --gov-border: #334155;
+  --gov-text: #F8FAFC;
+  --gov-muted: #CBD5E1;
+  --gov-warning: #F59E0B;
+  --gov-critical: #EF4444;
+  --gov-subtle: #1E293B;
+  --gov-soft-blue: rgba(59, 130, 246, 0.14);
+  --gov-soft-green: rgba(34, 197, 94, 0.13);
+  --gov-soft-amber: rgba(245, 158, 11, 0.14);
+  --gov-soft-red: rgba(239, 68, 68, 0.14);
+  --gov-soft-purple: rgba(124, 104, 238, 0.14);
+  --gov-header: #111827;
+  --gov-sidebar: #111827;
+  --gov-sidebar-border: #334155;
+  --gov-sidebar-muted: rgba(203, 213, 225, 0.82);
+  --gov-sidebar-chip: #1E293B;
+  --gov-shadow: rgba(0, 0, 0, 0.22);
+  --gov-shadow-strong: rgba(0, 0, 0, 0.32);
 }
 
 html, body, #root {
@@ -27,12 +79,21 @@ html, body, #root {
 body {
   margin: 0;
   padding: 0;
-  background-color: var(--bg-dark);
-  color: #f8fafc;
-  background-image: 
-    radial-gradient(at 10% 10%, rgba(6, 182, 212, 0.05) 0px, transparent 50%),
-    radial-gradient(at 90% 90%, rgba(168, 85, 247, 0.05) 0px, transparent 50%),
-    radial-gradient(at 50% 50%, rgba(16, 185, 129, 0.03) 0px, transparent 50%);
+  background-color: var(--gov-bg);
+  color: var(--gov-text);
+  background-image: none;
+}
+
+.gov-app,
+.gov-main,
+body {
+  transition: background-color 200ms ease, color 200ms ease, border-color 200ms ease;
+}
+
+.gov-app,
+.gov-main {
+  background-color: var(--gov-bg) !important;
+  color: var(--gov-text) !important;
 }
 
 /* Custom Scrollbar */
@@ -41,36 +102,153 @@ body {
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #090d16;
+  background: var(--gov-bg);
 }
 ::-webkit-scrollbar-thumb {
-  background: #1e293b;
+  background: var(--gov-border);
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #334155;
+  background: var(--gov-muted);
 }
 
-/* Glassmorphism Card System */
+.gov-header {
+  background: var(--gov-header);
+  border-bottom: 1px solid var(--gov-border);
+  color: var(--gov-text);
+  box-shadow: 0 3px 12px var(--gov-shadow);
+  transition: background-color 200ms ease, border-color 200ms ease, color 200ms ease;
+}
+
+.gov-tricolor-line span:nth-child(1) {
+  background: var(--gov-saffron);
+}
+
+.gov-tricolor-line span:nth-child(2) {
+  background: var(--gov-header);
+}
+
+.gov-tricolor-line span:nth-child(3) {
+  background: var(--gov-green);
+}
+
+.gov-icon-button {
+  background: var(--gov-surface);
+  color: var(--gov-blue);
+  border: 1px solid var(--gov-border);
+}
+
+.gov-logo-mark {
+  background: var(--gov-navy);
+}
+
+.gov-logo-mark > div {
+  background: var(--gov-surface);
+  border: 1px solid var(--gov-border);
+}
+
+.gov-logo-mark svg {
+  color: var(--gov-navy);
+}
+
+[data-theme="dark"] .gov-logo-mark {
+  background: var(--gov-blue);
+}
+
+[data-theme="dark"] .gov-logo-mark svg {
+  color: var(--gov-blue);
+}
+
+.gov-brand-title {
+  color: var(--gov-navy);
+}
+
+.gov-brand-title span {
+  color: var(--gov-saffron);
+}
+
+.gov-demo-badge {
+  background: var(--gov-blue);
+  color: #ffffff;
+  border: 1px solid var(--gov-blue);
+}
+
+.gov-brand-subtitle {
+  color: var(--gov-muted);
+}
+
+.gov-brand-subtitle .font-semibold {
+  color: var(--gov-navy);
+}
+
+.gov-header-stat,
+.gov-clock,
+.gov-theme-toggle {
+  background: var(--gov-subtle);
+  border: 1px solid var(--gov-border);
+  color: var(--gov-text);
+}
+
+.gov-stat-icon {
+  background: var(--gov-soft-green);
+  color: var(--gov-green);
+  border: 1px solid rgba(25, 135, 84, 0.24);
+}
+
+.gov-stat-label,
+.gov-stat-main span,
+.gov-stat-value span {
+  color: var(--gov-muted);
+}
+
+.gov-stat-main {
+  color: var(--gov-navy);
+}
+
+.gov-stat-value {
+  color: var(--gov-green);
+}
+
+.gov-clock svg {
+  color: var(--gov-blue);
+}
+
+.gov-theme-toggle {
+  gap: 2px;
+}
+
+.gov-theme-toggle button {
+  color: var(--gov-muted);
+}
+
+.gov-theme-toggle button.is-active {
+  background: var(--gov-blue);
+  color: #ffffff !important;
+}
+
+.gov-theme-toggle button:not(.is-active):hover {
+  background: var(--gov-soft-blue);
+  color: var(--gov-blue);
+}
+
+/* Government command-center card system */
 .glass-panel {
-  background: rgba(14, 21, 38, 0.75);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 16px;
-  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  background: var(--gov-surface);
+  border: 1px solid var(--gov-border);
+  border-radius: 10px;
+  box-shadow: 0 8px 18px var(--gov-shadow);
+  transition: background-color 200ms ease, color 200ms ease, border-color 200ms ease, box-shadow 200ms ease, transform 200ms ease;
 }
 
 .glass-panel:hover {
-  border-color: rgba(255, 255, 255, 0.14);
+  border-color: var(--gov-border);
+  box-shadow: 0 10px 24px var(--gov-shadow-strong);
 }
 
 .glass-panel-glow {
-  background: rgba(14, 21, 38, 0.85);
-  backdrop-filter: blur(16px);
-  border: 1px solid rgba(6, 182, 212, 0.35);
-  box-shadow: 0 0 25px rgba(6, 182, 212, 0.15);
+  background: var(--gov-surface);
+  border: 1px solid rgba(30, 90, 168, 0.28);
+  box-shadow: 0 10px 24px var(--gov-shadow-strong);
 }
 
 /* Animated Radar Pulse for Live Status */
@@ -83,9 +261,9 @@ body {
 .live-dot {
   width: 9px;
   height: 9px;
-  background-color: #10b981;
+  background-color: var(--gov-green);
   border-radius: 50%;
-  animation: radar-pulse 2s infinite ease-in-out;
+  animation: none;
 }
 
 @keyframes critical-pulse {
@@ -97,44 +275,43 @@ body {
 .critical-dot {
   width: 9px;
   height: 9px;
-  background-color: #f43f5e;
+  background-color: var(--gov-critical);
   border-radius: 50%;
-  animation: critical-pulse 1.2s infinite ease-in-out;
+  animation: none;
 }
 
 /* AI Camera overlay styling */
 .ai-overlay-box {
   position: absolute;
   border: 2px solid;
-  border-radius: 6px;
+  border-radius: 4px;
   pointer-events: none;
   font-family: 'JetBrains Mono', monospace;
   font-size: 11px;
   font-weight: 700;
   padding: 2px;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 3px 10px rgba(15, 23, 42, 0.24);
 }
 
-/* Leaflet Map Dark Styling Overrides */
+/* Leaflet Map Styling Overrides */
 .leaflet-container {
   width: 100%;
   height: 100%;
-  background: #090d16 !important;
-  border-radius: 14px;
+  background: var(--gov-subtle) !important;
+  border-radius: 10px;
 }
 
 .leaflet-popup-content-wrapper {
-  background: rgba(15, 23, 42, 0.95) !important;
-  color: #f8fafc !important;
-  border: 1px solid rgba(6, 182, 212, 0.3) !important;
-  backdrop-filter: blur(12px) !important;
-  border-radius: 12px !important;
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6) !important;
+  background: var(--gov-surface) !important;
+  color: var(--gov-text) !important;
+  border: 1px solid var(--gov-border) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 12px 28px rgba(18, 59, 93, 0.16) !important;
 }
 
 .leaflet-popup-tip {
-  background: #0f172a !important;
+  background: var(--gov-surface) !important;
 }
 
 .custom-leaflet-marker {
@@ -145,31 +322,243 @@ body {
 
 /* Custom Neon Gradient Text */
 .text-gradient-cyan {
-  background: linear-gradient(135deg, #38bdf8 0%, #06b6d4 50%, #3b82f6 100%);
+  background: linear-gradient(135deg, var(--gov-navy) 0%, var(--gov-blue) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 .text-gradient-gold {
-  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #d97706 100%);
+  background: linear-gradient(135deg, #b55f08 0%, var(--gov-saffron) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 .text-gradient-rose {
-  background: linear-gradient(135deg, #fb7185 0%, #f43f5e 50%, #e11d48 100%);
+  background: linear-gradient(135deg, var(--gov-critical) 0%, #991B1B 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 /* Scanline visual effect for video viewports */
 .scanline-overlay {
-  background: linear-gradient(
-    to bottom,
-    rgba(255,255,255,0),
-    rgba(255,255,255,0) 50%,
-    rgba(0, 0, 0, 0.3) 50%,
-    rgba(0, 0, 0, 0.3)
-  );
-  background-size: 100% 4px;
+  background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(18, 59, 93, 0.08) 50%, rgba(18, 59, 93, 0.08));
+  background-size: 100% 5px;
+}
+
+/* Scoped visual theme translation for existing Tailwind-heavy JSX. */
+.gov-app :is(.text-white, .text-slate-100, .text-slate-200) {
+  color: var(--gov-text) !important;
+}
+
+.gov-app :is(.text-slate-300, .text-slate-400, .text-slate-500) {
+  color: var(--gov-muted) !important;
+}
+
+.gov-app :is(.text-cyan-300, .text-cyan-400, .text-blue-300, .text-blue-400) {
+  color: var(--gov-blue) !important;
+}
+
+.gov-app :is(.text-emerald-300, .text-emerald-400) {
+  color: var(--gov-green) !important;
+}
+
+.gov-app :is(.text-amber-300, .text-amber-400) {
+  color: #b46b09 !important;
+}
+
+.gov-app :is(.text-rose-300, .text-rose-400) {
+  color: var(--gov-critical) !important;
+}
+
+.gov-app :is(.text-purple-300, .text-purple-400) {
+  color: #5b3f95 !important;
+}
+
+.gov-app :is(
+  .bg-slate-950,
+  .bg-slate-950\/95,
+  .bg-slate-950\/90,
+  .bg-slate-950\/80,
+  .bg-slate-950\/70,
+  .bg-slate-950\/60,
+  .bg-slate-900,
+  .bg-slate-900\/90,
+  .bg-slate-900\/80,
+  .bg-slate-900\/70,
+  .bg-slate-900\/60,
+  .bg-slate-800,
+  .bg-slate-800\/90
+) {
+  background-color: var(--gov-subtle) !important;
+}
+
+.gov-app :is(.border-slate-800, .border-slate-800\/90, .border-slate-800\/80, .border-slate-800\/70, .border-slate-700, .border-slate-700\/60) {
+  border-color: var(--gov-border) !important;
+}
+
+.gov-app :is(.divide-slate-800\/70, .divide-slate-800) > :not([hidden]) ~ :not([hidden]) {
+  border-color: var(--gov-border) !important;
+}
+
+.gov-app .bg-cyan-950,
+.gov-app .bg-cyan-950\/80,
+.gov-app .bg-cyan-950\/50,
+.gov-app .bg-cyan-950\/40,
+.gov-app .bg-blue-950\/80,
+.gov-app .bg-blue-950\/50 {
+  background-color: #EAF2FC !important;
+  background-color: var(--gov-soft-blue) !important;
+}
+
+.gov-app .bg-emerald-950,
+.gov-app .bg-emerald-950\/90,
+.gov-app .bg-emerald-950\/80 {
+  background-color: #EAF7F0 !important;
+  background-color: var(--gov-soft-green) !important;
+}
+
+.gov-app .bg-amber-950,
+.gov-app .bg-amber-950\/90,
+.gov-app .bg-amber-950\/80,
+.gov-app .bg-amber-950\/50 {
+  background-color: #FFF5E5 !important;
+  background-color: var(--gov-soft-amber) !important;
+}
+
+.gov-app .bg-rose-950,
+.gov-app .bg-rose-950\/90,
+.gov-app .bg-rose-950\/80,
+.gov-app .bg-rose-950\/50 {
+  background-color: #FDECEF !important;
+  background-color: var(--gov-soft-red) !important;
+}
+
+.gov-app .bg-purple-950\/90,
+.gov-app .bg-purple-950\/80,
+.gov-app .bg-purple-950\/50 {
+  background-color: #F2EEFA !important;
+  background-color: var(--gov-soft-purple) !important;
+}
+
+.gov-app :is(.border-cyan-500\/40, .border-cyan-500\/30, .border-cyan-500\/25, .border-cyan-500\/20, .border-cyan-800, .border-cyan-800\/80, .border-cyan-800\/60, .border-cyan-700) {
+  border-color: rgba(30, 90, 168, 0.28) !important;
+}
+
+.gov-app :is(.border-emerald-800, .border-emerald-700, .border-emerald-500\/40, .border-emerald-500\/20) {
+  border-color: rgba(25, 135, 84, 0.28) !important;
+}
+
+.gov-app :is(.border-amber-800, .border-amber-500\/50, .border-amber-500\/40, .border-amber-500\/25, .border-amber-500\/20) {
+  border-color: rgba(245, 158, 11, 0.34) !important;
+}
+
+.gov-app :is(.border-rose-900\/60, .border-rose-800, .border-rose-500, .border-rose-500\/40, .border-rose-500\/20) {
+  border-color: rgba(220, 53, 69, 0.34) !important;
+}
+
+.gov-app button.bg-gradient-to-r,
+.gov-app .bg-gradient-to-r:is(.from-cyan-500, .from-blue-500) {
+  background-image: none !important;
+  background-color: var(--gov-blue) !important;
+  color: #ffffff !important;
+  box-shadow: 0 6px 14px rgba(30, 90, 168, 0.18) !important;
+}
+
+.gov-app .bg-gradient-to-r.from-amber-500 {
+  background-image: none !important;
+  background-color: var(--gov-saffron) !important;
+  color: #111827 !important;
+}
+
+.gov-app .bg-gradient-to-r.from-emerald-500 {
+  background-image: none !important;
+  background-color: var(--gov-green) !important;
+  color: #ffffff !important;
+}
+
+.gov-app table thead {
+  background: var(--gov-soft-blue) !important;
+  color: var(--gov-navy) !important;
+}
+
+.gov-app table tbody tr:hover {
+  background: var(--gov-subtle) !important;
+}
+
+.gov-app input,
+.gov-app select {
+  background: var(--gov-surface) !important;
+  color: var(--gov-text) !important;
+  border-color: var(--gov-border) !important;
+}
+
+.gov-app input:focus,
+.gov-app select:focus,
+.gov-app button:focus-visible {
+  outline: 2px solid rgba(30, 90, 168, 0.25) !important;
+  outline-offset: 2px;
+}
+
+.gov-app .shadow-2xl,
+.gov-app .shadow-xl,
+.gov-app .shadow-lg,
+.gov-app .shadow-md {
+  box-shadow: 0 8px 18px rgba(18, 59, 93, 0.08) !important;
+  box-shadow: 0 8px 18px var(--gov-shadow) !important;
+}
+
+.gov-app .backdrop-blur,
+.gov-app .backdrop-blur-xl,
+.gov-app .backdrop-blur-md,
+.gov-app .backdrop-blur-sm {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.gov-app aside :is(.text-white, .text-blue-50\/85, .text-blue-100\/80) {
+  color: #ffffff !important;
+}
+
+.gov-app aside.bg-\[\#123B5D\],
+.gov-app aside .bg-\[\#123B5D\] {
+  background-color: var(--gov-sidebar) !important;
+}
+
+.gov-app aside.border-\[\#0D2D48\],
+.gov-app aside .border-\[\#0D2D48\] {
+  border-color: var(--gov-sidebar-border) !important;
+}
+
+.gov-app aside .bg-\[\#1E5AA8\] {
+  background-color: var(--gov-blue) !important;
+  color: #ffffff !important;
+}
+
+.gov-app aside .bg-\[\#0D2D48\] {
+  background-color: var(--gov-sidebar-chip) !important;
+  color: var(--gov-sidebar-muted) !important;
+}
+
+.gov-app aside .bg-white\/8 {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.gov-app header .bg-\[\#1E5AA8\],
+.gov-app header .bg-\[\#1E5AA8\] * {
+  color: #ffffff !important;
+}
+
+.gov-app button.bg-\[\#1E5AA8\],
+.gov-app button.bg-\[\#1E5AA8\] * {
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .gov-app .bg-\[\#F5F7FA\],
+[data-theme="dark"].gov-app .bg-\[\#F5F7FA\] {
+  background-color: var(--gov-bg) !important;
+}
+
+[data-theme="dark"] .gov-app .text-\[\#1F2937\],
+[data-theme="dark"].gov-app .text-\[\#1F2937\] {
+  color: var(--gov-text) !important;
 }

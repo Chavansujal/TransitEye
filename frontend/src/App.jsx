@@ -20,6 +20,11 @@ import {
 export default function App() {
   const [activeTab, setActiveTab] = useState("overview");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [theme, setTheme] = useState(() => {
+    if (typeof window === "undefined") return "light";
+    const savedTheme = localStorage.getItem("transiteye-theme");
+    return savedTheme === "dark" ? "dark" : "light";
+  });
 
   // App Level State
   const [buses, setBuses] = useState([
@@ -52,6 +57,11 @@ export default function App() {
   ]);
 
   const [analytics, setAnalytics] = useState({});
+
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+    localStorage.setItem("transiteye-theme", theme);
+  }, [theme]);
 
   // Polling backend API every 3s
   useEffect(() => {
@@ -96,13 +106,15 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0b0f19] text-white flex flex-col font-sans max-w-full overflow-x-hidden">
+    <div className="gov-app min-h-screen flex flex-col font-sans max-w-full overflow-x-hidden" data-theme={theme}>
       {/* Fixed Top Header */}
       <Header 
         activeBusesCount={buses.filter(b => b.status === "ONLINE" || b.status === "INCIDENT").length}
         totalBusesCount={buses.length}
         isMobileMenuOpen={isMobileMenuOpen}
         onToggleMobileMenu={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+        theme={theme}
+        onThemeChange={setTheme}
       />
 
       {/* Main Body Layout with Sidebar */}
@@ -114,7 +126,7 @@ export default function App() {
           setIsMobileMenuOpen={setIsMobileMenuOpen}
         />
 
-        <main className="flex-1 overflow-y-auto bg-[#0b0f19] min-w-0">
+        <main className="gov-main flex-1 overflow-y-auto min-w-0">
           {activeTab === "overview" && (
             <Overview 
               buses={buses} 

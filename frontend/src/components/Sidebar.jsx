@@ -1,22 +1,21 @@
 import React from "react";
-import { 
-  LayoutDashboard, 
-  Video, 
-  MapPin, 
-  Bus, 
-  AlertTriangle, 
-  ShieldAlert, 
+import {
+  LayoutDashboard,
+  Video,
+  MapPin,
+  Bus,
+  AlertTriangle,
+  ShieldAlert,
   BarChart3,
-  Cpu,
   Radio,
   X
 } from "lucide-react";
 
-export default function Sidebar({ 
-  activeTab, 
-  setActiveTab, 
-  isMobileMenuOpen = false, 
-  setIsMobileMenuOpen 
+export default function Sidebar({
+  activeTab,
+  setActiveTab,
+  isMobileMenuOpen = false,
+  setIsMobileMenuOpen
 }) {
   const menuItems = [
     { id: "overview", label: "Command Center", icon: LayoutDashboard, badge: "Live" },
@@ -38,12 +37,13 @@ export default function Sidebar({
   const renderContent = () => (
     <>
       <div className="space-y-1.5">
-        <div className="px-3 py-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest font-mono flex items-center justify-between">
+        <div className="px-3 py-2 text-[10px] font-bold text-blue-100/80 uppercase tracking-widest font-mono flex items-center justify-between">
           <span>OPERATIONS CONSOLE</span>
           {isMobileMenuOpen && (
-            <button 
+            <button
               onClick={() => setIsMobileMenuOpen(false)}
-              className="lg:hidden p-1 rounded-lg hover:bg-slate-900 text-slate-400 hover:text-white"
+              className="lg:hidden p-1 rounded-lg hover:bg-white/10 text-blue-100 hover:text-white"
+              aria-label="Close Navigation Menu"
             >
               <X className="w-4 h-4" />
             </button>
@@ -56,29 +56,28 @@ export default function Sidebar({
             <button
               key={item.id}
               onClick={() => handleSelectTab(item.id)}
-              className={`w-full flex items-center justify-between px-3.5 py-3 rounded-xl text-xs font-semibold transition-all duration-200 group relative ${
+              className={`w-full flex items-center justify-between px-3.5 py-3 rounded-lg text-xs font-semibold transition-all duration-200 group relative border ${
                 isActive
-                  ? "bg-slate-900/90 text-cyan-400 border border-cyan-500/30 shadow-lg shadow-cyan-500/10"
-                  : "text-slate-400 hover:text-slate-200 hover:bg-slate-900/40"
+                  ? "bg-[#1E5AA8] text-white border-blue-300/40 shadow-sm"
+                  : "text-blue-50/85 border-transparent hover:text-white hover:bg-white/10"
               }`}
             >
-              {/* Left active highlight bar */}
               {isActive && (
-                <div className="absolute left-0 top-2 bottom-2 w-1 bg-gradient-to-b from-cyan-400 to-blue-500 rounded-r-full"></div>
+                <div className="absolute left-0 top-2 bottom-2 w-1 bg-[#F28C28] rounded-r-full"></div>
               )}
 
               <div className="flex items-center gap-3.5 pl-1">
                 <Icon className={`w-4 h-4 transition duration-200 ${
-                  isActive ? "text-cyan-400" : "text-slate-400 group-hover:text-slate-200"
+                  isActive ? "text-white" : "text-blue-100/80 group-hover:text-white"
                 }`} />
                 <span className="tracking-wide">{item.label}</span>
               </div>
 
               {item.badge && (
                 <span className={`text-[9px] px-2 py-0.5 rounded-md font-mono font-bold uppercase transition ${
-                  isActive 
-                    ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/30"
-                    : "bg-slate-900 text-slate-500 group-hover:text-slate-400"
+                  isActive
+                    ? "bg-white/15 text-white border border-white/20"
+                    : "bg-[#0D2D48] text-blue-100/75 border border-white/10 group-hover:text-white"
                 }`}>
                   {item.badge}
                 </span>
@@ -89,27 +88,27 @@ export default function Sidebar({
       </div>
 
       {/* System Telemetry Box at Sidebar Bottom */}
-      <div className="glass-panel p-4 text-xs space-y-2.5 border-slate-800/80 bg-slate-950/60 relative overflow-hidden mt-auto">
+      <div className="p-4 text-xs space-y-2.5 border border-white/15 bg-white/8 relative overflow-hidden mt-auto rounded-lg">
         <div className="flex items-center justify-between font-mono">
-          <span className="flex items-center gap-1.5 font-bold text-slate-200">
-            <Radio className="w-3.5 h-3.5 text-cyan-400 animate-pulse" /> Edge Telemetry
+          <span className="flex items-center gap-1.5 font-bold text-white">
+            <Radio className="w-3.5 h-3.5 text-[#7CE3B1]" /> Edge Telemetry
           </span>
-          <span className="text-[9px] text-emerald-400 bg-emerald-950/80 px-2 py-0.5 rounded-full border border-emerald-800 font-bold">
+          <span className="text-[9px] text-[#7CE3B1] bg-[#073B2B] px-2 py-0.5 rounded-full border border-emerald-500/40 font-bold">
             ONLINE
           </span>
         </div>
-        
-        <p className="text-[11px] text-slate-400 leading-relaxed font-sans">
+
+        <p className="text-[11px] text-blue-50/80 leading-relaxed font-sans">
           Buses perform local inferencing. Low bandwidth, privacy compliant.
         </p>
 
         <div className="space-y-1">
-          <div className="flex justify-between text-[10px] font-mono text-slate-400">
+          <div className="flex justify-between text-[10px] font-mono text-blue-50/75">
             <span>Edge Filtering:</span>
-            <span className="text-emerald-400 font-bold">97.4%</span>
+            <span className="text-[#7CE3B1] font-bold">97.4%</span>
           </div>
-          <div className="w-full bg-slate-900 h-1.5 rounded-full overflow-hidden border border-slate-800">
-            <div className="bg-gradient-to-r from-cyan-500 via-blue-500 to-emerald-400 h-full w-[97.4%] shadow-sm shadow-emerald-400"></div>
+          <div className="w-full bg-[#0D2D48] h-1.5 rounded-full overflow-hidden border border-white/10">
+            <div className="bg-[#198754] h-full w-[97.4%]"></div>
           </div>
         </div>
       </div>
@@ -119,7 +118,7 @@ export default function Sidebar({
   return (
     <>
       {/* Desktop Static Sidebar */}
-      <aside className="hidden lg:flex w-64 bg-[#070a12]/95 border-r border-slate-800/80 flex-col justify-between h-[calc(100vh-4rem)] p-4 shrink-0 backdrop-blur-xl">
+      <aside className="hidden lg:flex w-64 bg-[#123B5D] border-r border-[#0D2D48] flex-col justify-between h-[calc(100vh-5rem)] p-4 shrink-0 shadow-md">
         {renderContent()}
       </aside>
 
@@ -127,12 +126,12 @@ export default function Sidebar({
       {isMobileMenuOpen && (
         <div className="lg:hidden">
           {/* Dark Backdrop */}
-          <div 
-            className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-40"
+          <div
+            className="fixed inset-0 bg-slate-950/50 backdrop-blur-sm z-40"
             onClick={() => setIsMobileMenuOpen && setIsMobileMenuOpen(false)}
           />
           {/* Sliding Panel */}
-          <aside className="fixed top-16 left-0 bottom-0 w-72 max-w-[85vw] bg-[#070a12] border-r border-slate-800/90 flex flex-col justify-between p-4 z-50 overflow-y-auto shadow-2xl animate-in slide-in-from-left duration-200">
+          <aside className="fixed top-[4.5rem] sm:top-20 left-0 bottom-0 w-72 max-w-[85vw] bg-[#123B5D] border-r border-[#0D2D48] flex flex-col justify-between p-4 z-50 overflow-y-auto shadow-2xl animate-in slide-in-from-left duration-200">
             {renderContent()}
           </aside>
         </div>

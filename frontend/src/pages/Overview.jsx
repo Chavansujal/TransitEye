@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { 
   Bus, 
   AlertTriangle, 
@@ -7,254 +7,325 @@ import {
   TrendingUp, 
   CheckCircle2, 
   Clock, 
-  Zap,
-  ArrowRight,
-  Activity,
-  Layers,
-  Sparkles
+  ArrowUpRight, 
+  Sparkles,
+  MapPin
 } from "lucide-react";
+import Organic3DVisual from "../components/Organic3DVisual";
+import AnimatedNumber from "../components/AnimatedNumber";
 
-export default function Overview({ buses = [], events = [], roadIssues = [], incidents = [], onNavigate }) {
-  const activeBuses = buses.filter(b => b.status === "ONLINE" || b.status === "INCIDENT").length;
-  const criticalCount = incidents.filter(i => i.status === "NEW" || i.severity === "CRITICAL").length;
+export default function Overview({ buses = [], events = [], roadIssues = [], incidents = [], onNavigate, theme = "dark" }) {
+  const [dataFilter, setDataFilter] = useState("all");
+
+  const safeBuses = Array.isArray(buses) ? buses : [];
+  const safeEvents = Array.isArray(events) ? events : [];
+  const safeRoadIssues = Array.isArray(roadIssues) ? roadIssues : [];
+  const safeIncidents = Array.isArray(incidents) ? incidents : [];
+
+  const activeBuses = safeBuses.filter(b => b.status === "ONLINE" || b.status === "INCIDENT").length;
+  const criticalCount = safeIncidents.filter(i => i.status === "NEW" || i.severity === "CRITICAL").length;
+
+  const filteredEvents = safeEvents.filter(evt => {
+    if (dataFilter === "edge_raw") return evt.confidence && evt.confidence < 0.95;
+    if (dataFilter === "verified_incident") return evt.severity === "CRITICAL" || evt.registrationNumber;
+    return true;
+  });
 
   return (
-    <div className="p-3 sm:p-6 space-y-4 sm:space-y-6 max-w-7xl mx-auto">
-      {/* Hero Banner with Modern Gradient Glow */}
-      <div className="relative glass-panel p-4 sm:p-6 lg:p-8 overflow-hidden bg-gradient-to-r from-slate-950 via-[#0d1424] to-cyan-950/40 border-cyan-500/25 shadow-2xl">
-        <div className="absolute -right-16 -top-16 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
-        <div className="absolute right-32 -bottom-16 w-60 h-60 bg-blue-600/10 rounded-full blur-2xl pointer-events-none"></div>
-
-        <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-4 sm:gap-6">
-          <div className="space-y-2 max-w-3xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-950/80 border border-cyan-800/80 text-cyan-300 font-mono text-[10px] sm:text-xs">
-              <Sparkles className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
-              <span>MOBILE SENSING INFRASTRUCTURE • SIH 26124</span>
-            </div>
-            <h2 className="text-xl sm:text-2xl lg:text-3xl font-black text-white tracking-tight leading-tight">
-              Urban Intelligence Operations Dashboard
-            </h2>
-            <p className="text-xs sm:text-sm text-slate-300/90 leading-relaxed">
-              Public transport buses transformed into mobile Edge AI sensing nodes. Detects potholes, traffic bottlenecks, pedestrian hazards & rash driving in real-time across Pune.
-            </p>
+    <div className="space-y-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 font-sans text-[var(--te-text)] animate-fade-in-up">
+      
+      {/* Clean Hero Section */}
+      <section className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-center min-h-0 sm:min-h-[440px] relative overflow-hidden">
+        
+        {/* Left Column: Clear Hierarchy & Action Buttons */}
+        <div className="lg:col-span-7 space-y-4 sm:space-y-5 z-10">
+          <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded bg-[var(--te-lime-bg)] text-[var(--te-lime)] border border-[var(--te-lime-border)] text-[11px] sm:text-xs font-semibold max-w-full truncate">
+            <Sparkles className="w-3.5 h-3.5 text-[var(--te-lime)] animate-pulse shrink-0" />
+            <span className="truncate">PMC Urban Sensing Infrastructure • SIH 26124</span>
           </div>
 
-          <div className="flex items-center gap-3 shrink-0">
+          <h1 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-[var(--te-text)] leading-[1.15] sm:leading-[1.1]">
+            Transit<span className="text-[var(--te-lime)]">Eye</span> Mobile <br className="hidden sm:inline" />
+            Urban Intelligence Platform
+          </h1>
+
+          <p className="text-xs sm:text-sm lg:text-base text-[var(--te-text-muted)] max-w-xl leading-relaxed">
+            Converting Pune city buses into mobile urban sensing nodes. Edge AI processes HD video locally on onboard hardware, filtering 97.4% of bandwidth to upload verified road defects & ANPR alerts in real time.
+          </p>
+
+          {/* Action Buttons */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3 pt-1 sm:pt-2">
             <button
               onClick={() => onNavigate("live")}
-              className="w-full sm:w-auto flex items-center justify-center gap-2.5 px-5 py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-bold text-xs uppercase tracking-wider transition duration-300 shadow-xl shadow-cyan-500/25"
+              className="te-button-primary text-xs sm:text-sm font-semibold justify-center sm:justify-start"
             >
-              Launch Live AI Feed <ArrowRight className="w-4 h-4" />
+              <span>Explore Live Edge Camera Feed</span>
+              <ArrowUpRight className="w-4 h-4 stroke-[2.5]" />
+            </button>
+
+            <button
+              onClick={() => onNavigate("gis")}
+              className="te-button-secondary text-xs sm:text-sm font-semibold justify-center sm:justify-start"
+            >
+              <MapPin className="w-4 h-4 text-[var(--te-lime)]" />
+              <span>Pune GIS Spatial Map</span>
             </button>
           </div>
-        </div>
-      </div>
 
-      {/* Modern Metric Cards Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
-        {/* Active Buses */}
-        <div className="glass-panel p-4 sm:p-5 relative overflow-hidden group hover:border-blue-500/40">
-          <div className="flex items-center justify-between text-slate-400 mb-2 sm:mb-3">
-            <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider font-mono">Active Sensing Fleet</span>
-            <div className="p-2 sm:p-2.5 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20">
-              <Bus className="w-4 h-4 sm:w-5 sm:h-5" />
+          {/* Micro Telemetry Bar */}
+          <div className="pt-3 flex flex-wrap items-center gap-4 sm:gap-6 text-xs text-[var(--te-text-muted)] border-t border-[var(--te-border)]">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-[var(--te-lime)]"></span>
+              <span><strong className="text-[var(--te-text)] font-semibold">97.4%</strong> Edge Filtered</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-[var(--te-lime)]"></span>
+              <span><strong className="text-[var(--te-text)] font-semibold">~48.6 GB</strong> 5G Saved/Day</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-amber-500"></span>
+              <span><strong className="text-[var(--te-text)] font-semibold">{activeBuses} / {safeBuses.length}</strong> Buses Active</span>
             </div>
           </div>
-          <div className="text-2xl sm:text-3xl font-black text-white font-mono">{activeBuses} <span className="text-slate-500 text-sm sm:text-base font-normal">/ {buses.length}</span></div>
-          <div className="text-[11px] sm:text-xs text-emerald-400 flex items-center gap-1.5 mt-2 sm:mt-3 font-mono">
+        </div>
+
+        {/* Right Column: Dynamic Visual */}
+        <div className="lg:col-span-5 h-[240px] sm:h-[340px] lg:h-[400px] relative flex items-center justify-center">
+          <Organic3DVisual theme={theme} />
+        </div>
+      </section>
+
+      {/* Primary Key Metric Cards */}
+      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="te-card p-5 space-y-2">
+          <div className="flex items-center justify-between text-[var(--te-text-muted)] text-xs font-semibold uppercase tracking-wider">
+            <span>Active Sensing Fleet</span>
+            <Bus className="w-4 h-4 text-[var(--te-lime)]" />
+          </div>
+          <div className="text-3xl font-extrabold text-[var(--te-text)]">
+            <AnimatedNumber value={activeBuses} /> <span className="text-sm font-normal text-[var(--te-text-dim)]">/ {safeBuses.length}</span>
+          </div>
+          <div className="text-xs text-[var(--te-lime)] flex items-center gap-1 font-semibold">
             <CheckCircle2 className="w-3.5 h-3.5" /> 91.6% Fleet Operational
           </div>
         </div>
 
-        {/* Events Today */}
-        <div className="glass-panel p-4 sm:p-5 relative overflow-hidden group hover:border-amber-500/40">
-          <div className="flex items-center justify-between text-slate-400 mb-2 sm:mb-3">
-            <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider font-mono">Events Logged Today</span>
-            <div className="p-2 sm:p-2.5 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
-              <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5" />
-            </div>
+        <div className="te-card p-5 space-y-2">
+          <div className="flex items-center justify-between text-[var(--te-text-muted)] text-xs font-semibold uppercase tracking-wider">
+            <span>Events Processed Today</span>
+            <TrendingUp className="w-4 h-4 text-[var(--te-lime)]" />
           </div>
-          <div className="text-2xl sm:text-3xl font-black text-white font-mono">{events.length + 138}</div>
-          <div className="text-[11px] sm:text-xs text-slate-400 flex items-center gap-1.5 mt-2 sm:mt-3 font-mono">
-            <span>Potholes, Bottlenecks & Alerts</span>
+          <div className="text-3xl font-extrabold text-[var(--te-text)]">
+            <AnimatedNumber value={safeEvents.length + 138} />
           </div>
+          <div className="text-xs text-[var(--te-text-muted)]">Potholes, Bottlenecks & Alerts</div>
         </div>
 
-        {/* Road Defect Priorities */}
-        <div className="glass-panel p-4 sm:p-5 relative overflow-hidden group hover:border-rose-500/40">
-          <div className="flex items-center justify-between text-slate-400 mb-2 sm:mb-3">
-            <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider font-mono">Defect Priority Corridors</span>
-            <div className="p-2 sm:p-2.5 rounded-xl bg-rose-500/10 text-rose-400 border border-rose-500/20">
-              <AlertTriangle className="w-4 h-4 sm:w-5 sm:h-5" />
-            </div>
+        <div className="te-card p-5 space-y-2">
+          <div className="flex items-center justify-between text-[var(--te-text-muted)] text-xs font-semibold uppercase tracking-wider">
+            <span>Priority Road Defects</span>
+            <AlertTriangle className="w-4 h-4 text-amber-500" />
           </div>
-          <div className="text-2xl sm:text-3xl font-black text-white font-mono">{roadIssues.length} <span className="text-slate-500 text-sm sm:text-base font-normal">Corridors</span></div>
-          <div className="text-[11px] sm:text-xs text-rose-400 flex items-center gap-1.5 mt-2 sm:mt-3 font-mono font-semibold">
-            <span>Max Priority Score: 92/100</span>
+          <div className="text-3xl font-extrabold text-[var(--te-text)]">
+            <AnimatedNumber value={safeRoadIssues.length} />
           </div>
+          <div className="text-xs text-amber-600 dark:text-amber-400 font-semibold">Corridor Score: 92/100</div>
         </div>
 
-        {/* Critical ANPR Incidents */}
-        <div className="glass-panel p-4 sm:p-5 relative overflow-hidden group hover:border-purple-500/40">
-          <div className="flex items-center justify-between text-slate-400 mb-2 sm:mb-3">
-            <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider font-mono">ANPR Incidents</span>
-            <div className="p-2 sm:p-2.5 rounded-xl bg-purple-500/10 text-purple-400 border border-purple-500/20">
-              <ShieldAlert className="w-4 h-4 sm:w-5 sm:h-5" />
-            </div>
+        <div className="te-card p-5 space-y-2">
+          <div className="flex items-center justify-between text-[var(--te-text-muted)] text-xs font-semibold uppercase tracking-wider">
+            <span>ANPR Violations</span>
+            <ShieldAlert className="w-4 h-4 text-rose-500" />
           </div>
-          <div className="text-2xl sm:text-3xl font-black text-white font-mono">{incidents.length}</div>
-          <div className="text-[11px] sm:text-xs text-purple-400 flex items-center gap-1.5 mt-2 sm:mt-3 font-mono font-semibold">
-            <span>{criticalCount} Actionable Dispatches</span>
+          <div className="text-3xl font-extrabold text-[var(--te-text)]">
+            <AnimatedNumber value={safeIncidents.length} />
+          </div>
+          <div className="text-xs text-rose-600 dark:text-rose-400 font-semibold">
+            <AnimatedNumber value={criticalCount} /> Actionable Dispatches
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* Middle Section: Edge AI Optimization + Actionable Corridors */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-        {/* Edge AI Bandwidth Savings Widget */}
-        <div className="glass-panel p-4 sm:p-6 lg:col-span-1 space-y-4 border-slate-800">
-          <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-            <h3 className="text-sm sm:text-base font-bold text-white flex items-center gap-2">
-              <Cpu className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-400 shrink-0" /> Edge AI Bandwidth Savings
+      {/* Municipal Defect Priorities & Edge AI Savings */}
+      <section className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        
+        {/* Edge AI Bandwidth Optimization */}
+        <div className="lg:col-span-5 te-card p-5 space-y-4">
+          <div className="flex items-center justify-between border-b border-[var(--te-border)] pb-3">
+            <h3 className="text-sm font-bold text-[var(--te-text)] flex items-center gap-2">
+              <Cpu className="w-4 h-4 text-[var(--te-lime)]" /> Edge AI Bandwidth Savings
             </h3>
-            <span className="text-[9px] sm:text-[10px] bg-emerald-950/80 text-emerald-300 border border-emerald-800 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full font-mono font-bold shrink-0">
-              97.4% REDUCTION
+            <span className="text-[11px] bg-[var(--te-lime-bg)] text-[var(--te-lime)] border border-[var(--te-lime-border)] px-2 py-0.5 rounded font-semibold">
+              97.4% Reduction
             </span>
           </div>
 
-          <p className="text-xs text-slate-400 leading-relaxed">
-            Public bus cameras process HD video locally on NVIDIA Jetson edge acceleration units. Only compact metadata & compressed incident snapshots are uploaded to the cloud command server.
+          <p className="text-xs text-[var(--te-text-muted)] leading-relaxed">
+            Bus-mounted HD cameras run real-time RF-DETR inferencing directly on Jetson edge devices, transmitting only verified metadata and compressed frames.
           </p>
 
-          <div className="space-y-3 bg-slate-950/80 p-3.5 sm:p-4 rounded-xl border border-slate-800/80 font-mono text-xs">
-            <div className="flex justify-between text-slate-300 text-[11px] sm:text-xs">
-              <span>Edge Processed:</span>
-              <span className="text-emerald-400 font-bold">97.4% (14,250)</span>
+          <div className="space-y-3 bg-[var(--te-panel)] p-3.5 rounded-md border border-[var(--te-border)] text-xs">
+            <div className="flex justify-between text-[var(--te-text)] font-medium">
+              <span>Processed Locally at Edge:</span>
+              <span className="text-[var(--te-lime)] font-bold">97.4% (14,250 frames)</span>
             </div>
-            <div className="w-full bg-slate-900 h-2.5 rounded-full overflow-hidden border border-slate-800">
-              <div className="bg-gradient-to-r from-emerald-500 to-cyan-400 h-full w-[97.4%] shadow-sm shadow-emerald-500"></div>
+            <div className="w-full bg-[var(--te-surface)] h-2 rounded-full overflow-hidden border border-[var(--te-border)]">
+              <div className="bg-[var(--te-lime)] h-full w-[97.4%]"></div>
             </div>
 
-            <div className="flex justify-between text-slate-300 pt-1 text-[11px] sm:text-xs">
-              <span>Events Transmitted:</span>
-              <span className="text-cyan-400 font-bold">2.6% (390)</span>
+            <div className="flex justify-between text-[var(--te-text)] font-medium pt-1">
+              <span>Transmitted to Cloud:</span>
+              <span className="text-[var(--te-text-muted)] font-bold">2.6% (390 events)</span>
             </div>
-            <div className="w-full bg-slate-900 h-2.5 rounded-full overflow-hidden border border-slate-800">
-              <div className="bg-gradient-to-r from-cyan-500 to-blue-500 h-full w-[2.6%] shadow-sm shadow-cyan-500"></div>
+            <div className="w-full bg-[var(--te-surface)] h-2 rounded-full overflow-hidden border border-[var(--te-border)]">
+              <div className="bg-[var(--te-text-muted)] h-full w-[2.6%]"></div>
             </div>
           </div>
 
-          <div className="p-3 sm:p-3.5 bg-cyan-950/40 border border-cyan-800/60 rounded-xl flex items-center justify-between text-xs font-mono">
-            <span className="text-slate-300">Estimated 5G Saved:</span>
-            <span className="text-cyan-400 font-bold text-xs sm:text-sm">~48.6 GB / day</span>
+          <div className="p-3 bg-[var(--te-lime-bg)] border border-[var(--te-lime-border)] rounded-md flex items-center justify-between text-xs">
+            <span className="text-[var(--te-text-muted)]">Estimated 5G Cellular Data Saved:</span>
+            <span className="text-[var(--te-lime)] font-bold text-sm">~48.6 GB / day</span>
           </div>
         </div>
 
         {/* Priority Corridors List */}
-        <div className="glass-panel p-4 sm:p-6 lg:col-span-2 space-y-4 border-slate-800">
-          <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div className="lg:col-span-7 te-card p-5 space-y-4">
+          <div className="flex items-center justify-between border-b border-[var(--te-border)] pb-3">
             <div>
-              <h3 className="text-sm sm:text-base font-bold text-white flex items-center gap-2">
-                <AlertTriangle className="w-4 h-4 sm:w-5 sm:h-5 text-amber-400 shrink-0" /> Actionable Municipal Road Priorities
+              <h3 className="text-sm font-bold text-[var(--te-text)] flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 text-amber-500" /> Municipal Defect Priorities
               </h3>
-              <p className="text-[11px] sm:text-xs text-slate-400">
-                Synthesis of multi-bus defect corroborations across Pune routes.
+              <p className="text-xs text-[var(--te-text-muted)]">
+                Corroborated road defect reports across active Pune transit routes.
               </p>
             </div>
             <button
               onClick={() => onNavigate("road_issues")}
-              className="text-xs text-cyan-400 hover:text-cyan-300 flex items-center gap-1 font-bold font-mono shrink-0 ml-2"
+              className="text-xs text-[var(--te-lime)] hover:underline flex items-center gap-1 font-semibold shrink-0 ml-2"
             >
-              VIEW ALL <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              View All Defect Logs <ArrowUpRight className="w-3.5 h-3.5" />
             </button>
           </div>
 
-          <div className="space-y-3">
-            {roadIssues.map((issue) => (
+          <div className="space-y-2.5">
+            {safeRoadIssues.map((issue) => (
               <div 
                 key={issue.id} 
-                className="p-3.5 sm:p-4 rounded-xl bg-slate-950/60 border border-slate-800/80 hover:border-slate-700 transition flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4"
+                className="p-3.5 rounded-md bg-[var(--te-panel)] border border-[var(--te-border)] hover:border-[var(--te-border-strong)] transition flex flex-col sm:flex-row sm:items-center justify-between gap-3"
               >
-                <div className="space-y-1.5">
-                  <div className="flex items-center gap-2.5 flex-wrap">
-                    <span className="text-xs sm:text-sm font-bold text-white">{issue.location}</span>
-                    <span className={`text-[9px] px-2 py-0.5 rounded-full font-mono font-extrabold tracking-wider ${
-                      issue.severity === "CRITICAL" ? "bg-rose-950/90 text-rose-300 border border-rose-800" :
-                      issue.severity === "HIGH" ? "bg-amber-950/90 text-amber-300 border border-amber-800" :
-                      "bg-blue-950/90 text-blue-300 border border-blue-800"
+                <div className="space-y-1 text-xs">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="font-bold text-[var(--te-text)]">{issue.location}</span>
+                    <span className={`text-[10px] px-2 py-0.5 rounded font-semibold ${
+                      issue.severity === "CRITICAL" ? "bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/30" :
+                      issue.severity === "HIGH" ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30" :
+                      "bg-[var(--te-panel)] text-[var(--te-text-muted)] border border-[var(--te-border)]"
                     }`}>
                       {issue.severity}
                     </span>
                   </div>
-                  <div className="text-[11px] sm:text-xs text-slate-400 flex flex-wrap items-center gap-x-4 gap-y-1">
-                    <span>Defect: <strong className="text-slate-200">{issue.issueType}</strong></span>
-                    <span>Reports: <strong className="text-slate-200">{issue.reports}</strong> ({issue.busesReporting} buses)</span>
+                  <div className="text-[var(--te-text-muted)] flex flex-wrap items-center gap-x-4 gap-y-1">
+                    <span>Defect Type: <strong className="text-[var(--te-text)]">{issue.issueType}</strong></span>
+                    <span>Reports: <strong className="text-[var(--te-text)]">{issue.reports}</strong> ({issue.busesReporting} buses)</span>
                   </div>
-                  <p className="text-[11px] sm:text-xs text-cyan-300/90 italic">
-                    💡 Recommendation: "{issue.recommendation}"
+                  <p className="text-[var(--te-lime)] italic pt-0.5">
+                    Action: "{issue.recommendation}"
                   </p>
                 </div>
 
                 <div className="flex items-center gap-4 shrink-0 sm:self-center">
-                  <div className="text-left sm:text-right font-mono">
-                    <div className="text-[9px] sm:text-[10px] text-slate-400 uppercase tracking-widest">Priority Score</div>
-                    <div className="text-xl sm:text-2xl font-black text-white">{issue.priorityScore}<span className="text-xs text-slate-500 font-normal">/100</span></div>
+                  <div className="text-left sm:text-right">
+                    <div className="text-[10px] text-[var(--te-text-muted)] uppercase">Priority Score</div>
+                    <div className="text-xl font-extrabold text-[var(--te-text)]">{issue.priorityScore}<span className="text-xs text-[var(--te-text-muted)] font-normal">/100</span></div>
                   </div>
                 </div>
               </div>
             ))}
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* Live Event Stream Table */}
-      <div className="glass-panel p-4 sm:p-6 space-y-4 border-slate-800">
-        <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-          <h3 className="text-sm sm:text-base font-bold text-white flex items-center gap-2">
-            <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-400 shrink-0" /> Recent Edge-Filtered Event Stream
-          </h3>
-          <span className="text-[11px] sm:text-xs text-slate-400 flex items-center gap-1.5 font-mono shrink-0">
-            <span className="live-dot"></span> <span className="hidden sm:inline">Telemetry Broadcast Stream</span><span className="sm:hidden">Live</span>
-          </span>
+      {/* Live Edge AI Telemetry Table */}
+      <section className="te-card p-5 space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[var(--te-border)] pb-3">
+          <div className="flex items-center gap-2">
+            <Clock className="w-4 h-4 text-[var(--te-lime)]" />
+            <h3 className="text-sm font-bold text-[var(--te-text)]">Recent Edge AI Event Telemetry</h3>
+          </div>
+
+          {/* Filter Buttons */}
+          <div className="flex items-center gap-2 text-xs">
+            {[
+              { id: "all", label: "All Telemetry" },
+              { id: "edge_raw", label: "Edge Detections" },
+              { id: "verified_incident", label: "ANPR Incidents" }
+            ].map(f => (
+              <button
+                key={f.id}
+                onClick={() => setDataFilter(f.id)}
+                className={`px-3 py-1 rounded-md text-xs font-medium transition ${
+                  dataFilter === f.id
+                    ? "bg-[var(--te-lime)] text-[var(--te-lime-pill-text)]"
+                    : "bg-[var(--te-panel)] text-[var(--te-text-muted)] hover:text-[var(--te-text)] border border-[var(--te-border)]"
+                }`}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
         </div>
 
         <div className="overflow-x-auto no-scrollbar">
-          <table className="w-full text-left text-xs min-w-[650px]">
-            <thead className="bg-slate-950 text-slate-400 border-b border-slate-800 uppercase tracking-wider font-mono">
+          <table className="w-full text-left text-xs min-w-[700px]">
+            <thead className="bg-[var(--te-panel)] text-[var(--te-text-muted)] border-b border-[var(--te-border)] uppercase text-[10px] font-semibold">
               <tr>
-                <th className="p-3">Event ID</th>
-                <th className="p-3">Event Type</th>
-                <th className="p-3">Bus Source</th>
-                <th className="p-3">Location Name</th>
-                <th className="p-3">Confidence</th>
-                <th className="p-3">Severity</th>
-                <th className="p-3">Timestamp</th>
+                <th className="p-3">EVENT ID</th>
+                <th className="p-3">EVENT TYPE</th>
+                <th className="p-3">BUS SOURCE</th>
+                <th className="p-3">LOCATION</th>
+                <th className="p-3">CONFIDENCE</th>
+                <th className="p-3">PLATE / DETAILS</th>
+                <th className="p-3">SEVERITY</th>
+                <th className="p-3">TIMESTAMP</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/70 font-mono text-slate-300">
-              {events.map((evt) => (
-                <tr key={evt.id} className="hover:bg-slate-900/50 transition">
-                  <td className="p-3 text-cyan-400 font-bold">{evt.id}</td>
-                  <td className="p-3 text-white font-semibold">{evt.type}</td>
-                  <td className="p-3 text-slate-400">{evt.busId}</td>
-                  <td className="p-3 text-slate-300">{evt.locationName || "Pune Transit"}</td>
-                  <td className="p-3 text-emerald-400 font-bold">{(evt.confidence * 100).toFixed(0)}%</td>
+            <tbody className="divide-y divide-[var(--te-border)] text-[var(--te-text)]">
+              {filteredEvents.map((evt) => (
+                <tr key={evt.id} className="hover:bg-[var(--te-panel)] transition">
+                  <td className="p-3 text-[var(--te-lime)] font-mono-code font-bold">{evt.id}</td>
+                  <td className="p-3 font-semibold text-[var(--te-text)]">{evt.type}</td>
+                  <td className="p-3 text-[var(--te-text-muted)]">{evt.busId}</td>
+                  <td className="p-3 text-[var(--te-text-muted)]">{evt.locationName || "Pune Transit Corridor"}</td>
+                  <td className="p-3 font-semibold text-[var(--te-lime)]">
+                    {((evt.confidence || 0.94) * 100).toFixed(0)}%
+                  </td>
                   <td className="p-3">
-                    <span className={`px-2.5 py-0.5 rounded-md text-[10px] font-bold ${
-                      evt.severity === "CRITICAL" ? "bg-rose-950/80 text-rose-300 border border-rose-800" :
-                      evt.severity === "HIGH" ? "bg-amber-950/80 text-amber-300 border border-amber-800" :
-                      "bg-blue-950/80 text-blue-300 border border-blue-800"
+                    {evt.registrationNumber ? (
+                      <span className="px-2 py-0.5 rounded bg-[var(--te-lime-bg)] text-[var(--te-lime)] border border-[var(--te-lime-border)] font-mono-code font-semibold text-[11px]">
+                        ANPR: {evt.registrationNumber}
+                      </span>
+                    ) : (
+                      <span className="text-[var(--te-text-dim)] truncate block max-w-[150px]">
+                        {evt.details || "Raw Edge Metadata"}
+                      </span>
+                    )}
+                  </td>
+                  <td className="p-3">
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-semibold ${
+                      evt.severity === "CRITICAL" ? "bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/30" :
+                      evt.severity === "HIGH" ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30" :
+                      "bg-[var(--te-panel)] text-[var(--te-text-muted)] border border-[var(--te-border)]"
                     }`}>
                       {evt.severity}
                     </span>
                   </td>
-                  <td className="p-3 text-slate-400 text-[11px]">{evt.timestamp}</td>
+                  <td className="p-3 text-[var(--te-text-muted)] font-mono-code text-[11px]">{evt.timestamp}</td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
-      </div>
+      </section>
     </div>
   );
 }

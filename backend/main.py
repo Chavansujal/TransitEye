@@ -79,6 +79,7 @@ class EventCreateRequest(BaseModel):
     details: Optional[str] = None
     vehicleType: Optional[str] = None
     registrationNumber: Optional[str] = None
+    anprConfidence: Optional[float] = None
 
 class IncidentStatusUpdateRequest(BaseModel):
     status: str # "NEW", "UNDER REVIEW", "DISPATCHED", "RESOLVED"

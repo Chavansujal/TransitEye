@@ -935,36 +935,36 @@ export default function LiveMonitoring({ buses = [], onEventTriggered }) {
   };
 
   return (
-    <div className="p-3 sm:p-6 space-y-4 sm:space-y-6 max-w-7xl mx-auto">
+    <div className="space-y-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 font-sans text-[var(--te-text)] animate-fade-in-up">
       {/* Page Title & Bus Unit Selector Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4 glass-panel p-4 sm:p-6 border-cyan-500/25">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 te-card p-5 border-l-4 border-l-[var(--te-lime)]">
         <div>
-          <div className="flex items-center gap-2 text-cyan-400 font-mono text-[10px] sm:text-xs mb-1">
-            <Radio className="w-3.5 h-3.5 animate-pulse" /> LIVE CAMERA FEED & REAL-TIME EDGE INFERENCE
+          <div className="flex items-center gap-2 text-[var(--te-lime)] text-xs font-semibold uppercase tracking-wider mb-1">
+            <Radio className="w-4 h-4 shrink-0 text-[var(--te-lime)]" /> Live Camera Feed & Real-Time Edge Inference
           </div>
-          <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">
-            Multi-Camera Edge AI Telemetry
+          <h2 className="text-xl sm:text-2xl font-extrabold text-[var(--te-text)] tracking-tight">
+            Multi-Camera Edge AI Telemetry Console
           </h2>
-          <p className="text-xs sm:text-sm text-slate-400 mt-1">
+          <p className="text-xs sm:text-sm text-[var(--te-text-muted)] mt-1">
             Real-time Computer Vision (Custom Urban Vision AI + Multi-Object Tracking) running live across public transit bus sensor feeds.
           </p>
         </div>
 
         {/* Bus Selector */}
-        <div className="flex items-center gap-3 bg-slate-950/80 p-2.5 sm:p-3 rounded-2xl border border-slate-800 shrink-0 shadow-lg w-full md:w-auto justify-between md:justify-start">
+        <div className="flex items-center gap-3 bg-[var(--te-panel)] p-2.5 rounded-md border border-[var(--te-border)] shrink-0 w-full md:w-auto justify-between md:justify-start">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 shrink-0">
-              <Camera className="w-4 h-4 sm:w-5 sm:h-5" />
+            <div className="p-2 rounded bg-[var(--te-lime-bg)] text-[var(--te-lime)] border border-[var(--te-lime-border)] shrink-0">
+              <Camera className="w-4 h-4" />
             </div>
-            <div className="text-left font-mono">
-              <label className="text-[8px] sm:text-[9px] text-slate-400 uppercase tracking-widest block font-bold">Active Bus Node</label>
+            <div className="text-left font-sans">
+              <label className="text-[10px] text-[var(--te-text-muted)] uppercase tracking-wider block font-semibold">Active Bus Unit</label>
               <select
                 value={selectedBusId}
                 onChange={(e) => setSelectedBusId(e.target.value)}
-                className="bg-transparent text-white font-bold text-xs focus:outline-none cursor-pointer pt-0.5 max-w-[200px] sm:max-w-none"
+                className="bg-transparent text-[var(--te-text)] font-extrabold text-xs focus:outline-none cursor-pointer pt-0.5 max-w-[200px] sm:max-w-none"
               >
                 {buses.map(b => (
-                  <option key={b.id} value={b.id} className="bg-slate-950 text-white">
+                  <option key={b.id} value={b.id} className="bg-[var(--te-surface)] text-[var(--te-text)]">
                     {b.id} • {b.route.split(":")[0]} ({b.status})
                   </option>
                 ))}
@@ -975,11 +975,11 @@ export default function LiveMonitoring({ buses = [], onEventTriggered }) {
       </div>
 
       {/* Multi-Camera Switcher Bar & Bus Schematic */}
-      <div className="glass-panel px-3 sm:px-4 py-2.5 sm:py-3 border-slate-800/80 bg-slate-950/90 rounded-2xl">
+      <div className="te-card p-3 sm:p-4">
         <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
           {/* Camera Buttons */}
-          <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto w-full md:w-auto pb-1 md:pb-0 no-scrollbar">
-            <span className="text-[10px] font-mono text-slate-400 font-bold uppercase tracking-wider mr-1 shrink-0 hidden sm:inline">
+          <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto w-full md:w-auto pb-1 md:pb-0 no-scrollbar text-xs">
+            <span className="text-[11px] text-[var(--te-text-muted)] font-semibold uppercase tracking-wider mr-1 shrink-0 hidden sm:inline">
               Cameras:
             </span>
             {cameraAngles.map(cam => {
@@ -989,45 +989,45 @@ export default function LiveMonitoring({ buses = [], onEventTriggered }) {
                 <button
                   key={cam.id}
                   onClick={() => handleCameraChange(cam.id)}
-                  className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl border font-mono text-[11px] sm:text-xs transition duration-200 shrink-0 ${
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md border text-xs transition shrink-0 font-medium ${
                     isActive 
-                      ? "bg-cyan-950/80 border-cyan-400 text-cyan-300 shadow-md shadow-cyan-500/15"
-                      : "bg-slate-900/60 border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800"
+                      ? "bg-[var(--te-lime-bg)] border-[var(--te-lime-border)] text-[var(--te-lime)] font-semibold shadow-sm"
+                      : "bg-[var(--te-panel)] border-[var(--te-border)] text-[var(--te-text-muted)] hover:text-[var(--te-text)] hover:bg-[var(--te-panel-hover)]"
                   }`}
                 >
-                  <Icon className={`w-3.5 h-3.5 ${isActive ? "text-cyan-400 animate-pulse" : "text-slate-500"}`} />
-                  <span className="font-bold">{cam.label}</span>
+                  <Icon className={`w-3.5 h-3.5 ${isActive ? "text-[var(--te-lime)] animate-pulse" : "text-[var(--te-text-muted)]"}`} />
+                  <span>{cam.label}</span>
                 </button>
               );
             })}
           </div>
 
           {/* Interactive Bus Schematic */}
-          <div className="flex items-center justify-between sm:justify-start gap-2.5 bg-slate-900/80 px-3 py-1.5 rounded-xl border border-slate-800 font-mono text-xs shrink-0">
-            <div className="text-[10px] text-slate-400 font-bold uppercase">Bus Anatomy:</div>
-            <div className="relative flex items-center gap-1 px-2 py-0.5 bg-slate-950 rounded-lg border border-slate-800 text-[9px]">
+          <div className="flex items-center justify-between sm:justify-start gap-2.5 bg-[var(--te-panel)] px-3 py-1.5 rounded-md border border-[var(--te-border)] text-xs shrink-0">
+            <div className="text-[10px] text-[var(--te-text-muted)] font-semibold uppercase">Bus Anatomy:</div>
+            <div className="relative flex items-center gap-1 px-2 py-0.5 bg-[var(--te-surface)] rounded border border-[var(--te-border)] text-[9px]">
               {/* Rear */}
               <span className={`w-2 h-2 rounded-full border transition-all ${
-                activeCamera === "rear" ? "bg-cyan-400 border-white shadow-sm shadow-cyan-400 scale-125" : "bg-slate-700 border-slate-600"
+                activeCamera === "rear" ? "bg-[var(--te-lime)] border-white scale-125" : "bg-[var(--te-border-strong)] border-[var(--te-border)]"
               }`} title="Rear Camera" />
               {/* Left */}
               <span className={`w-2 h-2 rounded-full border transition-all ${
-                activeCamera === "side_left" ? "bg-cyan-400 border-white shadow-sm shadow-cyan-400 scale-125" : "bg-slate-700 border-slate-600"
+                activeCamera === "side_left" ? "bg-[var(--te-lime)] border-white scale-125" : "bg-[var(--te-border-strong)] border-[var(--te-border)]"
               }`} title="Left Mirror Camera" />
               {/* Cabin */}
               <span className={`w-2.5 h-2.5 rounded-sm border transition-all flex items-center justify-center text-[7px] font-bold ${
-                activeCamera === "cabin" ? "bg-cyan-400 text-slate-950 border-white scale-125" : "bg-slate-800 text-slate-500 border-slate-700"
+                activeCamera === "cabin" ? "bg-[var(--te-lime)] text-white scale-125" : "bg-[var(--te-panel)] text-[var(--te-text-muted)] border-[var(--te-border)]"
               }`} title="Cabin Camera">C</span>
               {/* Right */}
               <span className={`w-2 h-2 rounded-full border transition-all ${
-                activeCamera === "side_right" ? "bg-cyan-400 border-white shadow-sm shadow-cyan-400 scale-125" : "bg-slate-700 border-slate-600"
+                activeCamera === "side_right" ? "bg-[var(--te-lime)] border-white scale-125" : "bg-[var(--te-border-strong)] border-[var(--te-border)]"
               }`} title="Right Mirror Camera" />
               {/* Front */}
               <span className={`w-2 h-2 rounded-full border transition-all ${
-                activeCamera === "front" ? "bg-cyan-400 border-white shadow-sm shadow-cyan-400 scale-125" : "bg-slate-700 border-slate-600"
+                activeCamera === "front" ? "bg-[var(--te-lime)] border-white scale-125" : "bg-[var(--te-border-strong)] border-[var(--te-border)]"
               }`} title="Front Windshield Camera" />
             </div>
-            <span className="text-cyan-400 font-bold text-[10px]">
+            <span className="text-[var(--te-lime)] font-semibold text-[10px]">
               {cameraAngles.find(c => c.id === activeCamera)?.angle}
             </span>
           </div>
@@ -1037,96 +1037,96 @@ export default function LiveMonitoring({ buses = [], onEventTriggered }) {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Main Camera View Area */}
         <div className="lg:col-span-2 space-y-4">
-          <div className="glass-panel p-3 sm:p-5 relative overflow-hidden bg-slate-950 border-slate-800 rounded-2xl sm:rounded-3xl shadow-2xl">
+          <div className="te-card p-3 sm:p-4 relative overflow-hidden">
             {/* Viewport Telemetry Header Bar */}
-            <div className="flex flex-wrap items-center justify-between gap-2 px-2.5 sm:px-3.5 py-2 bg-slate-900/90 rounded-xl mb-3 border border-slate-800 text-[11px] sm:text-xs font-mono">
-              <div className="flex items-center gap-2 text-emerald-400">
-                <span className="live-dot shrink-0"></span>
-                <span className="font-bold uppercase text-white">{selectedBus.id}</span>
-                <span className="text-slate-600">•</span>
-                <span className="text-cyan-400 font-bold">{cameraAngles.find(c => c.id === activeCamera)?.label}</span>
-                <span className="text-slate-600 hidden sm:inline">|</span>
-                <span className="text-slate-400 text-[11px] hidden sm:inline"><strong className="text-emerald-400">{fps} FPS</strong></span>
+            <div className="flex flex-wrap items-center justify-between gap-2 px-3 py-2 bg-[var(--te-panel)] rounded-md mb-3 border border-[var(--te-border)] text-xs">
+              <div className="flex items-center gap-2 text-[var(--te-text)]">
+                <span className="live-pulse-dot shrink-0"></span>
+                <span className="font-bold font-mono-code uppercase">{selectedBus.id}</span>
+                <span className="text-[var(--te-text-dim)]">•</span>
+                <span className="text-[var(--te-lime)] font-semibold">{cameraAngles.find(c => c.id === activeCamera)?.label}</span>
+                <span className="text-[var(--te-text-dim)] hidden sm:inline">|</span>
+                <span className="text-[var(--te-text-muted)] text-[11px] hidden sm:inline"><strong className="text-[var(--te-lime)]">{fps} FPS</strong></span>
               </div>
 
               {/* Real-time Video Controls */}
-              <div className="flex items-center gap-1.5 flex-wrap">
+              <div className="flex items-center gap-1.5 flex-wrap text-xs">
                 {/* Front Cam Feed Switcher */}
                 {activeCamera === "front" && (
-                  <div className="flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800">
+                  <div className="flex items-center gap-1 bg-[var(--te-surface)] p-0.5 rounded border border-[var(--te-border)]">
                     <button
                       onClick={() => setFrontVideoFeed("cockpit")}
-                      className={`flex items-center gap-1 px-2 py-0.5 rounded-lg text-[9px] sm:text-[10px] font-bold font-mono transition ${
+                      className={`flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold transition ${
                         frontVideoFeed === "cockpit"
-                          ? "bg-emerald-500/20 border border-emerald-500/50 text-emerald-300 shadow-sm shadow-emerald-500/10"
-                          : "text-slate-400 hover:text-white"
+                          ? "bg-[var(--te-lime-bg)] text-[var(--te-lime)] border border-[var(--te-lime-border)]"
+                          : "text-[var(--te-text-muted)] hover:text-[var(--te-text)]"
                       }`}
                       title="Driver Cockpit Dashcam (Vikas Shinde)"
                     >
-                      <Film className="w-3 h-3 text-emerald-400" />
-                      <span>COCKPIT</span>
+                      <Film className="w-3 h-3 text-[var(--te-lime)]" />
+                      <span>Cockpit</span>
                     </button>
 
                     <button
                       onClick={() => setFrontVideoFeed("firefly")}
-                      className={`flex items-center gap-1 px-2 py-0.5 rounded-lg text-[9px] sm:text-[10px] font-bold font-mono transition ${
+                      className={`flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold transition ${
                         frontVideoFeed === "firefly"
-                          ? "bg-amber-500/20 border border-amber-500/50 text-amber-300 shadow-sm shadow-amber-500/10"
-                          : "text-slate-400 hover:text-white"
+                          ? "bg-[var(--te-lime-bg)] text-[var(--te-lime)] border border-[var(--te-lime-border)]"
+                          : "text-[var(--te-text-muted)] hover:text-[var(--te-text)]"
                       }`}
                       title="360° Continuous Road Camera Feed"
                     >
-                      <Film className="w-3 h-3 text-amber-400" />
+                      <Film className="w-3 h-3 text-[var(--te-lime)]" />
                       <span>360° AI</span>
                     </button>
 
                     <button
                       onClick={() => setFrontVideoFeed("veo")}
-                      className={`flex items-center gap-1 px-2 py-0.5 rounded-lg text-[9px] sm:text-[10px] font-bold font-mono transition ${
+                      className={`flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold transition ${
                         frontVideoFeed === "veo"
-                          ? "bg-purple-500/20 border border-purple-500/50 text-purple-300 shadow-sm shadow-purple-500/10"
-                          : "text-slate-400 hover:text-white"
+                          ? "bg-[var(--te-lime-bg)] text-[var(--te-lime)] border border-[var(--te-lime-border)]"
+                          : "text-[var(--te-text-muted)] hover:text-[var(--te-text)]"
                       }`}
                       title="Google Veo AI Municipal Bus Dashcam"
                     >
-                      <Film className="w-3 h-3 text-purple-400" />
-                      <span>VEO BUS</span>
+                      <Film className="w-3 h-3 text-[var(--te-lime)]" />
+                      <span>Veo Bus</span>
                     </button>
                   </div>
                 )}
 
                 <button
                   onClick={() => setAiVisionEnabled(!aiVisionEnabled)}
-                  className={`flex items-center gap-1 px-2 py-1 rounded-lg border text-[9px] sm:text-[10px] font-bold font-mono transition ${
+                  className={`flex items-center gap-1 px-2 py-0.5 rounded border text-[10px] font-semibold transition ${
                     aiVisionEnabled
-                      ? "bg-cyan-950 border-cyan-400 text-cyan-300"
-                      : "bg-slate-800 border-slate-700 text-slate-400 hover:text-white"
+                      ? "bg-[var(--te-lime-bg)] border-[var(--te-lime-border)] text-[var(--te-lime)]"
+                      : "bg-[var(--te-surface)] border-[var(--te-border)] text-[var(--te-text-muted)] hover:text-[var(--te-text)]"
                   }`}
                   title="Toggle Computer Vision Detection Layer"
                 >
                   <ScanLine className="w-3 h-3" />
-                  <span>VISION: {aiVisionEnabled ? "ON" : "OFF"}</span>
+                  <span>Vision: {aiVisionEnabled ? "ON" : "OFF"}</span>
                 </button>
 
                 <button
                   onClick={() => setShowTrails(!showTrails)}
-                  className={`px-2 py-1 rounded-lg border text-[9px] sm:text-[10px] font-mono font-bold transition hidden sm:inline-block ${
+                  className={`px-2 py-0.5 rounded border text-[10px] font-semibold transition hidden sm:inline-block ${
                     showTrails
-                      ? "bg-purple-950/80 border-purple-500 text-purple-300"
-                      : "bg-slate-800 border-slate-700 text-slate-500"
+                      ? "bg-[var(--te-lime-bg)] border-[var(--te-lime-border)] text-[var(--te-lime)]"
+                      : "bg-[var(--te-surface)] border-[var(--te-border)] text-[var(--te-text-muted)]"
                   }`}
                   title="Toggle Object Motion Trails"
                 >
-                  TRAILS
+                  Trails
                 </button>
 
                 <button
                   onClick={handleSnapshotCapture}
-                  className="flex items-center gap-1 px-2 py-1 rounded-lg bg-emerald-950/80 hover:bg-emerald-900 border border-emerald-600 text-emerald-300 text-[9px] sm:text-[10px] font-mono font-bold transition"
+                  className="flex items-center gap-1 px-2 py-0.5 rounded bg-[var(--te-lime-bg)] hover:bg-[var(--te-lime-border)] border border-[var(--te-lime-border)] text-[var(--te-lime)] text-[10px] font-semibold transition"
                   title="Capture Instant Edge Telemetry Snapshot"
                 >
-                  <Zap className="w-3 h-3 text-emerald-400" />
-                  <span>CAPTURE</span>
+                  <Zap className="w-3 h-3 text-[var(--te-lime)]" />
+                  <span>Capture</span>
                 </button>
               </div>
             </div>
@@ -1134,7 +1134,7 @@ export default function LiveMonitoring({ buses = [], onEventTriggered }) {
             {/* Simulated Live Camera Viewport with Real-Time Canvas Overlay */}
             <div 
               ref={containerRef}
-              className="relative w-full aspect-video bg-slate-950 rounded-xl sm:rounded-2xl overflow-hidden border border-slate-800/80 shadow-2xl flex items-center justify-center group select-none"
+              className="relative w-full aspect-video bg-black rounded-md overflow-hidden border border-[var(--te-border)] shadow flex items-center justify-center group select-none"
             >
               {/* Background Live Video Stream */}
               <video
@@ -1144,7 +1144,7 @@ export default function LiveMonitoring({ buses = [], onEventTriggered }) {
                 loop
                 muted
                 playsInline
-                className="absolute inset-0 w-full h-full object-cover opacity-80 scale-105 pointer-events-none"
+                className="absolute inset-0 w-full h-full object-cover opacity-85 scale-105 pointer-events-none"
                 poster={getCameraBg()}
               >
                 <source src={getCameraVideo()} type="video/mp4" />
@@ -1156,8 +1156,8 @@ export default function LiveMonitoring({ buses = [], onEventTriggered }) {
                 className="absolute inset-0 w-full h-full pointer-events-none z-10"
               />
 
-              {/* Scanlines Visual Overlay */}
-              <div className="absolute inset-0 scanline-overlay pointer-events-none opacity-25 z-20"></div>
+              {/* ANPR Camera Laser Scan Line */}
+              <div className="anpr-scan-line z-20"></div>
 
               {/* Camera Shutter Snapshot Flash Effect */}
               {snapshotFlash && (
@@ -1166,41 +1166,41 @@ export default function LiveMonitoring({ buses = [], onEventTriggered }) {
 
               {/* Notification Toast for Snapshot */}
               {snapshotMsg && (
-                <div className="absolute top-12 sm:top-16 left-1/2 -translate-x-1/2 bg-emerald-950/95 border border-emerald-500 text-emerald-200 px-3 sm:px-4 py-1.5 rounded-xl font-mono text-[10px] sm:text-xs shadow-2xl flex items-center gap-2 z-30 max-w-[90%] text-center">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                <div className="absolute top-12 sm:top-16 left-1/2 -translate-x-1/2 bg-black/90 border border-[var(--te-lime)] text-white px-3 sm:px-4 py-1.5 rounded font-mono-code text-xs shadow-2xl flex items-center gap-2 z-30 max-w-[90%] text-center">
+                  <CheckCircle2 className="w-4 h-4 text-[var(--te-lime)] shrink-0" />
                   <span>{snapshotMsg}</span>
                 </div>
               )}
 
               {/* Top-Left Sleek HUD Pill */}
-              <div className="absolute top-2.5 left-2.5 font-mono text-[9px] sm:text-[10px] text-cyan-300 bg-slate-950/80 px-2.5 py-1 rounded-xl border border-cyan-800/60 backdrop-blur shadow-lg flex items-center gap-1.5 z-20">
-                <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <div className="absolute top-2.5 left-2.5 font-mono-code text-[10px] text-white bg-black/80 px-2.5 py-1 rounded border border-white/20 backdrop-blur shadow flex items-center gap-1.5 z-20">
+                <span className="w-2 h-2 rounded-full bg-[var(--te-lime)] animate-pulse" />
                 <span className="font-bold text-white uppercase">{selectedBus.id}</span>
-                <span className="text-slate-600">|</span>
+                <span className="text-white/40">|</span>
                 <span>{fps} FPS</span>
               </div>
 
               {/* Top-Right Sleek Model Pill */}
-              <div className="absolute top-2.5 right-2.5 font-mono text-[9px] sm:text-[10px] bg-slate-950/80 px-2.5 py-1 rounded-xl border border-slate-800 backdrop-blur shadow-lg flex items-center gap-1.5 z-20">
-                <span className="text-slate-400 hidden sm:inline">Custom Urban Vision AI</span>
-                <span className="text-slate-600 hidden sm:inline">•</span>
-                <span className="text-cyan-400 font-bold uppercase">{currentScenario.replace("_", " ")}</span>
+              <div className="absolute top-2.5 right-2.5 font-sans text-[10px] bg-black/80 px-2.5 py-1 rounded border border-white/20 text-white backdrop-blur shadow flex items-center gap-1.5 z-20">
+                <span className="text-white/70 hidden sm:inline">Urban Vision AI</span>
+                <span className="text-white/40 hidden sm:inline">•</span>
+                <span className="text-[var(--te-lime)] font-semibold uppercase">{currentScenario.replace("_", " ")}</span>
               </div>
 
               {/* Source Badge (Bottom Left) */}
-              <div className="absolute bottom-2.5 left-2.5 z-20 bg-slate-950/80 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg border border-slate-800 text-[9px] sm:text-[10px] font-mono text-slate-300 flex items-center gap-1.5 backdrop-blur">
-                <span className={`w-1.5 h-1.5 rounded-full ${activeCamera === "cabin" ? "bg-cyan-400 animate-pulse" : frontVideoFeed === "cockpit" ? "bg-emerald-400 animate-pulse" : frontVideoFeed === "firefly" ? "bg-amber-400 animate-pulse" : "bg-cyan-400"}`} />
+              <div className="absolute bottom-2.5 left-2.5 z-20 bg-black/80 px-2.5 py-1 rounded border border-white/20 text-[10px] font-sans text-white flex items-center gap-1.5 backdrop-blur">
+                <span className="w-1.5 h-1.5 rounded-full bg-[var(--te-lime)] animate-pulse" />
                 <span>{activeCamera === "cabin" ? "Interior Cabin Cam" : activeCamera === "front" && frontVideoFeed === "cockpit" ? "Driver Cockpit" : activeCamera === "front" && frontVideoFeed === "firefly" ? "360° Road Cam" : activeCamera === "front" && frontVideoFeed === "veo" ? "Veo AI Bus Cam" : `${activeCamera.toUpperCase()}`}</span>
               </div>
 
               {/* ANPR Reader Box Overlay */}
               {(currentScenario === "rash_driving" || detectionState.event?.registrationNumber) && (
-                <div className="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 bg-slate-950/95 border border-rose-500 px-3 sm:px-5 py-1.5 sm:py-2.5 rounded-xl sm:rounded-2xl backdrop-blur-xl shadow-2xl flex items-center gap-2.5 sm:gap-3.5 z-20 max-w-[95%]">
-                  <ShieldAlert className="w-4 h-4 sm:w-6 sm:h-6 text-rose-400 shrink-0" />
-                  <div className="font-mono text-left text-[11px] sm:text-xs">
-                    <div className="text-[8px] sm:text-[10px] text-rose-400 font-bold uppercase tracking-widest">ANPR Reader</div>
-                    <div className="text-xs sm:text-base font-black text-white">
-                      REG: <span className="text-amber-300 bg-slate-900 px-1.5 sm:px-2.5 py-0.5 rounded border border-amber-500/50">MH12 AB 1234</span>
+                <div className="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 bg-black/90 border border-rose-500 px-4 py-2 rounded backdrop-blur shadow-xl flex items-center gap-3 z-20 max-w-[95%]">
+                  <ShieldAlert className="w-5 h-5 text-rose-400 shrink-0" />
+                  <div className="font-mono-code text-left text-xs">
+                    <div className="text-[9px] text-rose-400 font-bold uppercase tracking-widest">ANPR Plate Extracted</div>
+                    <div className="text-sm font-bold text-white">
+                      REG: <span className="text-amber-300 bg-black/80 px-2 py-0.5 rounded border border-amber-500/50">MH12 AB 1234</span>
                     </div>
                   </div>
                 </div>
@@ -1208,36 +1208,36 @@ export default function LiveMonitoring({ buses = [], onEventTriggered }) {
             </div>
 
             {/* Bottom Real-Time Telemetry Bar */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-3.5 mt-3 sm:mt-4 font-mono text-xs">
-              <div className="p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl bg-slate-900/80 border border-slate-800">
-                <div className="text-slate-400 text-[9px] sm:text-[10px] uppercase tracking-wider">Active Tracks</div>
-                <div className="text-base sm:text-xl font-black text-white flex items-center gap-1.5 sm:gap-2 mt-0.5">
-                  <Car className="w-4 h-4 text-cyan-400 shrink-0" /> {tracksRef.current.length || 3} Dynamic
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-3 font-sans text-xs">
+              <div className="p-3 rounded bg-[var(--te-panel)] border border-[var(--te-border)]">
+                <div className="text-[var(--te-text-muted)] text-[10px] uppercase font-semibold">Active Dynamic Tracks</div>
+                <div className="text-lg font-extrabold text-[var(--te-text)] flex items-center gap-1.5 mt-0.5">
+                  <Car className="w-4 h-4 text-[var(--te-lime)] shrink-0" /> {tracksRef.current.length || 3} Tracks
                 </div>
               </div>
 
-              <div className="p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl bg-slate-900/80 border border-slate-800">
-                <div className="text-slate-400 text-[9px] sm:text-[10px] uppercase tracking-wider">People / Passengers</div>
-                <div className="text-base sm:text-xl font-black text-white flex items-center gap-1.5 sm:gap-2 mt-0.5">
-                  <Users className="w-4 h-4 text-amber-400 shrink-0" /> {activeCamera === "cabin" ? "48 / 40" : "2 Crosswalk"}
+              <div className="p-3 rounded bg-[var(--te-panel)] border border-[var(--te-border)]">
+                <div className="text-[var(--te-text-muted)] text-[10px] uppercase font-semibold">Passengers / Commuters</div>
+                <div className="text-lg font-extrabold text-[var(--te-text)] flex items-center gap-1.5 mt-0.5">
+                  <Users className="w-4 h-4 text-[var(--te-amber)] shrink-0" /> {activeCamera === "cabin" ? "48 / 40" : "2 Crosswalk"}
                 </div>
               </div>
 
-              <div className="p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl bg-slate-900/80 border border-slate-800">
-                <div className="text-slate-400 text-[9px] sm:text-[10px] uppercase tracking-wider">Traffic Density</div>
-                <div className={`text-base sm:text-xl font-black mt-0.5 ${
-                  detectionState.traffic_density === "SEVERE" ? "text-rose-400" :
-                  detectionState.traffic_density === "HIGH" ? "text-amber-400" :
-                  "text-emerald-400"
+              <div className="p-3 rounded bg-[var(--te-panel)] border border-[var(--te-border)]">
+                <div className="text-[var(--te-text-muted)] text-[10px] uppercase font-semibold">Traffic Density</div>
+                <div className={`text-lg font-extrabold mt-0.5 ${
+                  detectionState.traffic_density === "SEVERE" ? "text-rose-600 dark:text-rose-400" :
+                  detectionState.traffic_density === "HIGH" ? "text-[var(--te-amber)]" :
+                  "text-[var(--te-lime)]"
                 }`}>
                   {detectionState.traffic_density || "MEDIUM"}
                 </div>
               </div>
 
-              <div className="p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl bg-slate-900/80 border border-slate-800">
-                <div className="text-slate-400 text-[9px] sm:text-[10px] uppercase tracking-wider">Edge Inference</div>
-                <div className="text-base sm:text-xl font-black text-emerald-400 flex items-center gap-1 mt-0.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" /> 97.4% Local
+              <div className="p-3 rounded bg-[var(--te-panel)] border border-[var(--te-border)]">
+                <div className="text-[var(--te-text-muted)] text-[10px] uppercase font-semibold">Edge Inference</div>
+                <div className="text-lg font-extrabold text-[var(--te-lime)] flex items-center gap-1 mt-0.5">
+                  <CheckCircle2 className="w-4 h-4 text-[var(--te-lime)] shrink-0" /> 97.4% Local
                 </div>
               </div>
             </div>
@@ -1245,20 +1245,20 @@ export default function LiveMonitoring({ buses = [], onEventTriggered }) {
         </div>
 
         {/* Demo Scenario Control Triggers (Right Column) */}
-        <div className="space-y-4">
-          <div className="glass-panel p-4 sm:p-5 space-y-4 border-cyan-500/30">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-              <h3 className="text-xs sm:text-sm font-bold text-white flex items-center gap-2">
-                <Sliders className="w-4 h-4 text-cyan-400 shrink-0" /> Problem Statement 26124 Scenarios
+        <div className="space-y-4 font-sans">
+          <div className="te-card p-4 space-y-4">
+            <div className="flex items-center justify-between border-b border-[var(--te-border)] pb-3">
+              <h3 className="text-xs sm:text-sm font-bold text-[var(--te-text)] flex items-center gap-2">
+                <Sliders className="w-4 h-4 text-[var(--te-lime)] shrink-0" /> Problem Statement 26124 Scenarios
               </h3>
-              <span className="text-[9px] sm:text-[10px] bg-cyan-950 text-cyan-300 border border-cyan-800 px-2 py-0.5 rounded-full font-mono font-bold shrink-0">
+              <span className="text-[10px] bg-[var(--te-lime-bg)] text-[var(--te-lime)] border border-[var(--te-lime-border)] px-2 py-0.5 rounded font-semibold shrink-0">
                 SIH TRIGGERS
               </span>
             </div>
 
             <div className="space-y-2.5 max-h-[480px] lg:max-h-[580px] overflow-y-auto pr-1">
               {/* Category: Traffic & Road Hazards */}
-              <div className="text-[10px] font-mono text-slate-400 font-bold uppercase tracking-wider pt-1">
+              <div className="text-[10px] font-semibold text-[var(--te-text-muted)] uppercase tracking-wider pt-1">
                 Road Defect Sensing (Onboard AI):
               </div>
 
@@ -1266,114 +1266,114 @@ export default function LiveMonitoring({ buses = [], onEventTriggered }) {
               <button
                 onClick={() => handleTriggerScenario("pothole", "front")}
                 disabled={loadingScenario}
-                className={`w-full p-2.5 sm:p-3 rounded-xl border text-left font-semibold text-xs transition duration-200 flex items-center justify-between group ${
+                className={`w-full p-2.5 rounded-md border text-left text-xs transition flex items-center justify-between group ${
                   currentScenario === "pothole"
-                    ? "bg-rose-950/50 border-rose-500 text-white shadow-md shadow-rose-500/10"
-                    : "bg-slate-950/60 border-slate-800 text-slate-300 hover:bg-slate-900"
+                    ? "bg-rose-500/15 border-rose-500 text-rose-600 dark:text-rose-400 font-semibold"
+                    : "bg-[var(--te-surface)] border-[var(--te-border)] text-[var(--te-text)] hover:bg-[var(--te-panel)]"
                 }`}
               >
-                <div className="flex items-center gap-2.5 sm:gap-3">
-                  <div className="w-7 h-7 rounded-lg bg-rose-500/10 flex items-center justify-center text-rose-400 border border-rose-500/20 shrink-0">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-7 h-7 rounded bg-rose-500/10 flex items-center justify-center text-rose-500 border border-rose-500/20 shrink-0">
                     <AlertTriangle className="w-3.5 h-3.5" />
                   </div>
                   <div>
-                    <div className="text-rose-300 font-bold text-xs">Pothole Defect (Front)</div>
-                    <div className="text-[10px] text-slate-400 font-normal">Deep asphalt crater detection & telemetry</div>
+                    <div className="font-bold text-xs">Pothole Defect (Front)</div>
+                    <div className="text-[10px] text-[var(--te-text-muted)] font-normal">Deep asphalt crater detection & telemetry</div>
                   </div>
                 </div>
-                <Play className="w-3.5 h-3.5 text-rose-400 shrink-0" />
+                <Play className="w-3.5 h-3.5 text-rose-500 shrink-0" />
               </button>
 
               {/* Missing Zebra Crossing */}
               <button
                 onClick={() => handleTriggerScenario("zebra_crossing", "side_left")}
                 disabled={loadingScenario}
-                className={`w-full p-2.5 sm:p-3 rounded-xl border text-left font-semibold text-xs transition duration-200 flex items-center justify-between group ${
+                className={`w-full p-2.5 rounded-md border text-left text-xs transition flex items-center justify-between group ${
                   currentScenario === "zebra_crossing"
-                    ? "bg-purple-950/50 border-purple-500 text-white shadow-md shadow-purple-500/10"
-                    : "bg-slate-950/60 border-slate-800 text-slate-300 hover:bg-slate-900"
+                    ? "bg-[var(--te-lime-bg)] border-[var(--te-lime-border)] text-[var(--te-lime)] font-semibold"
+                    : "bg-[var(--te-surface)] border-[var(--te-border)] text-[var(--te-text)] hover:bg-[var(--te-panel)]"
                 }`}
               >
-                <div className="flex items-center gap-2.5 sm:gap-3">
-                  <div className="w-7 h-7 rounded-lg bg-purple-500/10 flex items-center justify-center text-purple-400 border border-purple-500/20 shrink-0">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-7 h-7 rounded bg-[var(--te-lime-bg)] flex items-center justify-center text-[var(--te-lime)] border border-[var(--te-lime-border)] shrink-0">
                     <AlertCircle className="w-3.5 h-3.5" />
                   </div>
                   <div>
-                    <div className="text-purple-300 font-bold text-xs">Faded Zebra Crossing (Side)</div>
-                    <div className="text-[10px] text-slate-400 font-normal">Crosswalk marking degradation in school zone</div>
+                    <div className="font-bold text-xs">Faded Zebra Crossing (Side)</div>
+                    <div className="text-[10px] text-[var(--te-text-muted)] font-normal">Crosswalk marking degradation in school zone</div>
                   </div>
                 </div>
-                <Play className="w-3.5 h-3.5 text-purple-400 shrink-0" />
+                <Play className="w-3.5 h-3.5 text-[var(--te-lime)] shrink-0" />
               </button>
 
               {/* Broken Divider */}
               <button
                 onClick={() => handleTriggerScenario("missing_divider", "side_right")}
                 disabled={loadingScenario}
-                className={`w-full p-2.5 sm:p-3 rounded-xl border text-left font-semibold text-xs transition duration-200 flex items-center justify-between group ${
+                className={`w-full p-2.5 rounded-md border text-left text-xs transition flex items-center justify-between group ${
                   currentScenario === "missing_divider"
-                    ? "bg-amber-950/50 border-amber-500 text-white shadow-md shadow-amber-500/10"
-                    : "bg-slate-950/60 border-slate-800 text-slate-300 hover:bg-slate-900"
+                    ? "bg-amber-500/15 border-amber-500 text-amber-600 dark:text-amber-400 font-semibold"
+                    : "bg-[var(--te-surface)] border-[var(--te-border)] text-[var(--te-text)] hover:bg-[var(--te-panel)]"
                 }`}
               >
-                <div className="flex items-center gap-2.5 sm:gap-3">
-                  <div className="w-7 h-7 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-400 border border-amber-500/20 shrink-0">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-7 h-7 rounded bg-amber-500/10 flex items-center justify-center text-amber-500 border border-amber-500/20 shrink-0">
                     <AlertTriangle className="w-3.5 h-3.5" />
                   </div>
                   <div>
-                    <div className="text-amber-300 font-bold text-xs">Missing Road Divider</div>
-                    <div className="text-[10px] text-slate-400 font-normal">Median gap & illegal U-turn hazard</div>
+                    <div className="font-bold text-xs">Missing Road Divider</div>
+                    <div className="text-[10px] text-[var(--te-text-muted)] font-normal">Median gap & illegal U-turn hazard</div>
                   </div>
                 </div>
-                <Play className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                <Play className="w-3.5 h-3.5 text-amber-500 shrink-0" />
               </button>
 
               {/* Damaged Signboard */}
               <button
                 onClick={() => handleTriggerScenario("signboard_defect", "front")}
                 disabled={loadingScenario}
-                className={`w-full p-2.5 sm:p-3 rounded-xl border text-left font-semibold text-xs transition duration-200 flex items-center justify-between group ${
+                className={`w-full p-2.5 rounded-md border text-left text-xs transition flex items-center justify-between group ${
                   currentScenario === "signboard_defect"
-                    ? "bg-cyan-950/50 border-cyan-500 text-white shadow-md shadow-cyan-500/10"
-                    : "bg-slate-950/60 border-slate-800 text-slate-300 hover:bg-slate-900"
+                    ? "bg-[var(--te-lime-bg)] border-[var(--te-lime-border)] text-[var(--te-lime)] font-semibold"
+                    : "bg-[var(--te-surface)] border-[var(--te-border)] text-[var(--te-text)] hover:bg-[var(--te-panel)]"
                 }`}
               >
-                <div className="flex items-center gap-2.5 sm:gap-3">
-                  <div className="w-7 h-7 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400 border border-cyan-500/20 shrink-0">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-7 h-7 rounded bg-[var(--te-lime-bg)] flex items-center justify-center text-[var(--te-lime)] border border-[var(--te-lime-border)] shrink-0">
                     <Layers className="w-3.5 h-3.5" />
                   </div>
                   <div>
-                    <div className="text-cyan-300 font-bold text-xs">Damaged Signboard</div>
-                    <div className="text-[10px] text-slate-400 font-normal">Twisted 40 km/h speed limit sign</div>
+                    <div className="font-bold text-xs">Damaged Signboard</div>
+                    <div className="text-[10px] text-[var(--te-text-muted)] font-normal">Twisted 40 km/h speed limit sign</div>
                   </div>
                 </div>
-                <Play className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                <Play className="w-3.5 h-3.5 text-[var(--te-lime)] shrink-0" />
               </button>
 
               {/* Waterlogging */}
               <button
                 onClick={() => handleTriggerScenario("waterlogging", "front")}
                 disabled={loadingScenario}
-                className={`w-full p-2.5 sm:p-3 rounded-xl border text-left font-semibold text-xs transition duration-200 flex items-center justify-between group ${
+                className={`w-full p-2.5 rounded-md border text-left text-xs transition flex items-center justify-between group ${
                   currentScenario === "waterlogging"
-                    ? "bg-blue-950/50 border-blue-500 text-white shadow-md shadow-blue-500/10"
-                    : "bg-slate-950/60 border-slate-800 text-slate-300 hover:bg-slate-900"
+                    ? "bg-amber-500/15 border-amber-500 text-amber-600 dark:text-amber-400 font-semibold"
+                    : "bg-[var(--te-surface)] border-[var(--te-border)] text-[var(--te-text)] hover:bg-[var(--te-panel)]"
                 }`}
               >
-                <div className="flex items-center gap-2.5 sm:gap-3">
-                  <div className="w-7 h-7 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-400 border border-blue-500/20 shrink-0">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-7 h-7 rounded bg-amber-500/10 flex items-center justify-center text-amber-500 border border-amber-500/20 shrink-0">
                     <Radio className="w-3.5 h-3.5" />
                   </div>
                   <div>
-                    <div className="text-blue-300 font-bold text-xs">Severe Waterlogging</div>
-                    <div className="text-[10px] text-slate-400 font-normal">Submerged lane at underpass (14cm)</div>
+                    <div className="font-bold text-xs">Severe Waterlogging</div>
+                    <div className="text-[10px] text-[var(--te-text-muted)] font-normal">Submerged lane at underpass (14cm)</div>
                   </div>
                 </div>
-                <Play className="w-3.5 h-3.5 text-blue-400 shrink-0" />
+                <Play className="w-3.5 h-3.5 text-amber-500 shrink-0" />
               </button>
 
               {/* Category: Traffic Management & Incidents */}
-              <div className="text-[10px] font-mono text-slate-400 font-bold uppercase tracking-wider pt-2">
+              <div className="text-[10px] font-semibold text-[var(--te-text-muted)] uppercase tracking-wider pt-2">
                 Enforcement & Safety:
               </div>
 
@@ -1381,88 +1381,88 @@ export default function LiveMonitoring({ buses = [], onEventTriggered }) {
               <button
                 onClick={() => handleTriggerScenario("rash_driving", "rear")}
                 disabled={loadingScenario}
-                className={`w-full p-2.5 sm:p-3 rounded-xl border text-left font-semibold text-xs transition duration-200 flex items-center justify-between group ${
+                className={`w-full p-2.5 rounded-md border text-left text-xs transition flex items-center justify-between group ${
                   currentScenario === "rash_driving"
-                    ? "bg-rose-950/50 border-rose-500 text-white shadow-md shadow-rose-500/10"
-                    : "bg-slate-950/60 border-slate-800 text-slate-300 hover:bg-slate-900"
+                    ? "bg-rose-500/15 border-rose-500 text-rose-600 dark:text-rose-400 font-semibold"
+                    : "bg-[var(--te-surface)] border-[var(--te-border)] text-[var(--te-text)] hover:bg-[var(--te-panel)]"
                 }`}
               >
-                <div className="flex items-center gap-2.5 sm:gap-3">
-                  <div className="w-7 h-7 rounded-lg bg-rose-500/10 flex items-center justify-center text-rose-400 border border-rose-500/20 shrink-0">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-7 h-7 rounded bg-rose-500/10 flex items-center justify-center text-rose-500 border border-rose-500/20 shrink-0">
                     <ShieldAlert className="w-3.5 h-3.5" />
                   </div>
                   <div>
-                    <div className="text-rose-300 font-bold text-xs">Rash Driving & ANPR</div>
-                    <div className="text-[10px] text-slate-400 font-normal">Tailgating plate extraction: MH12 AB 1234</div>
+                    <div className="font-bold text-xs">Rash Driving & ANPR</div>
+                    <div className="text-[10px] text-[var(--te-text-muted)] font-normal">Tailgating plate extraction: MH12 AB 1234</div>
                   </div>
                 </div>
-                <Play className="w-3.5 h-3.5 text-rose-400 shrink-0" />
+                <Play className="w-3.5 h-3.5 text-rose-500 shrink-0" />
               </button>
 
               {/* Pedestrian */}
               <button
                 onClick={() => handleTriggerScenario("pedestrian", "front")}
                 disabled={loadingScenario}
-                className={`w-full p-2.5 sm:p-3 rounded-xl border text-left font-semibold text-xs transition duration-200 flex items-center justify-between group ${
+                className={`w-full p-2.5 rounded-md border text-left text-xs transition flex items-center justify-between group ${
                   currentScenario === "pedestrian"
-                    ? "bg-amber-950/50 border-amber-500 text-white shadow-md shadow-amber-500/10"
-                    : "bg-slate-950/60 border-slate-800 text-slate-300 hover:bg-slate-900"
+                    ? "bg-amber-500/15 border-amber-500 text-amber-600 dark:text-amber-400 font-semibold"
+                    : "bg-[var(--te-surface)] border-[var(--te-border)] text-[var(--te-text)] hover:bg-[var(--te-panel)]"
                 }`}
               >
-                <div className="flex items-center gap-2.5 sm:gap-3">
-                  <div className="w-7 h-7 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-400 border border-amber-500/20 shrink-0">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-7 h-7 rounded bg-amber-500/10 flex items-center justify-center text-amber-500 border border-amber-500/20 shrink-0">
                     <Users className="w-3.5 h-3.5" />
                   </div>
                   <div>
-                    <div className="text-amber-300 font-bold text-xs">Pedestrian Hazard</div>
-                    <div className="text-[10px] text-slate-400 font-normal">Roadway crossing proximity warning</div>
+                    <div className="font-bold text-xs">Pedestrian Hazard</div>
+                    <div className="text-[10px] text-[var(--te-text-muted)] font-normal">Roadway crossing proximity warning</div>
                   </div>
                 </div>
-                <Play className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                <Play className="w-3.5 h-3.5 text-amber-500 shrink-0" />
               </button>
 
               {/* Cabin Overcrowding */}
               <button
                 onClick={() => handleTriggerScenario("cabin_crowd", "cabin")}
                 disabled={loadingScenario}
-                className={`w-full p-2.5 sm:p-3 rounded-xl border text-left font-semibold text-xs transition duration-200 flex items-center justify-between group ${
+                className={`w-full p-2.5 rounded-md border text-left text-xs transition flex items-center justify-between group ${
                   currentScenario === "cabin_crowd"
-                    ? "bg-cyan-950/50 border-cyan-500 text-white shadow-md shadow-cyan-500/10"
-                    : "bg-slate-950/60 border-slate-800 text-slate-300 hover:bg-slate-900"
+                    ? "bg-[var(--te-lime-bg)] border-[var(--te-lime-border)] text-[var(--te-lime)] font-semibold"
+                    : "bg-[var(--te-surface)] border-[var(--te-border)] text-[var(--te-text)] hover:bg-[var(--te-panel)]"
                 }`}
               >
-                <div className="flex items-center gap-2.5 sm:gap-3">
-                  <div className="w-7 h-7 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400 border border-cyan-500/20 shrink-0">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-7 h-7 rounded bg-[var(--te-lime-bg)] flex items-center justify-center text-[var(--te-lime)] border border-[var(--te-lime-border)] shrink-0">
                     <Users className="w-3.5 h-3.5" />
                   </div>
                   <div>
-                    <div className="text-cyan-300 font-bold text-xs">Cabin Overcrowding</div>
-                    <div className="text-[10px] text-slate-400 font-normal">Footboard & open-door commuter hazard</div>
+                    <div className="font-bold text-xs">Cabin Overcrowding</div>
+                    <div className="text-[10px] text-[var(--te-text-muted)] font-normal">Footboard & open-door commuter hazard</div>
                   </div>
                 </div>
-                <Play className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                <Play className="w-3.5 h-3.5 text-[var(--te-lime)] shrink-0" />
               </button>
 
               {/* Reset to Normal */}
               <button
                 onClick={() => handleTriggerScenario("normal", "front")}
                 disabled={loadingScenario}
-                className={`w-full p-2.5 sm:p-3 rounded-xl border text-left font-semibold text-xs transition duration-200 flex items-center justify-between group ${
+                className={`w-full p-2.5 rounded-md border text-left text-xs transition flex items-center justify-between group ${
                   currentScenario === "normal"
-                    ? "bg-slate-800/90 border-cyan-500 text-white"
-                    : "bg-slate-950/60 border-slate-800 text-slate-400 hover:bg-slate-900"
+                    ? "bg-[var(--te-lime-bg)] border-[var(--te-lime-border)] text-[var(--te-lime)] font-semibold"
+                    : "bg-[var(--te-surface)] border-[var(--te-border)] text-[var(--te-text)] hover:bg-[var(--te-panel)]"
                 }`}
               >
-                <div className="flex items-center gap-2.5 sm:gap-3">
-                  <div className="w-7 h-7 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-400 border border-emerald-500/20 shrink-0">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-7 h-7 rounded bg-[var(--te-lime-bg)] flex items-center justify-center text-[var(--te-lime)] border border-[var(--te-lime-border)] shrink-0">
                     <CheckCircle2 className="w-3.5 h-3.5" />
                   </div>
                   <div>
-                    <div className="text-white font-bold text-xs">Normal Traffic Routine</div>
-                    <div className="text-[10px] text-slate-400 font-normal">Standard steady-state edge inference</div>
+                    <div className="font-bold text-xs text-[var(--te-text)]">Normal Traffic Routine</div>
+                    <div className="text-[10px] text-[var(--te-text-muted)] font-normal">Standard steady-state edge inference</div>
                   </div>
                 </div>
-                <Play className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                <Play className="w-3.5 h-3.5 text-[var(--te-text-muted)] shrink-0" />
               </button>
             </div>
           </div>

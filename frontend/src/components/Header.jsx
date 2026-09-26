@@ -1,5 +1,17 @@
 import React, { useState, useEffect } from "react";
-import { Shield, Cpu, Clock, Menu, X, Sun, Moon } from "lucide-react";
+import { 
+  Shield, 
+  Cpu, 
+  Clock, 
+  Menu, 
+  X, 
+  Sun, 
+  Moon, 
+  Radio, 
+  Activity,
+  Layers,
+  Sparkles
+} from "lucide-react";
 
 export default function Header({
   activeBusesCount = 11,
@@ -22,97 +34,99 @@ export default function Header({
   }, []);
 
   return (
-    <header className="gov-header relative h-18 sm:h-20 px-3 sm:px-6 flex items-center justify-between sticky top-0 z-50">
-      <div className="gov-tricolor-line absolute bottom-0 left-0 right-0 h-1 flex">
-        <span className="flex-1"></span>
-        <span className="flex-1"></span>
-        <span className="flex-1"></span>
-      </div>
-
-      {/* Brand & Platform Identity */}
-      <div className="flex items-center gap-2.5 sm:gap-3.5 min-w-0">
-        {/* Mobile Menu Hamburger Toggle Button */}
+    <header className="te-header h-16 sm:h-18 px-4 sm:px-6 flex items-center justify-between sticky top-0 z-50 transition-colors duration-200">
+      {/* Left: Brand Identity & Subtitle */}
+      <div className="flex items-center gap-3 min-w-0">
         <button
           onClick={onToggleMobileMenu}
-          className="gov-icon-button lg:hidden p-2 rounded-lg focus:outline-none transition"
-          aria-label="Toggle Navigation Menu"
+          className="lg:hidden p-2 rounded-lg bg-[var(--te-panel)] text-[var(--te-text)] border border-[var(--te-border)] hover:bg-[var(--te-panel-hover)] transition"
+          aria-label="Toggle Menu"
         >
           {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
         </button>
 
-        <div className="gov-logo-mark w-10 h-10 sm:w-12 sm:h-12 rounded-lg p-[1px] shadow-sm group cursor-pointer shrink-0">
-          <div className="w-full h-full rounded-[7px] flex items-center justify-center transition duration-300">
-            <Shield className="w-5 h-5 sm:w-6 sm:h-6 transition duration-300" />
+        {/* Tactical Badge Logo */}
+        <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-teal-500 to-blue-600 p-[1px] shadow-sm shrink-0">
+          <div className="w-full h-full rounded-[11px] bg-[var(--te-surface)] flex items-center justify-center">
+            <Shield className="w-5 h-5 text-teal-500" />
           </div>
         </div>
+
         <div className="min-w-0">
-          <div className="flex items-center gap-1.5 sm:gap-2.5">
-            <h1 className="gov-brand-title text-base sm:text-xl font-extrabold tracking-wide">
-              TRANSIT<span className="font-black">EYE</span>
+          <div className="flex items-center gap-2">
+            <h1 className="text-base sm:text-lg font-black tracking-tight text-[var(--te-text)] font-sans">
+              TRANSIT<span className="text-teal-500">EYE</span>
             </h1>
-            <span className="gov-demo-badge text-[9px] sm:text-[10px] px-1.5 sm:px-2 py-0.5 rounded-full font-mono shadow-sm shrink-0">
-              SIH-26124 DEMO
+            <span className="text-[10px] px-2 py-0.5 rounded-full font-mono font-bold bg-teal-500/10 text-teal-600 dark:text-teal-400 border border-teal-500/20 shrink-0">
+              SIH 26124
             </span>
           </div>
-          <p className="gov-brand-subtitle text-[10px] sm:text-[11px] hidden sm:flex items-center gap-1.5">
-            <span>Mobile Transport Fleet Sensing</span>
+          <p className="text-[11px] text-[var(--te-text-muted)] hidden sm:flex items-center gap-1.5 font-medium">
+            <span>Mobile Sensing Infrastructure</span>
             <span>•</span>
-            <span className="font-semibold">Pune City Command</span>
+            <span className="text-[var(--te-text)] font-semibold">PMC Pune Transit</span>
           </p>
         </div>
       </div>
 
-      {/* Real-time Status Telemetry */}
+      {/* Right: Operational Telemetry Gauges & Controls */}
       <div className="flex items-center gap-2 sm:gap-4">
-        {/* Edge Processing Badge */}
-        <div className="gov-header-stat hidden xl:flex items-center gap-3 px-3.5 py-2 rounded-lg shadow-sm">
-          <div className="gov-stat-icon p-1.5 rounded-md">
+        {/* Edge Processing Efficiency Meter */}
+        <div className="hidden xl:flex items-center gap-3 px-3 py-1.5 rounded-xl bg-[var(--te-panel)] border border-[var(--te-border)]">
+          <div className="p-1.5 rounded-lg bg-teal-500/10 text-teal-500">
             <Cpu className="w-4 h-4" />
           </div>
-          <div className="text-left font-mono">
-            <div className="gov-stat-label text-[9px] uppercase tracking-widest">Edge Ratio</div>
-            <div className="gov-stat-value text-xs font-bold">97.4% Local <span>/</span> 2.6% Cloud</div>
-          </div>
-        </div>
-
-        <div className="gov-theme-toggle hidden md:flex items-center p-1 rounded-lg border shadow-sm" aria-label="Theme selector">
-          <button
-            type="button"
-            onClick={() => onThemeChange && onThemeChange("light")}
-            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-[10px] sm:text-xs font-mono font-bold transition ${theme === "light" ? "is-active" : ""}`}
-            aria-pressed={theme === "light"}
-          >
-            <Sun className="w-3.5 h-3.5" />
-            <span>Light</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => onThemeChange && onThemeChange("dark")}
-            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-[10px] sm:text-xs font-mono font-bold transition ${theme === "dark" ? "is-active" : ""}`}
-            aria-pressed={theme === "dark"}
-          >
-            <Moon className="w-3.5 h-3.5" />
-            <span>Dark</span>
-          </button>
-        </div>
-
-        {/* Active Fleet Indicator */}
-        <div className="gov-header-stat flex items-center gap-2 sm:gap-3 px-2.5 sm:px-3.5 py-2 rounded-lg shadow-sm">
-          <div className="flex items-center justify-center shrink-0">
-            <span className="live-dot"></span>
-          </div>
-          <div className="text-left font-mono">
-            <div className="gov-stat-label text-[8px] sm:text-[9px] uppercase tracking-widest">Fleet Coverage</div>
-            <div className="gov-stat-main text-[11px] sm:text-xs font-bold whitespace-nowrap">
-              {activeBusesCount} <span>/</span> {totalBusesCount} Active
+          <div className="text-left font-mono text-[11px]">
+            <div className="text-[9px] uppercase tracking-wider text-[var(--te-text-muted)] font-bold">Edge Telemetry</div>
+            <div className="font-bold text-[var(--te-text)]">
+              <span className="text-teal-500">97.4% Local</span> <span className="text-[var(--te-text-dim)]">/</span> 2.6% Cloud
             </div>
           </div>
         </div>
 
-        {/* Live Clock Header */}
-        <div className="gov-clock hidden sm:flex items-center gap-2 font-mono text-xs px-3.5 py-2 rounded-lg shadow-sm">
-          <Clock className="w-4 h-4" />
-          <span className="font-semibold">{timeStr || "18:02:00 IST"}</span>
+        {/* Fleet Coverage Live Indicator */}
+        <div className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl bg-[var(--te-panel)] border border-[var(--te-border)]">
+          <div className="live-pulse-dot shrink-0"></div>
+          <div className="text-left font-mono text-[11px]">
+            <div className="text-[9px] uppercase tracking-wider text-[var(--te-text-muted)] font-bold">Fleet Sensing</div>
+            <div className="font-bold text-[var(--te-text)] whitespace-nowrap">
+              {activeBusesCount} <span className="text-[var(--te-text-dim)]">/</span> {totalBusesCount} Buses
+            </div>
+          </div>
+        </div>
+
+        {/* Live IST Clock */}
+        <div className="hidden sm:flex items-center gap-2 font-mono text-xs px-3 py-1.5 rounded-xl bg-[var(--te-panel)] border border-[var(--te-border)] text-[var(--te-text)]">
+          <Clock className="w-3.5 h-3.5 text-teal-500" />
+          <span className="font-bold">{timeStr || "18:02:00 IST"}</span>
+        </div>
+
+        {/* Light / Dark Mode Toggle */}
+        <div className="flex items-center p-1 rounded-xl bg-[var(--te-panel)] border border-[var(--te-border)]">
+          <button
+            onClick={() => onThemeChange && onThemeChange("light")}
+            className={`p-1.5 sm:px-2.5 sm:py-1 rounded-lg text-xs font-mono font-bold flex items-center gap-1.5 transition ${
+              theme === "light" 
+                ? "bg-[var(--te-surface)] text-teal-600 shadow-sm border border-[var(--te-border)]" 
+                : "text-[var(--te-text-muted)] hover:text-[var(--te-text)]"
+            }`}
+            title="Light Theme"
+          >
+            <Sun className="w-3.5 h-3.5" />
+            <span className="hidden md:inline">Light</span>
+          </button>
+          <button
+            onClick={() => onThemeChange && onThemeChange("dark")}
+            className={`p-1.5 sm:px-2.5 sm:py-1 rounded-lg text-xs font-mono font-bold flex items-center gap-1.5 transition ${
+              theme === "dark" 
+                ? "bg-[var(--te-surface)] text-teal-400 shadow-sm border border-[var(--te-border)]" 
+                : "text-[var(--te-text-muted)] hover:text-[var(--te-text)]"
+            }`}
+            title="Dark Theme"
+          >
+            <Moon className="w-3.5 h-3.5" />
+            <span className="hidden md:inline">Dark</span>
+          </button>
         </div>
       </div>
     </header>

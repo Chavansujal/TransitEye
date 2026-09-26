@@ -1,0 +1,52 @@
+# Byte-compiled / optimized / DLL files
+
+**pycache**/
+*.py[cod]
+*$py.class
+
+# Model weights and checkpoints (tracked via Git LFS)
+# *.pth and *.pth.bak are handled by LFS — see .gitattributes
+
+*.ckpt
+*.pt
+*.bin
+*.onnx
+
+# TensorBoard logs
+
+*.tfevents.*
+
+# Datasets
+
+datasets/incident/
+datasets/waterlogging/
+
+# Generated inference / video outputs
+
+outputs/video/*.mp4
+
+# Training metrics
+output/*/metrics.csv
+
+# Operating System files
+
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Environments
+
+.env
+.venv/
+env/
+venv/
+ENV/
+
+# IDE / Editor files
+
+.vscode/
+.idea/

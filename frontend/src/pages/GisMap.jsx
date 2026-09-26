@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { MapContainer, TileLayer, Marker, Popup, Polyline, Circle, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { MapPin, Filter, Layers, Info, Flame, ShieldCheck, AlertTriangle, Shield, Cpu, Activity } from "lucide-react";
+import { MapPin, Flame, AlertTriangle, Bus } from "lucide-react";
 
 // Helper component to fix Leaflet map tile rendering in tabbed layouts
 function MapController() {
@@ -10,44 +10,71 @@ function MapController() {
   useEffect(() => {
     const timer = setTimeout(() => {
       map.invalidateSize();
-    }, 200);
+    }, 250);
     return () => clearTimeout(timer);
   }, [map]);
   return null;
 }
 
-// Custom Leaflet Markers
-const createCustomIcon = (color) => {
+// Custom Leaflet Animated Markers with Restrained Palette
+const createCustomIcon = (color, type = "normal") => {
+  let innerEffect = "";
+  if (type === "pulse") {
+    innerEffect = `<circle cx="18" cy="18" r="14" fill="none" stroke="${color}" stroke-width="1.5">
+      <animate attributeName="r" values="8;16;8" dur="2s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.8;0.15;0.8" dur="2s" repeatCount="indefinite"/>
+    </circle>`;
+  } else if (type === "ripple") {
+    innerEffect = `<circle cx="18" cy="18" r="15" fill="none" stroke="${color}" stroke-width="1.5" stroke-dasharray="3,3">
+      <animateTransform attributeName="transform" type="rotate" from="0 18 18" to="360 18 18" dur="6s" repeatCount="indefinite"/>
+    </circle>`;
+  }
+
   const svg = `
-    <svg xmlns="http://www.w3.org/2000/svg" width="34" height="34" viewBox="0 0 32 32">
-      <circle cx="16" cy="16" r="14" fill="${color}" fill-opacity="0.25" stroke="${color}" stroke-width="2.5"/>
-      <circle cx="16" cy="16" r="6" fill="${color}"/>
+    <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36">
+      ${innerEffect}
+      <circle cx="18" cy="18" r="11" fill="${color}" fill-opacity="0.25" stroke="${color}" stroke-width="2.5"/>
+      <circle cx="18" cy="18" r="4.5" fill="${color}"/>
     </svg>
   `;
   return L.divIcon({
     className: "custom-leaflet-marker",
     html: svg,
-    iconSize: [34, 34],
-    iconAnchor: [17, 17],
+    iconSize: [36, 36],
+    iconAnchor: [18, 18],
   });
 };
 
-const busIcon = createCustomIcon("#06b6d4"); // Cyan for buses
-const potholeIcon = createCustomIcon("#ef4444"); // Red for potholes
-const congestionIcon = createCustomIcon("#f59e0b"); // Amber for congestion
-const incidentIcon = createCustomIcon("#a855f7"); // Purple for ANPR incidents
-const zebraIcon = createCustomIcon("#8b5cf6"); // Violet for zebra crossings
-const waterlogIcon = createCustomIcon("#3b82f6"); // Blue for waterlogging
-const signboardIcon = createCustomIcon("#10b981"); // Emerald for signboards
+const busIcon = createCustomIcon("#65a30d", "pulse"); // Lime for active buses
+const potholeIcon = createCustomIcon("#dc2626", "pulse"); // Restrained Red for potholes
+const congestionIcon = createCustomIcon("#d97706", "normal"); // Amber for congestion
+const incidentIcon = createCustomIcon("#dc2626", "pulse"); // Red for ANPR incidents
+const waterlogIcon = createCustomIcon("#d97706", "ripple"); // Amber ripple for waterlogging
 
-// Pune Key Transit Corridors for Congestion Heatmap
+// Pune Transit Waypoints for Smooth Live Bus Position Interpolation
+const BUS_WAYPOINTS = {
+  "BUS-101": [
+    [18.4862, 73.8324], [18.4920, 73.8350], [18.4980, 73.8380], [18.5040, 73.8420], [18.5100, 73.8450]
+  ],
+  "BUS-102": [
+    [18.5285, 73.8745], [18.5250, 73.8720], [18.5210, 73.8690], [18.5170, 73.8660], [18.5130, 73.8630]
+  ],
+  "BUS-103": [
+    [18.5910, 73.7420], [18.5860, 73.7460], [18.5800, 73.7510], [18.5740, 73.7560], [18.5680, 73.7610]
+  ],
+  "BUS-104": [
+    [18.5145, 73.8245], [18.5120, 73.8200], [18.5090, 73.8150], [18.5060, 73.8100], [18.5020, 73.8050]
+  ]
+};
+
+// Key Transit Corridors for Heatmap & Animated Polyline Flow
 const CONGESTION_CORRIDORS = [
   {
     id: "sinhagad",
-    name: "Sinhagad Road Bottleneck (Rajaram Bridge to Hingne)",
-    severity: "SEVERE",
+    name: "Sinhagad Road Corridor (Rajaram Bridge)",
+    severity: "CRITICAL",
     densityPct: 94,
-    color: "#ef4444",
+    color: "#dc2626",
     coords: [
       [18.5015, 73.8398],
       [18.4942, 73.8361],
@@ -57,10 +84,10 @@ const CONGESTION_CORRIDORS = [
   },
   {
     id: "swargate",
-    name: "Swargate Underpass Transit Corridor",
-    severity: "CRITICAL",
+    name: "Swargate Underpass Corridor",
+    severity: "HIGH",
     densityPct: 88,
-    color: "#f43f5e",
+    color: "#d97706",
     coords: [
       [18.5085, 73.8648],
       [18.5021, 73.8638],
@@ -69,10 +96,10 @@ const CONGESTION_CORRIDORS = [
   },
   {
     id: "fcroad",
-    name: "Fergusson College Road (Goodluck to Garware)",
-    severity: "HIGH",
+    name: "FC Road Transit Line",
+    severity: "MEDIUM",
     densityPct: 68,
-    color: "#f59e0b",
+    color: "#65a30d",
     coords: [
       [18.5265, 73.8425],
       [18.5221, 73.8415],
@@ -80,39 +107,15 @@ const CONGESTION_CORRIDORS = [
     ]
   },
   {
-    id: "paud",
-    name: "Paud Road Underpass & Flyover Approach",
-    severity: "HIGH",
-    densityPct: 62,
-    color: "#f59e0b",
-    coords: [
-      [18.5145, 73.8245],
-      [18.5112, 73.8194],
-      [18.5080, 73.8120]
-    ]
-  },
-  {
     id: "hinjewadi",
-    name: "Hinjewadi Phase 1 IT Expressway Bypass",
-    severity: "SEVERE",
+    name: "Hinjewadi IT Bypass Corridor",
+    severity: "CRITICAL",
     densityPct: 82,
-    color: "#ef4444",
+    color: "#dc2626",
     coords: [
       [18.5910, 73.7420],
       [18.5815, 73.7482],
       [18.5720, 73.7590]
-    ]
-  },
-  {
-    id: "station",
-    name: "Pune Station Express Transit Line",
-    severity: "NORMAL",
-    densityPct: 35,
-    color: "#10b981",
-    coords: [
-      [18.5285, 73.8745],
-      [18.5235, 73.8710],
-      [18.5185, 73.8682]
     ]
   }
 ];
@@ -122,7 +125,37 @@ export default function GisMap({ buses = [], events = [], roadIssues = [], incid
   const [showHeatmap, setShowHeatmap] = useState(true);
   const PUNE_CENTER = [18.5204, 73.8567];
 
-  const filteredBuses = buses.filter(b => filterType === "ALL" || filterType === "BUSES");
+  // State for live moving bus marker simulation
+  const [animatedBuses, setAnimatedBuses] = useState(buses);
+  const waypointIndexRef = useRef({ "BUS-101": 0, "BUS-102": 0, "BUS-103": 0, "BUS-104": 0 });
+
+  useEffect(() => {
+    if (!buses || buses.length === 0) return;
+
+    const interval = setInterval(() => {
+      setAnimatedBuses(prev => {
+        return prev.map(bus => {
+          const waypoints = BUS_WAYPOINTS[bus.id];
+          if (!waypoints) return bus;
+
+          const currentIndex = waypointIndexRef.current[bus.id] || 0;
+          const nextIndex = (currentIndex + 1) % waypoints.length;
+          waypointIndexRef.current[bus.id] = nextIndex;
+
+          const [nextLat, nextLng] = waypoints[nextIndex];
+          return {
+            ...bus,
+            latitude: nextLat,
+            longitude: nextLng
+          };
+        });
+      });
+    }, 2500);
+
+    return () => clearInterval(interval);
+  }, [buses]);
+
+  const filteredBuses = animatedBuses.filter(b => filterType === "ALL" || filterType === "BUSES");
   
   const filteredEvents = events.filter(e => {
     if (filterType === "ALL") return true;
@@ -133,43 +166,44 @@ export default function GisMap({ buses = [], events = [], roadIssues = [], incid
   });
 
   return (
-    <div className="p-3 sm:p-6 space-y-4 max-w-7xl mx-auto">
-      {/* Top Header & Filter Bar */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 sm:gap-4 glass-panel p-4 sm:p-5 border-cyan-500/20">
+    <div className="space-y-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 font-sans animate-fade-in-up">
+      
+      {/* Top Header & Layer Bar */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 te-card p-5 border-l-4 border-l-[var(--te-lime)]">
         <div>
-          <h2 className="text-lg sm:text-xl font-black text-white flex items-center gap-2 tracking-tight">
-            <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-400 shrink-0" /> Pune City GIS Spatial Intelligence Map
+          <h2 className="text-lg font-bold text-[var(--te-text)] flex items-center gap-2">
+            <MapPin className="w-5 h-5 text-[var(--te-lime)] shrink-0" /> Pune City GIS Spatial Intelligence Map
           </h2>
-          <p className="text-[11px] sm:text-xs text-slate-400 mt-0.5">
-            Fleet tracking, multi-bus corroborated road defects & real-time congestion heat corridors.
+          <p className="text-xs text-[var(--te-text-muted)] mt-0.5">
+            Real-time fleet tracking along transit routes, multi-bus corroborated defects & animated congestion heat corridors across Pune.
           </p>
         </div>
 
         {/* Action Controls & Layer Filter */}
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 text-xs font-medium">
           {/* Heatmap Toggle Button */}
           <button
             onClick={() => setShowHeatmap(!showHeatmap)}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono font-bold border transition ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md border transition ${
               showHeatmap 
-                ? "bg-rose-950/80 border-rose-500 text-rose-300 shadow-md shadow-rose-500/20" 
-                : "bg-slate-900 border-slate-800 text-slate-400 hover:text-white"
+                ? "bg-rose-500/15 border-rose-500/30 text-rose-600 dark:text-rose-400 font-semibold" 
+                : "bg-[var(--te-panel)] border-[var(--te-border)] text-[var(--te-text-muted)] hover:text-[var(--te-text)]"
             }`}
           >
-            <Flame className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${showHeatmap ? "text-rose-400 animate-pulse" : ""}`} />
-            <span>Heatmap: {showHeatmap ? "ON" : "OFF"}</span>
+            <Flame className={`w-3.5 h-3.5 ${showHeatmap ? "text-rose-500 animate-pulse" : ""}`} />
+            <span>Heatmap Overlay</span>
           </button>
 
           {/* Filter Buttons */}
-          <div className="flex items-center gap-1 bg-slate-950/80 p-1 rounded-xl border border-slate-800 text-[11px] sm:text-xs font-mono overflow-x-auto no-scrollbar max-w-full">
+          <div className="flex items-center gap-1 bg-[var(--te-panel)] p-1 rounded-md border border-[var(--te-border)] overflow-x-auto no-scrollbar">
             {["ALL", "BUSES", "POTHOLES", "CONGESTION", "INCIDENTS"].map(type => (
               <button
                 key={type}
                 onClick={() => setFilterType(type)}
-                className={`px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg font-bold transition duration-200 shrink-0 ${
+                className={`px-2.5 py-1 rounded text-xs font-semibold transition shrink-0 ${
                   filterType === type 
-                    ? "bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 shadow-md shadow-cyan-500/20" 
-                    : "text-slate-400 hover:text-white"
+                    ? "bg-[var(--te-lime)] text-[var(--te-lime-pill-text)]" 
+                    : "text-[var(--te-text-muted)] hover:text-[var(--te-text)]"
                 }`}
               >
                 {type}
@@ -180,70 +214,68 @@ export default function GisMap({ buses = [], events = [], roadIssues = [], incid
       </div>
 
       {/* Map Viewport Container */}
-      <div className="h-[450px] sm:h-[520px] lg:h-[600px] glass-panel p-1.5 sm:p-2 relative rounded-2xl sm:rounded-3xl overflow-hidden border-slate-800/80 shadow-2xl">
+      <div className="h-[480px] sm:h-[540px] lg:h-[600px] te-card p-1.5 relative overflow-hidden shadow-md">
         <MapContainer 
           center={PUNE_CENTER} 
           zoom={13} 
           scrollWheelZoom={true} 
-          style={{ height: "100%", width: "100%", borderRadius: "16px" }}
+          style={{ height: "100%", width: "100%", borderRadius: "8px" }}
         >
           <MapController />
-          {/* OpenStreetMap Standard Map Tiles */}
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             maxZoom={19}
           />
 
-          {/* Congestion Heatmap Corridor Polylines */}
+          {/* Congestion Corridors with Animated Flow Polylines */}
           {showHeatmap && CONGESTION_CORRIDORS.map(corr => (
             <React.Fragment key={corr.id}>
-              {/* Outer Heat Glow Polyline */}
+              {/* Outer Heat Glow */}
               <Polyline
                 positions={corr.coords}
                 pathOptions={{
                   color: corr.color,
-                  weight: 12,
-                  opacity: 0.35,
+                  weight: 10,
+                  opacity: 0.3,
                   lineCap: "round"
                 }}
               />
-              {/* Core Road Corridor Polyline */}
+              {/* Moving Polyline Direction Flow */}
               <Polyline
                 positions={corr.coords}
                 pathOptions={{
                   color: corr.color,
-                  weight: 5,
+                  weight: 4,
                   opacity: 0.9,
-                  dashArray: corr.severity === "SEVERE" || corr.severity === "CRITICAL" ? "8, 6" : undefined
+                  className: "route-polyline-animated"
                 }}
               >
                 <Popup>
                   <div className="p-1 space-y-1 font-sans text-xs">
-                    <div className="font-bold text-white flex items-center justify-between gap-3 border-b border-slate-700 pb-1">
+                    <div className="font-bold text-[var(--te-text)] flex items-center justify-between gap-3 border-b border-[var(--te-border)] pb-1">
                       <span>{corr.name}</span>
-                      <span className="font-mono text-rose-400">{corr.densityPct}% DENSITY</span>
+                      <span className="font-mono-code text-rose-500 font-bold">{corr.densityPct}% DENSITY</span>
                     </div>
-                    <div className="text-slate-300">Congestion Severity: <strong className="text-amber-400">{corr.severity}</strong></div>
-                    <div className="text-[10px] text-slate-400">Calculated across passing bus fleet speed & dwell times.</div>
+                    <div className="text-[var(--te-text-muted)]">Congestion Severity: <strong className="text-amber-500">{corr.severity}</strong></div>
                   </div>
                 </Popup>
               </Polyline>
-              {/* Intersection Heat Halos */}
+              {/* Intersection Halo */}
               <Circle
                 center={corr.coords[1]}
-                radius={240}
+                radius={200}
                 pathOptions={{
                   color: corr.color,
                   fillColor: corr.color,
-                  fillOpacity: 0.15,
+                  fillOpacity: 0.12,
                   weight: 1
                 }}
               />
             </React.Fragment>
           ))}
 
-          {/* Bus Markers */}
+          {/* Live Moving Bus Markers */}
           {filteredBuses.map((bus) => (
             <Marker 
               key={bus.id} 
@@ -251,20 +283,17 @@ export default function GisMap({ buses = [], events = [], roadIssues = [], incid
               icon={busIcon}
             >
               <Popup>
-                <div className="space-y-2 p-1 font-sans">
-                  <div className="flex items-center justify-between border-b border-slate-700 pb-1.5">
-                    <strong className="text-cyan-400 text-sm font-mono font-bold">{bus.id}</strong>
-                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-bold ${
-                      bus.status === "ONLINE" ? "bg-emerald-950 text-emerald-300" : "bg-rose-950 text-rose-300"
-                    }`}>
+                <div className="space-y-1.5 p-1 font-sans text-xs">
+                  <div className="flex items-center justify-between border-b border-[var(--te-border)] pb-1">
+                    <strong className="text-[var(--te-lime)] font-mono-code font-bold">{bus.id}</strong>
+                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-[var(--te-lime-bg)] text-[var(--te-lime)] font-semibold border border-[var(--te-lime-border)]">
                       {bus.status}
                     </span>
                   </div>
-                  <div className="text-xs text-slate-300 space-y-1">
-                    <div>Route: <strong className="text-white">{bus.route}</strong></div>
-                    <div>Speed: <strong className="text-emerald-400">{bus.speed} km/h</strong></div>
+                  <div className="text-[var(--te-text-muted)] space-y-0.5">
+                    <div>Route: <strong className="text-[var(--te-text)]">{bus.route}</strong></div>
+                    <div>Speed: <strong className="text-[var(--te-lime)]">{bus.speed} km/h</strong></div>
                     <div>Driver: {bus.driver}</div>
-                    <div>Cameras: <span className="text-emerald-400 font-bold">4 Cams Active</span></div>
                   </div>
                 </div>
               </Popup>
@@ -275,25 +304,12 @@ export default function GisMap({ buses = [], events = [], roadIssues = [], incid
           {filteredEvents.map((evt) => {
             const isPothole = evt.type.includes("Pothole") || evt.type.includes("Divider");
             const isCongestion = evt.type.includes("Congestion");
-            const isZebra = evt.type.includes("Zebra");
             const isWater = evt.type.includes("Waterlog");
-            const isSign = evt.type.includes("Signboard");
 
             const icon = isPothole ? potholeIcon 
-                       : isZebra ? zebraIcon 
                        : isWater ? waterlogIcon 
-                       : isSign ? signboardIcon 
                        : isCongestion ? congestionIcon 
                        : incidentIcon;
-            
-            // Find corroboration count from roadIssues
-            const matchedIssue = roadIssues.find(ri => 
-              ri.location && evt.locationName && (
-                ri.location.toLowerCase().includes(evt.locationName.toLowerCase().split(" ")[0]) ||
-                evt.locationName.toLowerCase().includes(ri.location.toLowerCase().split(" ")[0])
-              )
-            );
-            const corroborationCount = matchedIssue ? matchedIssue.busesReporting : 3;
 
             return (
               <Marker 
@@ -302,28 +318,16 @@ export default function GisMap({ buses = [], events = [], roadIssues = [], incid
                 icon={icon}
               >
                 <Popup>
-                  <div className="space-y-2 p-1 font-sans">
-                    <div className="flex items-center justify-between border-b border-slate-700 pb-1.5">
-                      <strong className="text-rose-400 text-sm font-bold">{evt.type}</strong>
-                      <span className="text-[10px] bg-slate-900 text-slate-300 px-2 py-0.5 rounded font-mono">
-                        {evt.id}
-                      </span>
+                  <div className="space-y-1.5 p-1 font-sans text-xs max-w-[220px]">
+                    <div className="flex items-center justify-between border-b border-[var(--te-border)] pb-1">
+                      <span className="font-bold text-[var(--te-text)]">{evt.type}</span>
+                      <span className="text-[10px] font-mono-code font-bold text-amber-500">{((evt.confidence || 0.94) * 100).toFixed(0)}%</span>
                     </div>
-
-                    {/* Multi-Bus Corroboration Badge */}
-                    <div className="flex items-center gap-1.5 px-2 py-1 bg-cyan-950/80 border border-cyan-700 rounded-lg text-[10px] text-cyan-300 font-mono font-bold">
-                      <ShieldCheck className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
-                      Verified by {corroborationCount} Buses
-                    </div>
-
-                    <div className="text-xs text-slate-300 space-y-1">
-                      <div>Location: <strong className="text-white">{evt.locationName || "Pune"}</strong></div>
-                      <div>Confidence: <strong className="text-emerald-400 font-mono font-bold">{(evt.confidence * 100).toFixed(0)}%</strong></div>
-                      <div>Camera Angle: <span className="font-mono text-cyan-300 uppercase">{evt.cameraAngle || "Front Cam"}</span></div>
+                    <div className="text-[var(--te-text-muted)] space-y-0.5">
+                      <div>Location: <strong className="text-[var(--te-text)]">{evt.locationName || "Pune Corridor"}</strong></div>
+                      <div>Source Bus: <strong className="text-[var(--te-lime)] font-mono-code">{evt.busId}</strong></div>
                       {evt.registrationNumber && (
-                        <div className="text-amber-300 font-mono font-bold bg-slate-950 p-1.5 rounded-lg border border-amber-500/40 mt-1">
-                          ANPR Plate: {evt.registrationNumber}
-                        </div>
+                        <div className="text-[var(--te-lime)] font-mono-code font-bold">ANPR Plate: {evt.registrationNumber}</div>
                       )}
                     </div>
                   </div>
@@ -332,96 +336,6 @@ export default function GisMap({ buses = [], events = [], roadIssues = [], incid
             );
           })}
         </MapContainer>
-
-        {/* Map Legend Overlay */}
-        <div className="absolute bottom-3 right-3 sm:bottom-6 sm:right-6 z-[1000] glass-panel p-3 sm:p-4 text-[11px] sm:text-xs space-y-2 border-slate-800 shadow-2xl backdrop-blur-xl max-w-[240px] sm:max-w-xs">
-          <div className="font-bold text-white text-[9px] sm:text-[10px] uppercase tracking-widest border-b border-slate-800 pb-1 flex items-center justify-between font-mono">
-            <span className="flex items-center gap-1.5">
-              <Layers className="w-3.5 h-3.5 text-cyan-400" /> GIS Spatial Layers
-            </span>
-            <span className="text-cyan-400 hidden sm:inline">SIH 26124</span>
-          </div>
-          <div className="space-y-1.5 font-mono text-[10px] sm:text-[11px]">
-            <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-cyan-400 shrink-0"></span>
-              <span className="text-slate-300">Active Bus Mobile Sensors (12)</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-rose-500 shrink-0"></span>
-              <span className="text-slate-300">Potholes & Missing Dividers</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-purple-500 shrink-0"></span>
-              <span className="text-slate-300">Faded Zebra Crossings & Pedestrians</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-blue-500 shrink-0"></span>
-              <span className="text-slate-300">Waterlogging / Submerged Lanes</span>
-            </div>
-            {showHeatmap && (
-              <div className="pt-1 border-t border-slate-800 flex items-center gap-1.5 text-rose-400 text-[9px] sm:text-[10px]">
-                <Flame className="w-3 h-3 animate-pulse shrink-0" />
-                <span>Congestion Heat Active</span>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Telemetry & Spec Footer matching Image 2 */}
-      <div className="glass-panel p-4 sm:p-5 border-slate-800/80 rounded-2xl grid grid-cols-1 md:grid-cols-3 gap-4 text-xs font-sans">
-        {/* Left Column: Brand & Tagline */}
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <div className="p-1 rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
-              <Shield className="w-4 h-4 sm:w-5 sm:h-5" />
-            </div>
-            <span className="font-black text-sm sm:text-base tracking-wider text-white font-mono">TRANSITEYE</span>
-          </div>
-          <p className="text-[11px] sm:text-xs text-slate-400 leading-relaxed">
-            AI-powered edge computing platform transforming public transport buses into real-time mobile urban sensing nodes across Pune City.
-          </p>
-        </div>
-
-        {/* Middle Column: Edge Infrastructure Specs */}
-        <div className="space-y-2 font-mono">
-          <div className="text-[11px] font-bold text-cyan-400 uppercase tracking-wider flex items-center gap-1.5 border-b border-slate-800 pb-1">
-            <Cpu className="w-3.5 h-3.5" /> Edge Infrastructure Specs
-          </div>
-          <div className="space-y-1 text-[11px] sm:text-xs">
-            <div className="flex justify-between">
-              <span className="text-slate-400">Onboard Accelerator:</span>
-              <span className="text-white font-semibold">NVIDIA Jetson Orin Nano</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-slate-400">Computer Vision:</span>
-              <span className="text-cyan-400 font-semibold">Custom Urban Vision AI + ANPR Reader</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-slate-400">Edge Bandwidth Filtering:</span>
-              <span className="text-emerald-400 font-semibold">97.4% Local Reduction</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Right Column: Pune Command Center */}
-        <div className="space-y-2 font-mono">
-          <div className="text-[11px] font-bold text-cyan-400 uppercase tracking-wider flex items-center gap-1.5 border-b border-slate-800 pb-1">
-            <Activity className="w-3.5 h-3.5" /> Pune Command Center
-          </div>
-          <div className="space-y-1 text-[11px] sm:text-xs">
-            <div className="flex justify-between items-center">
-              <span className="text-slate-400">System Telemetry:</span>
-              <span className="text-emerald-400 font-semibold flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> OPERATIONAL
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-slate-400">Coverage Routes:</span>
-              <span className="text-white font-semibold">Pune Metropolitan (PMPML)</span>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );

@@ -1,564 +1,300 @@
 @import "tailwindcss";
 @import "leaflet/dist/leaflet.css";
 
+/* 
+  TRANSITEYE URBAN INTELLIGENCE PLATFORM - DESIGN SYSTEM
+  Refined Municipal Mobility Command System
+*/
+
 :root {
-  --gov-navy: #123B5D;
-  --gov-blue: #1E5AA8;
-  --gov-saffron: #F28C28;
-  --gov-green: #198754;
-  --gov-bg: #F5F7FA;
-  --gov-surface: #FFFFFF;
-  --gov-border: #D9E2EC;
-  --gov-text: #1F2937;
-  --gov-muted: #64748B;
-  --gov-warning: #F59E0B;
-  --gov-critical: #DC3545;
-  --gov-subtle: #F8FAFC;
-  --gov-soft-blue: #EAF2FC;
-  --gov-soft-green: #EAF7F0;
-  --gov-soft-amber: #FFF5E5;
-  --gov-soft-red: #FDECEF;
-  --gov-soft-purple: #F2EEFA;
-  --gov-header: #FFFFFF;
-  --gov-sidebar: #123B5D;
-  --gov-sidebar-border: #0D2D48;
-  --gov-sidebar-muted: rgba(219, 234, 254, 0.82);
-  --gov-sidebar-chip: #0D2D48;
-  --gov-shadow: rgba(18, 59, 93, 0.07);
-  --gov-shadow-strong: rgba(18, 59, 93, 0.12);
+  /* LIGHT THEME: Warm off-white chassis, crisp white cards, dark charcoal text, restrained lime */
+  --te-bg: #F4F5F1;
+  --te-surface: #FFFFFF;
+  --te-panel: #EAECE6;
+  --te-panel-hover: #DFE2DA;
+  --te-border: #D5D9CF;
+  --te-border-strong: #B5BBB0;
+  --te-text: #111827;
+  --te-text-muted: #4B5563;
+  --te-text-dim: #6B7280;
 
-  --bg-dark: var(--gov-bg);
-  --bg-card: var(--gov-surface);
-  --bg-card-hover: #F8FAFC;
-  --border-color: var(--gov-border);
-  --border-glow: rgba(30, 90, 168, 0.18);
+  /* Restrained Lime Accent for Light Mode */
+  --te-lime: #4D7C0F;
+  --te-lime-bright: #65A30D;
+  --te-lime-bg: rgba(101, 163, 13, 0.12);
+  --te-lime-border: rgba(101, 163, 13, 0.30);
+  --te-lime-pill-bg: #4D7C0F;
+  --te-lime-pill-text: #FFFFFF;
 
-  --accent-cyan: var(--gov-blue);
-  --accent-blue: var(--gov-blue);
-  --accent-emerald: var(--gov-green);
-  --accent-amber: var(--gov-warning);
-  --accent-rose: var(--gov-critical);
-  --accent-purple: #6B4EA0;
+  /* Restrained Alert Colors ( Amber for Warning, Red for Emergency ) */
+  --te-amber: #D97706;
+  --te-amber-bg: rgba(217, 119, 6, 0.10);
+  --te-rose: #DC2626;
+  --te-rose-bg: rgba(220, 38, 38, 0.10);
 
-  font-family: Inter, "IBM Plex Sans", "Source Sans 3", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --te-nav-bg: rgba(244, 245, 241, 0.94);
+  --te-card-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+  --te-card-shadow-lg: 0 4px 12px -2px rgba(0, 0, 0, 0.08);
+
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 [data-theme="dark"] {
-  --gov-navy: #F8FAFC;
-  --gov-blue: #3B82F6;
-  --gov-saffron: #F28C28;
-  --gov-green: #22C55E;
-  --gov-bg: #0B1220;
-  --gov-surface: #172033;
-  --gov-border: #334155;
-  --gov-text: #F8FAFC;
-  --gov-muted: #CBD5E1;
-  --gov-warning: #F59E0B;
-  --gov-critical: #EF4444;
-  --gov-subtle: #1E293B;
-  --gov-soft-blue: rgba(59, 130, 246, 0.14);
-  --gov-soft-green: rgba(34, 197, 94, 0.13);
-  --gov-soft-amber: rgba(245, 158, 11, 0.14);
-  --gov-soft-red: rgba(239, 68, 68, 0.14);
-  --gov-soft-purple: rgba(124, 104, 238, 0.14);
-  --gov-header: #111827;
-  --gov-sidebar: #111827;
-  --gov-sidebar-border: #334155;
-  --gov-sidebar-muted: rgba(203, 213, 225, 0.82);
-  --gov-sidebar-chip: #1E293B;
-  --gov-shadow: rgba(0, 0, 0, 0.22);
-  --gov-shadow-strong: rgba(0, 0, 0, 0.32);
+  /* DARK THEME: Charcoal/Near-Black chassis, crisp white text, electric lime */
+  --te-bg: #0D0F12;
+  --te-surface: #15181E;
+  --te-panel: #1D222A;
+  --te-panel-hover: #262D37;
+  --te-border: #2A303C;
+  --te-border-strong: #3B4454;
+  --te-text: #F9FAFB;
+  --te-text-muted: #9CA3AF;
+  --te-text-dim: #6B7280;
+
+  /* Electric Lime Accent for Dark Mode */
+  --te-lime: #84CC16;
+  --te-lime-bright: #A3E635;
+  --te-lime-bg: rgba(132, 204, 22, 0.15);
+  --te-lime-border: rgba(132, 204, 22, 0.35);
+  --te-lime-pill-bg: #84CC16;
+  --te-lime-pill-text: #0D0F12;
+
+  --te-amber: #F59E0B;
+  --te-amber-bg: rgba(245, 158, 11, 0.15);
+  --te-rose: #EF4444;
+  --te-rose-bg: rgba(239, 68, 68, 0.15);
+
+  --te-nav-bg: rgba(13, 15, 18, 0.94);
+  --te-card-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.4);
+  --te-card-shadow-lg: 0 8px 24px -4px rgba(0, 0, 0, 0.6);
 }
 
 html, body, #root {
-  max-width: 100vw;
-  overflow-x: hidden;
-  -webkit-overflow-scrolling: touch;
-}
-
-body {
+  width: 100%;
+  height: 100%;
   margin: 0;
   padding: 0;
-  background-color: var(--gov-bg);
-  color: var(--gov-text);
-  background-image: none;
+  background-color: var(--te-bg);
+  color: var(--te-text);
+  font-family: Inter, system-ui, -apple-system, sans-serif;
+  transition: background-color 0.25s ease, color 0.25s ease;
 }
 
-.gov-app,
-.gov-main,
 body {
-  transition: background-color 200ms ease, color 200ms ease, border-color 200ms ease;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
 }
 
-.gov-app,
-.gov-main {
-  background-color: var(--gov-bg) !important;
-  color: var(--gov-text) !important;
+/* Base Card & Surface Utilities */
+.te-app {
+  background-color: var(--te-bg);
+  color: var(--te-text);
+  min-height: 100vh;
 }
 
-/* Custom Scrollbar */
+.te-card {
+  background-color: var(--te-surface);
+  border: 1px solid var(--te-border);
+  border-radius: 8px;
+  box-shadow: var(--te-card-shadow);
+  transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+}
+
+.te-card:hover {
+  border-color: var(--te-border-strong);
+}
+
+.te-button-primary {
+  background-color: var(--te-lime-pill-bg);
+  color: var(--te-lime-pill-text);
+  font-weight: 600;
+  padding: 0.6rem 1.25rem;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: opacity 0.2s ease, transform 0.15s ease;
+}
+
+.te-button-primary:hover {
+  opacity: 0.92;
+  transform: translateY(-1px);
+}
+
+.te-button-secondary {
+  background-color: var(--te-panel);
+  color: var(--te-text);
+  border: 1px solid var(--te-border);
+  font-weight: 600;
+  padding: 0.6rem 1.25rem;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.te-button-secondary:hover {
+  background-color: var(--te-panel-hover);
+  border-color: var(--te-border-strong);
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-slide-in-right {
+  animation: slideInRight 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Moving route dash line animation for Leaflet polylines */
+@keyframes routeStrokeFlow {
+  0% {
+    stroke-dashoffset: 24;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+.route-polyline-animated {
+  stroke-dasharray: 8, 8;
+  animation: routeStrokeFlow 1.8s linear infinite;
+}
+
+/* Bus Marker Motion Pulsing */
+@keyframes busPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(132, 204, 22, 0.6);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(132, 204, 22, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(132, 204, 22, 0);
+  }
+}
+
+.bus-marker-pulse {
+  animation: busPulse 2s infinite ease-out;
+}
+
+/* Pothole / Defect Marker Pulse */
+@keyframes defectPulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.defect-marker-pulse {
+  animation: defectPulse 1.8s infinite ease-in-out;
+}
+
+/* Waterlogging Ripple animation */
+@keyframes waterRipple {
+  0% {
+    transform: scale(0.7);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+}
+
+.water-ripple-ring {
+  animation: waterRipple 2.2s infinite ease-out;
+}
+
+/* ANPR Camera Laser Scan Line */
+@keyframes anprScan {
+  0% { top: 0%; opacity: 0.9; }
+  50% { top: 100%; opacity: 0.9; }
+  100% { top: 0%; opacity: 0.9; }
+}
+
+.anpr-scan-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--te-lime);
+  box-shadow: 0 0 6px var(--te-lime);
+  animation: anprScan 2.5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* Leaflet Map Styling */
+.leaflet-container {
+  width: 100%;
+  height: 100%;
+  background: var(--te-bg) !important;
+  font-family: inherit;
+  border-radius: 8px;
+}
+
+.leaflet-popup-content-wrapper {
+  background: var(--te-surface) !important;
+  color: var(--te-text) !important;
+  border: 1px solid var(--te-border) !important;
+  border-radius: 8px !important;
+  box-shadow: var(--te-card-shadow-lg) !important;
+  padding: 4px !important;
+}
+
+.leaflet-popup-tip {
+  background: var(--te-surface) !important;
+}
+
+/* Code Monospace Utility for Technical Hashes / Plates only */
+.font-mono-code {
+  font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Consolas, monospace;
+}
+
+/* Custom Scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: var(--gov-bg);
+  background: var(--te-bg);
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--gov-border);
-  border-radius: 9999px;
+  background: var(--te-border-strong);
+  border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--gov-muted);
-}
-
-.gov-header {
-  background: var(--gov-header);
-  border-bottom: 1px solid var(--gov-border);
-  color: var(--gov-text);
-  box-shadow: 0 3px 12px var(--gov-shadow);
-  transition: background-color 200ms ease, border-color 200ms ease, color 200ms ease;
-}
-
-.gov-tricolor-line span:nth-child(1) {
-  background: var(--gov-saffron);
-}
-
-.gov-tricolor-line span:nth-child(2) {
-  background: var(--gov-header);
-}
-
-.gov-tricolor-line span:nth-child(3) {
-  background: var(--gov-green);
-}
-
-.gov-icon-button {
-  background: var(--gov-surface);
-  color: var(--gov-blue);
-  border: 1px solid var(--gov-border);
-}
-
-.gov-logo-mark {
-  background: var(--gov-navy);
-}
-
-.gov-logo-mark > div {
-  background: var(--gov-surface);
-  border: 1px solid var(--gov-border);
-}
-
-.gov-logo-mark svg {
-  color: var(--gov-navy);
-}
-
-[data-theme="dark"] .gov-logo-mark {
-  background: var(--gov-blue);
-}
-
-[data-theme="dark"] .gov-logo-mark svg {
-  color: var(--gov-blue);
-}
-
-.gov-brand-title {
-  color: var(--gov-navy);
-}
-
-.gov-brand-title span {
-  color: var(--gov-saffron);
-}
-
-.gov-demo-badge {
-  background: var(--gov-blue);
-  color: #ffffff;
-  border: 1px solid var(--gov-blue);
-}
-
-.gov-brand-subtitle {
-  color: var(--gov-muted);
-}
-
-.gov-brand-subtitle .font-semibold {
-  color: var(--gov-navy);
-}
-
-.gov-header-stat,
-.gov-clock,
-.gov-theme-toggle {
-  background: var(--gov-subtle);
-  border: 1px solid var(--gov-border);
-  color: var(--gov-text);
-}
-
-.gov-stat-icon {
-  background: var(--gov-soft-green);
-  color: var(--gov-green);
-  border: 1px solid rgba(25, 135, 84, 0.24);
-}
-
-.gov-stat-label,
-.gov-stat-main span,
-.gov-stat-value span {
-  color: var(--gov-muted);
-}
-
-.gov-stat-main {
-  color: var(--gov-navy);
-}
-
-.gov-stat-value {
-  color: var(--gov-green);
-}
-
-.gov-clock svg {
-  color: var(--gov-blue);
-}
-
-.gov-theme-toggle {
-  gap: 2px;
-}
-
-.gov-theme-toggle button {
-  color: var(--gov-muted);
-}
-
-.gov-theme-toggle button.is-active {
-  background: var(--gov-blue);
-  color: #ffffff !important;
-}
-
-.gov-theme-toggle button:not(.is-active):hover {
-  background: var(--gov-soft-blue);
-  color: var(--gov-blue);
-}
-
-/* Government command-center card system */
-.glass-panel {
-  background: var(--gov-surface);
-  border: 1px solid var(--gov-border);
-  border-radius: 10px;
-  box-shadow: 0 8px 18px var(--gov-shadow);
-  transition: background-color 200ms ease, color 200ms ease, border-color 200ms ease, box-shadow 200ms ease, transform 200ms ease;
-}
-
-.glass-panel:hover {
-  border-color: var(--gov-border);
-  box-shadow: 0 10px 24px var(--gov-shadow-strong);
-}
-
-.glass-panel-glow {
-  background: var(--gov-surface);
-  border: 1px solid rgba(30, 90, 168, 0.28);
-  box-shadow: 0 10px 24px var(--gov-shadow-strong);
-}
-
-/* Animated Radar Pulse for Live Status */
-@keyframes radar-pulse {
-  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
-  70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
-  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
-}
-
-.live-dot {
-  width: 9px;
-  height: 9px;
-  background-color: var(--gov-green);
-  border-radius: 50%;
-  animation: none;
-}
-
-@keyframes critical-pulse {
-  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(244, 63, 94, 0.8); }
-  70% { transform: scale(1.1); box-shadow: 0 0 0 12px rgba(244, 63, 94, 0); }
-  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(244, 63, 94, 0); }
-}
-
-.critical-dot {
-  width: 9px;
-  height: 9px;
-  background-color: var(--gov-critical);
-  border-radius: 50%;
-  animation: none;
-}
-
-/* AI Camera overlay styling */
-.ai-overlay-box {
-  position: absolute;
-  border: 2px solid;
-  border-radius: 4px;
-  pointer-events: none;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  font-weight: 700;
-  padding: 2px;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 3px 10px rgba(15, 23, 42, 0.24);
-}
-
-/* Leaflet Map Styling Overrides */
-.leaflet-container {
-  width: 100%;
-  height: 100%;
-  background: var(--gov-subtle) !important;
-  border-radius: 10px;
-}
-
-.leaflet-popup-content-wrapper {
-  background: var(--gov-surface) !important;
-  color: var(--gov-text) !important;
-  border: 1px solid var(--gov-border) !important;
-  border-radius: 8px !important;
-  box-shadow: 0 12px 28px rgba(18, 59, 93, 0.16) !important;
-}
-
-.leaflet-popup-tip {
-  background: var(--gov-surface) !important;
-}
-
-.custom-leaflet-marker {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* Custom Neon Gradient Text */
-.text-gradient-cyan {
-  background: linear-gradient(135deg, var(--gov-navy) 0%, var(--gov-blue) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.text-gradient-gold {
-  background: linear-gradient(135deg, #b55f08 0%, var(--gov-saffron) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.text-gradient-rose {
-  background: linear-gradient(135deg, var(--gov-critical) 0%, #991B1B 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-/* Scanline visual effect for video viewports */
-.scanline-overlay {
-  background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(18, 59, 93, 0.08) 50%, rgba(18, 59, 93, 0.08));
-  background-size: 100% 5px;
-}
-
-/* Scoped visual theme translation for existing Tailwind-heavy JSX. */
-.gov-app :is(.text-white, .text-slate-100, .text-slate-200) {
-  color: var(--gov-text) !important;
-}
-
-.gov-app :is(.text-slate-300, .text-slate-400, .text-slate-500) {
-  color: var(--gov-muted) !important;
-}
-
-.gov-app :is(.text-cyan-300, .text-cyan-400, .text-blue-300, .text-blue-400) {
-  color: var(--gov-blue) !important;
-}
-
-.gov-app :is(.text-emerald-300, .text-emerald-400) {
-  color: var(--gov-green) !important;
-}
-
-.gov-app :is(.text-amber-300, .text-amber-400) {
-  color: #b46b09 !important;
-}
-
-.gov-app :is(.text-rose-300, .text-rose-400) {
-  color: var(--gov-critical) !important;
-}
-
-.gov-app :is(.text-purple-300, .text-purple-400) {
-  color: #5b3f95 !important;
-}
-
-.gov-app :is(
-  .bg-slate-950,
-  .bg-slate-950\/95,
-  .bg-slate-950\/90,
-  .bg-slate-950\/80,
-  .bg-slate-950\/70,
-  .bg-slate-950\/60,
-  .bg-slate-900,
-  .bg-slate-900\/90,
-  .bg-slate-900\/80,
-  .bg-slate-900\/70,
-  .bg-slate-900\/60,
-  .bg-slate-800,
-  .bg-slate-800\/90
-) {
-  background-color: var(--gov-subtle) !important;
-}
-
-.gov-app :is(.border-slate-800, .border-slate-800\/90, .border-slate-800\/80, .border-slate-800\/70, .border-slate-700, .border-slate-700\/60) {
-  border-color: var(--gov-border) !important;
-}
-
-.gov-app :is(.divide-slate-800\/70, .divide-slate-800) > :not([hidden]) ~ :not([hidden]) {
-  border-color: var(--gov-border) !important;
-}
-
-.gov-app .bg-cyan-950,
-.gov-app .bg-cyan-950\/80,
-.gov-app .bg-cyan-950\/50,
-.gov-app .bg-cyan-950\/40,
-.gov-app .bg-blue-950\/80,
-.gov-app .bg-blue-950\/50 {
-  background-color: #EAF2FC !important;
-  background-color: var(--gov-soft-blue) !important;
-}
-
-.gov-app .bg-emerald-950,
-.gov-app .bg-emerald-950\/90,
-.gov-app .bg-emerald-950\/80 {
-  background-color: #EAF7F0 !important;
-  background-color: var(--gov-soft-green) !important;
-}
-
-.gov-app .bg-amber-950,
-.gov-app .bg-amber-950\/90,
-.gov-app .bg-amber-950\/80,
-.gov-app .bg-amber-950\/50 {
-  background-color: #FFF5E5 !important;
-  background-color: var(--gov-soft-amber) !important;
-}
-
-.gov-app .bg-rose-950,
-.gov-app .bg-rose-950\/90,
-.gov-app .bg-rose-950\/80,
-.gov-app .bg-rose-950\/50 {
-  background-color: #FDECEF !important;
-  background-color: var(--gov-soft-red) !important;
-}
-
-.gov-app .bg-purple-950\/90,
-.gov-app .bg-purple-950\/80,
-.gov-app .bg-purple-950\/50 {
-  background-color: #F2EEFA !important;
-  background-color: var(--gov-soft-purple) !important;
-}
-
-.gov-app :is(.border-cyan-500\/40, .border-cyan-500\/30, .border-cyan-500\/25, .border-cyan-500\/20, .border-cyan-800, .border-cyan-800\/80, .border-cyan-800\/60, .border-cyan-700) {
-  border-color: rgba(30, 90, 168, 0.28) !important;
-}
-
-.gov-app :is(.border-emerald-800, .border-emerald-700, .border-emerald-500\/40, .border-emerald-500\/20) {
-  border-color: rgba(25, 135, 84, 0.28) !important;
-}
-
-.gov-app :is(.border-amber-800, .border-amber-500\/50, .border-amber-500\/40, .border-amber-500\/25, .border-amber-500\/20) {
-  border-color: rgba(245, 158, 11, 0.34) !important;
-}
-
-.gov-app :is(.border-rose-900\/60, .border-rose-800, .border-rose-500, .border-rose-500\/40, .border-rose-500\/20) {
-  border-color: rgba(220, 53, 69, 0.34) !important;
-}
-
-.gov-app button.bg-gradient-to-r,
-.gov-app .bg-gradient-to-r:is(.from-cyan-500, .from-blue-500) {
-  background-image: none !important;
-  background-color: var(--gov-blue) !important;
-  color: #ffffff !important;
-  box-shadow: 0 6px 14px rgba(30, 90, 168, 0.18) !important;
-}
-
-.gov-app .bg-gradient-to-r.from-amber-500 {
-  background-image: none !important;
-  background-color: var(--gov-saffron) !important;
-  color: #111827 !important;
-}
-
-.gov-app .bg-gradient-to-r.from-emerald-500 {
-  background-image: none !important;
-  background-color: var(--gov-green) !important;
-  color: #ffffff !important;
-}
-
-.gov-app table thead {
-  background: var(--gov-soft-blue) !important;
-  color: var(--gov-navy) !important;
-}
-
-.gov-app table tbody tr:hover {
-  background: var(--gov-subtle) !important;
-}
-
-.gov-app input,
-.gov-app select {
-  background: var(--gov-surface) !important;
-  color: var(--gov-text) !important;
-  border-color: var(--gov-border) !important;
-}
-
-.gov-app input:focus,
-.gov-app select:focus,
-.gov-app button:focus-visible {
-  outline: 2px solid rgba(30, 90, 168, 0.25) !important;
-  outline-offset: 2px;
-}
-
-.gov-app .shadow-2xl,
-.gov-app .shadow-xl,
-.gov-app .shadow-lg,
-.gov-app .shadow-md {
-  box-shadow: 0 8px 18px rgba(18, 59, 93, 0.08) !important;
-  box-shadow: 0 8px 18px var(--gov-shadow) !important;
-}
-
-.gov-app .backdrop-blur,
-.gov-app .backdrop-blur-xl,
-.gov-app .backdrop-blur-md,
-.gov-app .backdrop-blur-sm {
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-}
-
-.gov-app aside :is(.text-white, .text-blue-50\/85, .text-blue-100\/80) {
-  color: #ffffff !important;
-}
-
-.gov-app aside.bg-\[\#123B5D\],
-.gov-app aside .bg-\[\#123B5D\] {
-  background-color: var(--gov-sidebar) !important;
-}
-
-.gov-app aside.border-\[\#0D2D48\],
-.gov-app aside .border-\[\#0D2D48\] {
-  border-color: var(--gov-sidebar-border) !important;
-}
-
-.gov-app aside .bg-\[\#1E5AA8\] {
-  background-color: var(--gov-blue) !important;
-  color: #ffffff !important;
-}
-
-.gov-app aside .bg-\[\#0D2D48\] {
-  background-color: var(--gov-sidebar-chip) !important;
-  color: var(--gov-sidebar-muted) !important;
-}
-
-.gov-app aside .bg-white\/8 {
-  background-color: rgba(255, 255, 255, 0.08) !important;
-}
-
-.gov-app header .bg-\[\#1E5AA8\],
-.gov-app header .bg-\[\#1E5AA8\] * {
-  color: #ffffff !important;
-}
-
-.gov-app button.bg-\[\#1E5AA8\],
-.gov-app button.bg-\[\#1E5AA8\] * {
-  color: #ffffff !important;
-}
-
-[data-theme="dark"] .gov-app .bg-\[\#F5F7FA\],
-[data-theme="dark"].gov-app .bg-\[\#F5F7FA\] {
-  background-color: var(--gov-bg) !important;
-}
-
-[data-theme="dark"] .gov-app .text-\[\#1F2937\],
-[data-theme="dark"].gov-app .text-\[\#1F2937\] {
-  color: var(--gov-text) !important;
+  background: var(--te-text-muted);
 }

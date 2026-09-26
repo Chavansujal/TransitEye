@@ -5,14 +5,25 @@ frontend/node_modules/
 env/
 venv/
 ENV/
+AI model/.venv/
+AI model/env/
+AI model/venv/
 
 # Build outputs
 dist/
 frontend/dist/
 build/
 
+# Model outputs & datasets
+AI model/datasets/
+AI model/output/
+AI model/outputs/
+AI model/test_videos/*.mp4
+
 # Python cache & bytecode
 __pycache__/
+*/__pycache__/
+*/*/__pycache__/
 *.py[cod]
 *$py.class
 *.so
@@ -36,6 +47,6 @@ yarn-debug.log*
 .DS_Store
 Thumbs.db
 
-# Raw media uploads in root and frontend root (public/videos is tracked)
+# Raw media uploads in root and frontend root
 /*.mp4
 frontend/*.mp4

@@ -496,20 +496,20 @@ class DataStore:
                     "longitude": event.get("longitude", 73.8567)
                 })
         
-        # If it's a rash driving event, create an Incident entry
-        if "Rash Driving" in event.get("type", "") or event.get("registrationNumber"):
+        # If it's a rash driving/ANPR event or has a registration number, create an Incident entry
+        if "Rash Driving" in event.get("type", "") or "ANPR" in event.get("type", "") or event.get("registrationNumber"):
             inc = {
                 "id": f"INC-{len(self.incidents) + 704}",
                 "type": event.get("type", "Rash Driving & ANPR Tracking"),
                 "vehicle": event.get("vehicleType", "Offending Vehicle"),
                 "registrationNumber": event.get("registrationNumber", "MH12 AB 1234"),
-                "anprConfidence": event.get("anprConfidence", 0.91),
+                "anprConfidence": event.get("anprConfidence", event.get("confidence", 0.95)),
                 "busId": event.get("busId", "BUS-104"),
                 "location": event.get("locationName", "Karve Road Flyover"),
                 "latitude": event.get("latitude", 18.5082),
                 "longitude": event.get("longitude", 73.8361),
                 "timestamp": event.get("timestamp", time.strftime("%Y-%m-%dT%H:%M:%SZ")),
-                "severity": "CRITICAL",
+                "severity": event.get("severity", "CRITICAL"),
                 "status": "NEW",
                 "evidenceImage": "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?w=600&auto=format&fit=crop&q=80",
                 "details": event.get("details", "AI edge camera flagged dangerous driving behavior & extracted registration plate.")

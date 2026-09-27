@@ -56,11 +56,19 @@ export default function Overview({ buses = [], events = [], roadIssues = [], inc
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3 pt-1 sm:pt-2">
             <button
-              onClick={() => onNavigate("live")}
+              onClick={() => onNavigate("ai_model")}
               className="te-button-primary text-xs sm:text-sm font-semibold justify-center sm:justify-start"
             >
-              <span>Explore Live Edge Camera Feed</span>
+              <Cpu className="w-4 h-4 text-black shrink-0" />
+              <span>Test AI Models Live</span>
               <ArrowUpRight className="w-4 h-4 stroke-[2.5]" />
+            </button>
+
+            <button
+              onClick={() => onNavigate("live")}
+              className="te-button-secondary text-xs sm:text-sm font-semibold justify-center sm:justify-start"
+            >
+              <span>Explore Live Edge Camera Feed</span>
             </button>
 
             <button
@@ -68,7 +76,7 @@ export default function Overview({ buses = [], events = [], roadIssues = [], inc
               className="te-button-secondary text-xs sm:text-sm font-semibold justify-center sm:justify-start"
             >
               <MapPin className="w-4 h-4 text-[var(--te-lime)]" />
-              <span>Pune GIS Spatial Map</span>
+              <span>Pune GIS Map</span>
             </button>
           </div>
 

@@ -76,6 +76,21 @@ export async function fetchEdgeStats() {
   }
 }
 
+export async function createEvent(payload) {
+  try {
+    const res = await fetch(`${API_BASE}/api/events`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) throw new Error("Create event failed");
+    return await res.json();
+  } catch (err) {
+    console.error("Create event error:", err);
+    return null;
+  }
+}
+
 export async function triggerDemoScenario(scenario, busId = "BUS-104", cameraAngle = "front") {
   try {
     const res = await fetch(`${API_BASE}/api/demo/trigger`, {

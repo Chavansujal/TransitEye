@@ -11,7 +11,8 @@ import {
   AlertTriangle,
   ShieldAlert,
   BarChart3,
-  Activity
+  Activity,
+  Cpu
 } from "lucide-react";
 
 export default function EditorialNavbar({
@@ -37,6 +38,7 @@ export default function EditorialNavbar({
 
   const navItems = [
     { id: "overview", label: "Overview", icon: Activity },
+    { id: "ai_model", label: "AI Model Hub", icon: Cpu },
     { id: "live", label: "Live Vision", icon: Eye },
     { id: "gis", label: "GIS Map", icon: MapPin },
     { id: "incidents", label: "ANPR Triage", icon: ShieldAlert },

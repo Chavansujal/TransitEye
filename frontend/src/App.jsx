@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import EditorialNavbar from "./components/EditorialNavbar";
 import Overview from "./pages/Overview";
 import LiveMonitoring from "./pages/LiveMonitoring";
+import AiModelPlayground from "./pages/AiModelPlayground";
 import GisMap from "./pages/GisMap";
 import FleetManagement from "./pages/FleetManagement";
 import RoadConditionIntelligence from "./pages/RoadConditionIntelligence";
@@ -230,6 +231,12 @@ export default function App() {
             incidents={incidents}
             onNavigate={(tab) => setActiveTab(tab)}
             theme={theme}
+          />
+        )}
+
+        {activeTab === "ai_model" && (
+          <AiModelPlayground 
+            onEventTriggered={handleEventTriggered}
           />
         )}
 

@@ -103,6 +103,76 @@ python ai/ai_service.py --plate MH02AR3934 --backend-url http://<IP>:8000/api/ev
 
 ---
 
+## 🧪 Model Evaluation Guide for Evaluators & Reviewers
+
+Evaluators and reviewers can evaluate the trained AI models (**RF-DETR** Potholes, Accidents, Waterlogging, ANPR) using **4 flexible evaluation methods**:
+
+### Option 1: Interactive AI Model Hub in Prototype Web UI (Zero Terminal Setup)
+Evaluators accessing the live Web Prototype URL (or `http://localhost:5173`) can test models **directly inside the React UI**:
+1. Click **"AI Model Hub"** or **"Test AI Models Live"** on the top navigation header.
+2. Select between 5 fine-tuned **RF-DETR** models: **Potholes**, **ANPR License Plates**, **Accidents**, **Waterlogging**, or **COCO Baseline**.
+3. Click 1-click pre-loaded test assets or drag-and-drop any custom image/video file.
+4. Adjust confidence threshold sliders live and click **"Post Detection to Live Dashboard"** to dispatch real-time events to the GIS Map and ANPR Triage!
+
+*Alternatively, launch the standalone lightweight testing server:*
+```powershell
+cd "AI model"
+python app.py --port 8080
+```
+Open **`http://127.0.0.1:8080`** in your browser.
+
+---
+
+### Option 2: Standalone CLI Inference Scripts
+Navigate into the `AI model` directory first, then run direct inference scripts:
+
+```powershell
+cd "AI model"
+```
+
+* **Pothole Detection on Image**:
+  ```powershell
+  python ai/inference/test_pothole.py --image test_custom/pothole.png --threshold 0.65
+  ```
+* **ANPR License Plate Recognition & OCR**:
+  ```powershell
+  python ai/inference/anpr.py --image test_images/bus.jpeg
+  python ai/inference/video_anpr.py --video test_videos/anpr_sample.mp4
+  ```
+* **Accident & Motion Tracking (IoU Tracker)**:
+  ```powershell
+  python ai/inference/video_incident.py --video test_videos/traffic.mp4
+  ```
+* **Waterlogging / Flood Hazard Detection**:
+  ```powershell
+  python ai/inference/video_waterlogging.py --video test_videos/flood.mp4
+  ```
+
+---
+
+### Option 3: End-to-End Edge Platform Evaluation
+Test the Edge AI service broadcasting live events to the React Command Center Dashboard:
+1. Run `.\run_all.ps1` from root to launch FastAPI backend (`:8000`) and React Dashboard (`:5173`).
+2. Trigger an immediate ANPR license plate event:
+   ```powershell
+   python ai/ai_service.py --plate MH02AR3934 --bus BUS-104 --vehicle "White SUV"
+   ```
+3. Run continuous edge sensing daemon (simulates live bus camera feed every 5s):
+   ```powershell
+   python ai/ai_service.py --continuous --interval 5
+   ```
+   *Watch live glowing alert toasts, GIS map markers, and incident triage updates appear live on `http://localhost:5173/`.*
+
+---
+
+### Option 4: Custom Dataset Training & Validation
+Evaluate training capability on custom datasets (COCO / Roboflow format):
+```powershell
+python ai/train.py --dataset-dir datasets/transiteye --output-dir output/pothole_rfdetr_s --epochs 50 --batch-size 4
+```
+
+---
+
 ## 🔗 AI Model -> Backend -> Frontend Integration Flow
 
 ```

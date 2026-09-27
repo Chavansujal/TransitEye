@@ -222,6 +222,20 @@ python ai/inference/detect.py
 
 ---
 
+## 🧪 Comprehensive Evaluator Guide
+
+Evaluators & judges can test all model checkpoints using **4 evaluation workflows**:
+
+1. **Interactive Testing Web UI**: Run `python app.py --port 8080` and navigate to `http://127.0.0.1:8080`. Toggle between **Potholes**, **Accidents**, **Waterlogging**, **ANPR**, and **COCO** models live.
+2. **Pothole Detection**: `python ai/inference/test_pothole.py --image test_custom/pothole.png`
+3. **ANPR License Plate Recognition**: `python ai/inference/anpr.py --image test_images/bus.jpeg`
+4. **Accident & Motion Tracking**: `python ai/inference/video_incident.py --video test_videos/traffic.mp4`
+5. **Waterlogging Hazard Detection**: `python ai/inference/video_waterlogging.py --video test_videos/flood.mp4`
+6. **Edge Daemon Live Dispatch**: Run `python ../ai/ai_service.py --plate MH02AR3934` to broadcast live AI events to the main React Command Center.
+
+
+---
+
 ## Troubleshooting & FAQs
 
 - **`ModuleNotFoundError: No module named 'rfdetr'`**:

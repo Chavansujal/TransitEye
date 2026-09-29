@@ -330,10 +330,11 @@ export async function fetchSamples() {
   } catch (err) {
     return {
       images: [
-        { name: "Pothole Defect - Karve Road", path: "/snapshots/test_forensic_snap.jpg", model: "pothole" },
-        { name: "Truck Rollover & Collision", path: "/snapshots/test_truck_crash_snap.jpg", model: "incident" },
-        { name: "Monsoon Waterlogging Hazard", path: "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?w=600&auto=format&fit=crop&q=80", model: "waterlogging" },
-        { name: "HSRP License Plate Lock", path: "/snapshots/plate_tn76ab7224.jpg", model: "anpr" }
+        { name: "Pothole Defect – Karve Road Corridor", path: "/snapshots/pothole_karve_road.jpg", model: "pothole" },
+        { name: "Highway Semi-Truck Jackknife Collision", path: "/snapshots/accident_highway_scene.jpg", model: "incident" },
+        { name: "Monsoon Street Waterlogging Hazard", path: "/snapshots/waterlogging_monsoon_street.jpg", model: "waterlogging" },
+        { name: "Vehicle Dashcam Plate Lock (MH 12 AB 7224)", path: "/snapshots/anpr_car_road.jpg", model: "anpr" },
+        { name: "Urban Transit Bus & Pedestrian Stream", path: "/snapshots/fleet_transit_coco.jpg", model: "coco" }
       ],
       videos: [
         { name: "Pothole Defect Road Stream", path: "/videos/pothole-road.mp4", model: "pothole" },
@@ -411,63 +412,131 @@ export function generateClientEdgeInference(modelName, threshold = 0.45, sampleP
   if (modelName === "incident") {
     detections = [
       {
+        id: 1,
         class_name: "accident_collision",
         confidence: 0.96,
-        box: [180, 140, 480, 420],
+        box: [400, 160, 890, 280],
+        box_pct: { x: 42, y: 29, w: 51, h: 26 },
         speed_kmh: 84.0,
-        label: "Offending Vehicle (Collision Impact Risk)"
+        label: "Jackknife Semi-Trailer Collision Impact"
       },
       {
-        class_name: "rash_driving",
-        confidence: 0.93,
-        box: [80, 220, 310, 460],
-        speed_kmh: 94.0,
-        label: "Erratic Multi-Lane Cut-In"
+        id: 2,
+        class_name: "hydrocarbon_slick",
+        confidence: 0.94,
+        box: [355, 65, 510, 175],
+        box_pct: { x: 37, y: 12, w: 16, h: 20 },
+        speed_kmh: 0.0,
+        label: "Hydrocarbon Diesel Slick Hazard"
       }
     ];
   } else if (modelName === "anpr") {
     detections = [
       {
-        class_name: "license_plate",
-        confidence: 0.96,
-        box: [240, 320, 440, 380],
-        plate_text: "TN 76 AB 7224",
-        label: "HSRP Plate: TN 76 AB 7224 (IND)"
+        id: 1,
+        class_name: "motor_vehicle",
+        confidence: 0.98,
+        box: [460, 245, 845, 545],
+        box_pct: { x: 36, y: 34, w: 30, h: 42 },
+        speed_kmh: 42.0,
+        label: "Target Vehicle (Frontal Velocity 42 km/h)"
       },
       {
-        class_name: "commercial_vehicle",
-        confidence: 0.94,
-        box: [150, 160, 520, 480],
-        plate_text: "AP 09 OF 1111",
-        label: "Offender Truck: AP 09 OF 1111"
+        id: 2,
+        class_name: "license_plate",
+        confidence: 0.986,
+        box: [582, 453, 716, 493],
+        box_pct: { x: 45.5, y: 63, w: 10.5, h: 5.5 },
+        plate_text: "MH 12 AB 7224",
+        label: "HSRP OCR: MH 12 AB 7224 (IND 98.6%)"
       }
     ];
   } else if (modelName === "waterlogging") {
     detections = [
       {
+        id: 1,
         class_name: "waterlogging_severe",
+        confidence: 0.96,
+        box: [0, 60, 210, 205],
+        box_pct: { x: 0, y: 11, w: 39, h: 27 },
+        depth_cm: 32.5,
+        label: "Submerged Auto-Rickshaw (>30cm Flood Depth)"
+      },
+      {
+        id: 2,
+        class_name: "waterlogging_commuter",
         confidence: 0.94,
-        box: [120, 280, 560, 470],
-        depth_cm: 14.5,
-        label: "Severe Submerged Transit Lane (>12cm Depth)"
+        box: [160, 130, 450, 265],
+        box_pct: { x: 30, y: 24, w: 54, h: 25 },
+        depth_cm: 18.0,
+        label: "Commuter Motorbike in Road Waterlogging"
+      },
+      {
+        id: 3,
+        class_name: "inundated_lane",
+        confidence: 0.95,
+        box: [10, 175, 530, 360],
+        box_pct: { x: 2, y: 32, w: 96, h: 35 },
+        depth_cm: 26.5,
+        label: "Critical Waterlogging Lane Inundation"
+      }
+    ];
+  } else if (modelName === "coco") {
+    detections = [
+      {
+        id: 1,
+        class_name: "bus",
+        confidence: 0.978,
+        box: [20, 144, 960, 482],
+        box_pct: { x: 2, y: 20, w: 94, h: 47 },
+        label: "Transit Bus (Fleet Unit #104)"
+      },
+      {
+        id: 2,
+        class_name: "person",
+        confidence: 0.942,
+        box: [60, 252, 250, 583],
+        box_pct: { x: 6, y: 35, w: 19, h: 46 },
+        label: "Pedestrian Crosswalk Stream"
+      },
+      {
+        id: 3,
+        class_name: "person",
+        confidence: 0.925,
+        box: [270, 259, 430, 561],
+        box_pct: { x: 27, y: 36, w: 16, h: 42 },
+        label: "Pedestrian Foot Traffic"
       }
     ];
   } else {
     // Pothole default
     detections = [
       {
+        id: 1,
         class_name: "severe_pothole",
-        confidence: 0.95,
-        box: [280, 290, 440, 410],
-        depth_cm: 7.8,
-        label: "Severe Surface Pothole (Depth 7.8cm)"
+        confidence: 0.96,
+        box: [230, 330, 665, 520],
+        box_pct: { x: 18, y: 46, w: 34, h: 26 },
+        depth_cm: 8.4,
+        label: "Severe Surface Pothole Crater (Depth 8.4cm)"
       },
       {
-        class_name: "road_crack",
-        confidence: 0.88,
-        box: [140, 340, 260, 430],
-        depth_cm: 3.2,
-        label: "Longitudinal Asphalt Fissure"
+        id: 2,
+        class_name: "subsurface_cavity",
+        confidence: 0.92,
+        box: [790, 288, 1070, 420],
+        box_pct: { x: 62, y: 40, w: 22, h: 18 },
+        depth_cm: 6.2,
+        label: "Subsurface Cavity Defect (Depth 6.2cm)"
+      },
+      {
+        id: 3,
+        class_name: "road_fissure",
+        confidence: 0.89,
+        box: [614, 223, 793, 310],
+        box_pct: { x: 48, y: 31, w: 14, h: 12 },
+        depth_cm: 4.1,
+        label: "Asphalt Fissure & Road Deterioration"
       }
     ];
   }

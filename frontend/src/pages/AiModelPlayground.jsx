@@ -309,7 +309,7 @@ export default function AiModelPlayground({ onEventTriggered }) {
   const [loadingStatus, setLoadingStatus] = useState(true);
 
   // Image Inference State
-  const [selectedSamplePath, setSelectedSamplePath] = useState("/snapshots/test_forensic_snap.jpg");
+  const [selectedSamplePath, setSelectedSamplePath] = useState("/snapshots/pothole_karve_road.jpg");
   const [uploadedImageFile, setUploadedImageFile] = useState(null);
   const [imagePreviewUrl, setImagePreviewUrl] = useState(null);
   const [detectionResult, setDetectionResult] = useState(null);
@@ -345,7 +345,7 @@ export default function AiModelPlayground({ onEventTriggered }) {
       latency: "12.8 ms",
       fps: "78 FPS",
       size: "121.5 MB",
-      samplePath: "/snapshots/test_forensic_snap.jpg",
+      samplePath: "/snapshots/pothole_karve_road.jpg",
       videoPath: "/videos/pothole-road.mp4",
     },
     {
@@ -360,7 +360,7 @@ export default function AiModelPlayground({ onEventTriggered }) {
       latency: "14.2 ms",
       fps: "70 FPS",
       size: "121.5 MB",
-      samplePath: "/snapshots/test_truck_crash_snap.jpg",
+      samplePath: "/snapshots/accident_highway_scene.jpg",
       videoPath: "/videos/incident-crash.mp4",
     },
     {
@@ -375,7 +375,7 @@ export default function AiModelPlayground({ onEventTriggered }) {
       latency: "13.1 ms",
       fps: "76 FPS",
       size: "121.5 MB",
-      samplePath: "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?w=600&auto=format&fit=crop&q=80",
+      samplePath: "/snapshots/waterlogging_monsoon_street.jpg",
       videoPath: "/videos/waterlogging-hazard.mp4",
     },
     {
@@ -390,7 +390,7 @@ export default function AiModelPlayground({ onEventTriggered }) {
       latency: "18.4 ms",
       fps: "64 FPS",
       size: "135.2 MB",
-      samplePath: "/snapshots/plate_tn76ab7224.jpg",
+      samplePath: "/snapshots/anpr_car_road.jpg",
       videoPath: "/videos/bus-cockpit-dashcam.mp4",
     },
     {
@@ -405,7 +405,7 @@ export default function AiModelPlayground({ onEventTriggered }) {
       latency: "11.9 ms",
       fps: "84 FPS",
       size: "116 MB",
-      samplePath: "/snapshots/test_forensic_snap.jpg",
+      samplePath: "/snapshots/fleet_transit_coco.jpg",
       videoPath: "/videos/road-traffic.mp4",
     }
   ];
@@ -700,10 +700,12 @@ export default function AiModelPlayground({ onEventTriggered }) {
                       }}
                       className="w-full p-2 bg-[var(--te-panel)] border border-[var(--te-border)] rounded text-xs text-[var(--te-text)] font-mono focus:outline-none focus:border-[var(--te-lime)]"
                     >
-                      <option value="/snapshots/test_forensic_snap.jpg">Pothole Defect - Karve Road Corridor</option>
-                      <option value="/snapshots/test_truck_crash_snap.jpg">Truck Jackknife Collision Scene</option>
-                      <option value="/snapshots/plate_tn76ab7224.jpg">High-Security Plate (TN 76 AB 7224)</option>
-                      <option value="https://images.unsplash.com/photo-1549399542-7e3f8b79c341?w=600&auto=format&fit=crop&q=80">Monsoon Waterlogging Hazard</option>
+                      <option value="/snapshots/pothole_karve_road.jpg">Pothole Defect – Karve Road Corridor</option>
+                      <option value="/snapshots/accident_highway_scene.jpg">Highway Semi-Truck Jackknife Collision</option>
+                      <option value="/snapshots/waterlogging_monsoon_street.jpg">Monsoon Street Waterlogging Hazard</option>
+                      <option value="/snapshots/anpr_car_road.jpg">Vehicle Dashcam Plate Lock (MH 12 AB 7224)</option>
+                      <option value="/snapshots/fleet_transit_coco.jpg">Urban Transit Bus & Pedestrian Stream</option>
+                      <option value="/snapshots/plate_tn76ab7224.jpg">High-Security Plate (TN 76 AB 7224 Crop)</option>
                     </select>
                   </div>
                 )}
@@ -950,11 +952,62 @@ export default function AiModelPlayground({ onEventTriggered }) {
                       <img
                         src={imagePreviewUrl || resolveAssetUrl(selectedSamplePath)}
                         alt="Preview"
-                        className="w-full h-full object-contain opacity-90"
+                        className="w-full h-full object-contain opacity-95"
                       />
-                      <div className="absolute bottom-3 left-3 bg-black/80 px-2.5 py-1 rounded text-[10px] font-mono-code text-white/80 border border-white/20">
-                        Ready: Click "Run Real RF-DETR Inference"
-                      </div>
+                      {/* Dynamic Bounding Box Overlay for Edge/Vercel Client Mode */}
+                      {detectionResult && detectionResult.detections && detectionResult.detections.map((det, idx) => {
+                        const box = det.box_pct || { x: 25, y: 25, w: 50, h: 50 };
+                        const colorBorder = selectedModel === "incident" ? "border-rose-500 shadow-[0_0_15px_rgba(244,63,94,0.6)]"
+                          : selectedModel === "waterlogging" ? "border-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.6)]"
+                          : selectedModel === "anpr" ? "border-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.6)]"
+                          : selectedModel === "coco" ? "border-blue-400 shadow-[0_0_15px_rgba(59,130,246,0.6)]"
+                          : "border-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.6)]";
+                        const bgPill = selectedModel === "incident" ? "bg-rose-600"
+                          : selectedModel === "waterlogging" ? "bg-cyan-600"
+                          : selectedModel === "anpr" ? "bg-amber-600"
+                          : selectedModel === "coco" ? "bg-blue-600"
+                          : "bg-emerald-600";
+                        return (
+                          <div
+                            key={idx}
+                            className={`absolute border-2 rounded transition-all duration-150 pointer-events-auto z-10 ${colorBorder}`}
+                            style={{
+                              left: `${box.x}%`,
+                              top: `${box.y}%`,
+                              width: `${box.w}%`,
+                              height: `${box.h}%`
+                            }}
+                          >
+                            <div className="absolute -top-1 -left-1 w-2.5 h-2.5 border-t-2 border-l-2 border-white pointer-events-none" />
+                            <div className="absolute -top-1 -right-1 w-2.5 h-2.5 border-t-2 border-r-2 border-white pointer-events-none" />
+                            <div className="absolute -bottom-1 -left-1 w-2.5 h-2.5 border-b-2 border-l-2 border-white pointer-events-none" />
+                            <div className="absolute -bottom-1 -right-1 w-2.5 h-2.5 border-b-2 border-r-2 border-white pointer-events-none" />
+
+                            <div className={`absolute -top-6 left-0 ${bgPill} text-white font-mono-code font-bold text-[9px] px-1.5 py-0.5 rounded shadow flex items-center gap-1.5 whitespace-nowrap`}>
+                              <span>{det.label || det.class_name}</span>
+                              <span className="opacity-90">({(det.confidence * 100).toFixed(0)}%)</span>
+                            </div>
+
+                            {det.plate_text && (
+                              <div className="absolute -bottom-7 left-0 bg-black/95 border border-amber-400/80 rounded px-1.5 py-0.5 flex items-center gap-1 font-mono-code shadow-md whitespace-nowrap">
+                                <span className="bg-blue-600 text-white font-extrabold text-[8px] px-1 py-0.5 rounded leading-none">IND</span>
+                                <span className="text-amber-300 font-bold text-xs tracking-wider">{det.plate_text}</span>
+                              </div>
+                            )}
+
+                            {!det.plate_text && (det.depth_cm || det.speed_kmh) && (
+                              <div className="absolute -bottom-5 left-0 bg-black/90 text-[8px] font-mono-code px-1.5 py-0.5 rounded border border-white/20 whitespace-nowrap shadow text-zinc-300">
+                                {det.depth_cm ? `Depth: ${det.depth_cm} cm` : `Speed: ${det.speed_kmh} km/h`}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                      {!detectionResult && (
+                        <div className="absolute bottom-3 left-3 bg-black/80 px-2.5 py-1 rounded text-[10px] font-mono-code text-white/80 border border-white/20">
+                          Ready: Click "Run Real RF-DETR Inference"
+                        </div>
+                      )}
                     </div>
                   ) : (
                     <div className="flex flex-col items-center justify-center text-center p-6 space-y-2">

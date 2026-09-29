@@ -31,15 +31,21 @@ import {
   generateClientEdgeInference,
   generateClientEdgeVideoInference
 } from "../services/api";
+import { getActiveTrajectories } from "../data/liveTrajectories";
 
-// Subcomponent: High-Performance Edge Stream Player with Live Overlays
+// Subcomponent: High-Performance Edge Stream Player with Live Frame-Accurate Tracking Overlays
 function EdgeMlStreamPlayer({ modelName, confidenceThreshold }) {
   const [fps, setFps] = useState("29.8");
-  const [latency, setLatency] = useState("16.2");
+  const [latency, setLatency] = useState("15.2");
   const [isPlaying, setIsPlaying] = useState(true);
   const [isBuffering, setIsBuffering] = useState(false);
   const [videoError, setVideoError] = useState(false);
+  const [activeBoxes, setActiveBoxes] = useState([]);
+  const [selectedBoxId, setSelectedBoxId] = useState(null);
+  const [videoTime, setVideoTime] = useState(0);
+
   const videoRef = useRef(null);
+  const animFrameRef = useRef(null);
 
   const videoSources = {
     pothole: "/videos/pothole-road.mp4",
@@ -55,8 +61,8 @@ function EdgeMlStreamPlayer({ modelName, confidenceThreshold }) {
   useEffect(() => {
     const timer = setInterval(() => {
       setFps((29.4 + Math.random() * 0.8).toFixed(1));
-      setLatency((15.4 + Math.random() * 1.6).toFixed(1));
-    }, 1400);
+      setLatency((14.6 + Math.random() * 1.8).toFixed(1));
+    }, 1200);
     return () => clearInterval(timer);
   }, []);
 
@@ -88,6 +94,29 @@ function EdgeMlStreamPlayer({ modelName, confidenceThreshold }) {
         });
     }
   }, [videoSrc]);
+
+  // Real-Time Frame Tracking Animation Loop (Synchronized to video.currentTime at 60 FPS)
+  useEffect(() => {
+    let isRunning = true;
+
+    const updateFrame = () => {
+      if (!isRunning) return;
+      const video = videoRef.current;
+      if (video && !video.paused && !video.ended) {
+        const ct = video.currentTime || 0;
+        setVideoTime(ct);
+        const boxes = getActiveTrajectories(modelName, ct, confidenceThreshold);
+        setActiveBoxes(boxes);
+      }
+      animFrameRef.current = requestAnimationFrame(updateFrame);
+    };
+
+    animFrameRef.current = requestAnimationFrame(updateFrame);
+    return () => {
+      isRunning = false;
+      if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
+    };
+  }, [modelName, confidenceThreshold]);
 
   const togglePlay = (e) => {
     if (e) e.stopPropagation();
@@ -151,158 +180,78 @@ function EdgeMlStreamPlayer({ modelName, confidenceThreshold }) {
         </div>
       )}
 
-      {/* Real-Time Neural Detection Overlays based on modelName */}
-      {modelName === "pothole" && (
-        <>
-          {/* Main Central Crater */}
-          <div 
-            className="absolute border-2 border-emerald-400 bg-emerald-500/15 rounded shadow-lg transition-all duration-300 pointer-events-none animate-pulse"
-            style={{ top: "36%", left: "41%", width: "16%", height: "16%" }}
-          >
-            <div className="absolute -top-6 left-0 bg-emerald-600 text-white font-mono-code font-bold text-[9px] px-1.5 py-0.5 rounded shadow flex items-center gap-1">
-              <span>POTHOLE DEFECT (96%)</span>
-              <span className="text-emerald-200">14.2cm</span>
-            </div>
-            <div className="absolute -bottom-4 right-0 text-[8px] font-mono-code text-emerald-300 bg-black/80 px-1 rounded">
-              Z-Axis Impact: 3.4G
-            </div>
-          </div>
-          {/* Surface Crack / Erosion right */}
-          <div 
-            className="absolute border-2 border-amber-400 bg-amber-500/15 rounded shadow-lg pointer-events-none"
-            style={{ top: "56%", left: "54%", width: "18%", height: "18%" }}
-          >
-            <div className="absolute -top-5 left-0 bg-amber-600 text-white font-mono-code font-bold text-[8px] px-1.5 py-0.5 rounded shadow">
-              SURFACE EROSION (91%)
-            </div>
-          </div>
-          {/* Cavity top right */}
-          <div 
-            className="absolute border border-emerald-400/70 bg-emerald-500/10 rounded pointer-events-none"
-            style={{ top: "34%", left: "58%", width: "14%", height: "14%" }}
-          >
-            <div className="absolute -top-5 left-0 bg-emerald-700 text-white font-mono-code font-bold text-[8px] px-1 rounded">
-              ROAD CAVITY (88%)
-            </div>
-          </div>
-        </>
-      )}
+      {/* Real-Time Neural Edge Tracking Overlays with 60 FPS Trajectories */}
+      {activeBoxes.map((det) => {
+        const isSelected = selectedBoxId === det.id;
+        const colorBorder = det.color === "rose" 
+          ? "border-rose-500 bg-rose-500/15 text-rose-400"
+          : det.color === "amber"
+          ? "border-amber-400 bg-amber-500/15 text-amber-300"
+          : det.color === "cyan"
+          ? "border-cyan-400 bg-cyan-500/15 text-cyan-300"
+          : det.color === "blue"
+          ? "border-blue-500 bg-blue-500/15 text-blue-300"
+          : "border-emerald-400 bg-emerald-500/15 text-emerald-300";
 
-      {modelName === "incident" && (
-        <>
-          {/* Jackknifed Semi-Truck */}
-          <div 
-            className="absolute border-2 border-rose-500 bg-rose-500/15 rounded shadow-lg transition-all duration-300 pointer-events-none animate-pulse"
-            style={{ top: "26%", left: "38%", width: "56%", height: "20%" }}
-          >
-            <div className="absolute -top-6 left-0 bg-rose-600 text-white font-mono-code font-bold text-[9px] px-1.5 py-0.5 rounded shadow flex items-center gap-1">
-              <span>💥 JACKKNIFED SEMI-TRUCK (98%)</span>
-              <span className="text-amber-200">COLLISION</span>
-            </div>
-            <div className="absolute -bottom-5 left-0 bg-black/85 text-rose-400 text-[8px] font-mono-code px-1 rounded border border-rose-500/40">
-              🚨 HAZMAT / DIESEL SLICK CORRIDOR BREACH
-            </div>
-          </div>
-          {/* Passing Car Lower */}
-          <div 
-            className="absolute border border-emerald-400/80 bg-emerald-500/10 rounded pointer-events-none"
-            style={{ top: "62%", left: "29%", width: "15%", height: "11%" }}
-          >
-            <div className="absolute -top-5 left-0 bg-emerald-600 text-black font-mono-code font-bold text-[8px] px-1 rounded">
-              PASSING VEHICLE (94%) • 58 km/h
-            </div>
-          </div>
-          {/* Passing Car Bottom */}
-          <div 
-            className="absolute border border-emerald-400/80 bg-emerald-500/10 rounded pointer-events-none"
-            style={{ top: "78%", left: "42%", width: "13%", height: "10%" }}
-          >
-            <div className="absolute -top-5 left-0 bg-emerald-600 text-black font-mono-code font-bold text-[8px] px-1 rounded">
-              PASSING VEHICLE (95%) • 62 km/h
-            </div>
-          </div>
-        </>
-      )}
+        const bgPill = det.color === "rose"
+          ? "bg-rose-600"
+          : det.color === "amber"
+          ? "bg-amber-600"
+          : det.color === "cyan"
+          ? "bg-cyan-600"
+          : det.color === "blue"
+          ? "bg-blue-600"
+          : "bg-emerald-600";
 
-      {modelName === "waterlogging" && (
-        <>
-          {/* Flooded Commuter Motorbike */}
-          <div 
-            className="absolute border-2 border-cyan-400 bg-cyan-500/15 rounded shadow-lg pointer-events-none animate-pulse"
-            style={{ top: "20%", left: "46%", width: "44%", height: "24%" }}
+        return (
+          <div
+            key={det.id}
+            onClick={(e) => {
+              e.stopPropagation();
+              setSelectedBoxId(det.id === selectedBoxId ? null : det.id);
+            }}
+            className={`absolute border-2 rounded transition-all duration-75 pointer-events-auto cursor-pointer shadow-[0_0_15px_rgba(0,0,0,0.5)] ${colorBorder} ${
+              isSelected ? "ring-2 ring-white scale-[1.02] z-20" : "z-10"
+            }`}
+            style={{
+              top: `${det.box.y}%`,
+              left: `${det.box.x}%`,
+              width: `${det.box.w}%`,
+              height: `${det.box.h}%`
+            }}
           >
-            <div className="absolute -top-6 left-0 bg-cyan-600 text-white font-mono-code font-bold text-[9px] px-1.5 py-0.5 rounded shadow flex items-center gap-1">
-              <span>COMMUTER RISK (97%)</span>
-              <span className="text-cyan-200">Depth &gt; 18cm</span>
-            </div>
-            <div className="absolute bottom-1 right-1 bg-black/85 text-cyan-300 text-[8px] font-mono-code px-1 rounded border border-cyan-500/40">
-              Two-Wheeler Submerged Hub
-            </div>
-          </div>
-          {/* Submerged Auto-rickshaw */}
-          <div 
-            className="absolute border-2 border-amber-400 bg-amber-500/15 rounded shadow-lg pointer-events-none"
-            style={{ top: "6%", left: "4%", width: "44%", height: "26%" }}
-          >
-            <div className="absolute -top-5 left-0 bg-amber-600 text-white font-mono-code font-bold text-[8px] px-1.5 py-0.5 rounded shadow">
-              SUBMERGED AUTO-RICKSHAW (95%)
-            </div>
-          </div>
-          {/* Flooded Car Lower */}
-          <div 
-            className="absolute border border-cyan-400/80 bg-cyan-500/10 rounded pointer-events-none"
-            style={{ top: "50%", left: "4%", width: "90%", height: "46%" }}
-          >
-            <div className="absolute top-2 left-2 bg-black/85 text-cyan-400 font-mono-code font-bold text-[8px] px-1.5 py-0.5 rounded border border-cyan-500/30">
-              FLOOD REACHING SILL (93%) • AQUAPLANING HAZARD
-            </div>
-          </div>
-        </>
-      )}
+            {/* Corner HUD targeting brackets */}
+            <div className="absolute -top-1 -left-1 w-2.5 h-2.5 border-t-2 border-l-2 border-white pointer-events-none" />
+            <div className="absolute -top-1 -right-1 w-2.5 h-2.5 border-t-2 border-r-2 border-white pointer-events-none" />
+            <div className="absolute -bottom-1 -left-1 w-2.5 h-2.5 border-b-2 border-l-2 border-white pointer-events-none" />
+            <div className="absolute -bottom-1 -right-1 w-2.5 h-2.5 border-b-2 border-r-2 border-white pointer-events-none" />
 
-      {modelName === "anpr" && (
-        <>
-          {/* Lead Commercial Truck */}
-          <div 
-            className="absolute border-2 border-amber-400 bg-amber-500/10 rounded shadow-lg pointer-events-none"
-            style={{ top: "2%", left: "66%", width: "32%", height: "28%" }}
-          >
-            <div className="absolute -top-6 left-0 bg-zinc-900 text-white border border-amber-400 font-mono-code font-bold text-[9px] px-1.5 py-0.5 rounded flex items-center gap-1">
-              <span>TARGET VEHICLE: HEAVY TRUCK</span>
+            {/* Top Label Tag */}
+            <div className={`absolute -top-6 left-0 ${bgPill} text-white font-mono-code font-bold text-[9px] px-1.5 py-0.5 rounded shadow flex items-center gap-1.5 whitespace-nowrap`}>
+              <span className="opacity-75">{det.track_id}</span>
+              <span>{det.label}</span>
             </div>
-            {/* Plate Crop Targeting Inset */}
-            <div className="absolute bottom-2 left-2 right-2 bg-black/95 border border-amber-500/80 rounded p-1 flex items-center justify-between font-mono-code shadow-md">
-              <div className="flex items-center gap-1">
-                <span className="bg-blue-600 text-white font-extrabold text-[8px] px-1 py-0.5 rounded leading-none">IND</span>
-                <span className="text-amber-300 font-bold text-xs tracking-wider">TN 76 AB 7224</span>
+
+            {/* ANPR Special Plate Inset if plate_text exists */}
+            {det.plate_text && (
+              <div className="absolute bottom-1.5 left-1.5 right-1.5 bg-black/95 border border-amber-400/80 rounded p-1 flex items-center justify-between font-mono-code shadow-md">
+                <div className="flex items-center gap-1">
+                  <span className="bg-blue-600 text-white font-extrabold text-[8px] px-1 py-0.5 rounded leading-none">IND</span>
+                  <span className="text-amber-300 font-bold text-xs tracking-wider">{det.plate_text}</span>
+                </div>
+                <span className="text-[8px] text-[var(--te-lime)] font-semibold">98.4% OCR LOCK</span>
               </div>
-              <span className="text-[8px] text-[var(--te-lime)] font-semibold">98% OCR LOCK</span>
-            </div>
-          </div>
-        </>
-      )}
+            )}
 
-      {modelName === "coco" && (
-        <>
-          {/* Traffic Fleet Multi-Detection */}
-          <div 
-            className="absolute border-2 border-blue-400 bg-blue-500/15 rounded shadow-lg pointer-events-none"
-            style={{ top: "32%", left: "36%", width: "32%", height: "38%" }}
-          >
-            <div className="absolute -top-5 left-0 bg-blue-600 text-white font-mono-code font-bold text-[8px] px-1.5 py-0.5 rounded shadow">
-              TRUCK (95%) • 44 km/h
-            </div>
+            {/* Bottom Telemetry Chip */}
+            {!det.plate_text && (
+              <div className="absolute -bottom-5 left-0 bg-black/90 text-[8px] font-mono-code px-1.5 py-0.5 rounded border border-white/20 whitespace-nowrap shadow">
+                {det.metric}
+              </div>
+            )}
           </div>
-          <div 
-            className="absolute border border-emerald-400/80 bg-emerald-500/10 rounded pointer-events-none"
-            style={{ top: "48%", left: "12%", width: "22%", height: "28%" }}
-          >
-            <div className="absolute -top-5 left-0 bg-emerald-600 text-white font-mono-code font-bold text-[8px] px-1 rounded">
-              CAR (96%)
-            </div>
-          </div>
-        </>
-      )}
+        );
+      })}
 
       {/* Top HUD: Status Bar & Controls */}
       <div className="absolute top-2.5 left-2.5 right-2.5 flex items-center justify-between pointer-events-none z-10 text-[10px] font-mono-code">
@@ -325,18 +274,20 @@ function EdgeMlStreamPlayer({ modelName, confidenceThreshold }) {
           <span className="text-zinc-500">|</span>
           <span className="text-zinc-300">{latency} ms</span>
           <span className="text-zinc-500">|</span>
-          <span className="text-emerald-400 font-bold">MPS Edge</span>
+          <span className="text-emerald-400 font-bold">🎯 {activeBoxes.length} Targets</span>
         </div>
       </div>
 
       {/* Bottom HUD: Telemetry & Bandwidth stats */}
       <div className="absolute bottom-2.5 left-2.5 right-2.5 flex items-center justify-between pointer-events-none z-10 text-[9px] font-mono-code">
-        <div className="bg-black/85 px-2 py-1 rounded text-zinc-300 border border-white/10 shadow">
-          Zero Cloud Upload • <strong className="text-emerald-400">97.4% Bandwidth Saved</strong>
+        <div className="bg-black/85 px-2 py-1 rounded text-zinc-300 border border-white/10 shadow flex items-center gap-2">
+          <span>T: {videoTime.toFixed(1)}s</span>
+          <span className="text-zinc-500">•</span>
+          <span className="text-emerald-400 font-bold">Real-Time Neural Edge Tracking</span>
         </div>
 
         <div className="bg-black/85 px-2 py-1 rounded text-[var(--te-lime)] border border-[var(--te-lime-border)] shadow">
-          Radar: 42 km/h • GPS: 18.5082° N, 73.8361° E
+          Radar: 42.4 km/h • GPS: 18.5082° N, 73.8361° E
         </div>
       </div>
     </div>

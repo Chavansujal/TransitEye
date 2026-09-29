@@ -117,9 +117,9 @@ export default function IncidentCenter({ incidents = [], onIncidentUpdated }) {
                       playsInline
                       className="w-full h-full object-cover"
                     >
+                      <source src="/videos/incident-crash.mp4" type="video/mp4" />
                       <source src="/videos/bus-cockpit-dashcam.mp4" type="video/mp4" />
-                      <source src="/videos/firefly-360-road.mp4" type="video/mp4" />
-                      <source src="/videos/gemini-pothole-bus.mp4" type="video/mp4" />
+                      <source src="/videos/pothole-road.mp4" type="video/mp4" />
                     </video>
                   ) : (
                     <img 

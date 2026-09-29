@@ -336,9 +336,11 @@ export async function fetchSamples() {
         { name: "HSRP License Plate Lock", path: "/snapshots/plate_tn76ab7224.jpg", model: "anpr" }
       ],
       videos: [
-        { name: "Dashcam Road Stream", path: "/videos/bus-cockpit-dashcam.mp4", model: "anpr" },
-        { name: "360° Multi-Lane Highway", path: "/videos/firefly-360-road.mp4", model: "incident" },
-        { name: "Transit Bus Pothole Inspection", path: "/videos/gemini-pothole-bus.mp4", model: "pothole" }
+        { name: "Pothole Defect Road Stream", path: "/videos/pothole-road.mp4", model: "pothole" },
+        { name: "Highway Jackknife Collision", path: "/videos/incident-crash.mp4", model: "incident" },
+        { name: "Monsoon Waterlogging Hazard", path: "/videos/waterlogging-hazard.mp4", model: "waterlogging" },
+        { name: "Dashcam Road Stream (ANPR)", path: "/videos/bus-cockpit-dashcam.mp4", model: "anpr" },
+        { name: "Multi-Lane Highway Traffic", path: "/videos/road-traffic.mp4", model: "coco" }
       ]
     };
   }

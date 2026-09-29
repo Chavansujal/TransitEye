@@ -36,16 +36,20 @@ import {
 function EdgeMlStreamPlayer({ modelName, confidenceThreshold }) {
   const [fps, setFps] = useState("29.8");
   const [latency, setLatency] = useState("16.2");
+  const [isPlaying, setIsPlaying] = useState(true);
+  const [isBuffering, setIsBuffering] = useState(false);
+  const [videoError, setVideoError] = useState(false);
+  const videoRef = useRef(null);
 
   const videoSources = {
-    pothole: "/videos/gemini-pothole-bus.mp4",
-    incident: "/videos/firefly-360-road.mp4",
-    waterlogging: "/videos/gemini-pothole-bus.mp4",
+    pothole: "/videos/pothole-road.mp4",
+    incident: "/videos/incident-crash.mp4",
+    waterlogging: "/videos/waterlogging-hazard.mp4",
     anpr: "/videos/bus-cockpit-dashcam.mp4",
     coco: "/videos/road-traffic.mp4"
   };
 
-  const videoSrc = videoSources[modelName] || "/videos/bus-cockpit-dashcam.mp4";
+  const videoSrc = videoSources[modelName] || "/videos/pothole-road.mp4";
 
   // Dynamic telemetry flicker
   useEffect(() => {
@@ -56,14 +60,68 @@ function EdgeMlStreamPlayer({ modelName, confidenceThreshold }) {
     return () => clearInterval(timer);
   }, []);
 
+  // Robust mobile and desktop video autoplay
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    setVideoError(false);
+    setIsBuffering(true);
+
+    video.defaultMuted = true;
+    video.muted = true;
+    video.playsInline = true;
+    video.setAttribute("playsinline", "true");
+    video.setAttribute("webkit-playsinline", "true");
+
+    const playPromise = video.play();
+    if (playPromise !== undefined) {
+      playPromise
+        .then(() => {
+          setIsPlaying(true);
+          setIsBuffering(false);
+        })
+        .catch((err) => {
+          console.warn("Video autoplay deferred by browser policy:", err);
+          setIsPlaying(false);
+          setIsBuffering(false);
+        });
+    }
+  }, [videoSrc]);
+
+  const togglePlay = (e) => {
+    if (e) e.stopPropagation();
+    const video = videoRef.current;
+    if (!video) return;
+    if (video.paused) {
+      video.play().then(() => setIsPlaying(true)).catch(() => {});
+    } else {
+      video.pause();
+      setIsPlaying(false);
+    }
+  };
+
   return (
-    <div className="relative w-full h-full flex items-center justify-center bg-black overflow-hidden group select-none">
+    <div 
+      className="relative w-full h-full flex items-center justify-center bg-black overflow-hidden group select-none cursor-pointer"
+      onClick={togglePlay}
+    >
       <video
+        ref={videoRef}
         key={videoSrc}
         autoPlay
         loop
         muted
         playsInline
+        onWaiting={() => setIsBuffering(true)}
+        onPlaying={() => {
+          setIsBuffering(false);
+          setIsPlaying(true);
+        }}
+        onError={() => {
+          setVideoError(true);
+          setIsBuffering(false);
+        }}
         className="w-full h-full object-cover"
         src={videoSrc}
       />
@@ -71,27 +129,60 @@ function EdgeMlStreamPlayer({ modelName, confidenceThreshold }) {
       {/* Laser Scan line for neural edge scan */}
       <div className="anpr-scan-line"></div>
 
+      {/* Central Tap-to-Play fallback if browser blocks initial autoplay */}
+      {!isPlaying && !videoError && (
+        <div 
+          onClick={togglePlay}
+          className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm z-30 transition cursor-pointer"
+        >
+          <div className="w-16 h-16 rounded-full bg-[var(--te-lime)] flex items-center justify-center text-black shadow-[0_0_30px_rgba(200,255,0,0.5)] transform hover:scale-105 active:scale-95 transition">
+            <Play className="w-8 h-8 fill-current ml-1" />
+          </div>
+          <span className="mt-3 text-xs font-mono-code font-bold uppercase tracking-wider text-[var(--te-lime)] bg-black/80 px-3 py-1 rounded border border-[var(--te-lime-border)]">
+            Tap to Play Live Stream
+          </span>
+        </div>
+      )}
+
+      {/* Buffering spinner */}
+      {isBuffering && isPlaying && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/40 pointer-events-none z-20">
+          <RefreshCw className="w-8 h-8 text-[var(--te-lime)] animate-spin" />
+        </div>
+      )}
+
       {/* Real-Time Neural Detection Overlays based on modelName */}
       {modelName === "pothole" && (
         <>
+          {/* Main Central Crater */}
           <div 
             className="absolute border-2 border-emerald-400 bg-emerald-500/15 rounded shadow-lg transition-all duration-300 pointer-events-none animate-pulse"
-            style={{ top: "54%", left: "42%", width: "24%", height: "18%" }}
+            style={{ top: "36%", left: "41%", width: "16%", height: "16%" }}
           >
             <div className="absolute -top-6 left-0 bg-emerald-600 text-white font-mono-code font-bold text-[9px] px-1.5 py-0.5 rounded shadow flex items-center gap-1">
-              <span>POTHOLE DEFECT (95%)</span>
-              <span className="text-emerald-200">8.4cm</span>
+              <span>POTHOLE DEFECT (96%)</span>
+              <span className="text-emerald-200">14.2cm</span>
             </div>
             <div className="absolute -bottom-4 right-0 text-[8px] font-mono-code text-emerald-300 bg-black/80 px-1 rounded">
               Z-Axis Impact: 3.4G
             </div>
           </div>
+          {/* Surface Crack / Erosion right */}
           <div 
             className="absolute border-2 border-amber-400 bg-amber-500/15 rounded shadow-lg pointer-events-none"
-            style={{ top: "66%", left: "18%", width: "18%", height: "14%" }}
+            style={{ top: "56%", left: "54%", width: "18%", height: "18%" }}
           >
             <div className="absolute -top-5 left-0 bg-amber-600 text-white font-mono-code font-bold text-[8px] px-1.5 py-0.5 rounded shadow">
-              SURFACE CRACK (89%)
+              SURFACE EROSION (91%)
+            </div>
+          </div>
+          {/* Cavity top right */}
+          <div 
+            className="absolute border border-emerald-400/70 bg-emerald-500/10 rounded pointer-events-none"
+            style={{ top: "34%", left: "58%", width: "14%", height: "14%" }}
+          >
+            <div className="absolute -top-5 left-0 bg-emerald-700 text-white font-mono-code font-bold text-[8px] px-1 rounded">
+              ROAD CAVITY (88%)
             </div>
           </div>
         </>
@@ -99,24 +190,71 @@ function EdgeMlStreamPlayer({ modelName, confidenceThreshold }) {
 
       {modelName === "incident" && (
         <>
+          {/* Jackknifed Semi-Truck */}
           <div 
             className="absolute border-2 border-rose-500 bg-rose-500/15 rounded shadow-lg transition-all duration-300 pointer-events-none animate-pulse"
-            style={{ top: "36%", left: "40%", width: "26%", height: "30%" }}
+            style={{ top: "26%", left: "38%", width: "56%", height: "20%" }}
           >
             <div className="absolute -top-6 left-0 bg-rose-600 text-white font-mono-code font-bold text-[9px] px-1.5 py-0.5 rounded shadow flex items-center gap-1">
-              <span>OFFENDING VEHICLE (96%)</span>
-              <span className="text-amber-200">94 km/h</span>
+              <span>💥 JACKKNIFED SEMI-TRUCK (98%)</span>
+              <span className="text-amber-200">COLLISION</span>
             </div>
             <div className="absolute -bottom-5 left-0 bg-black/85 text-rose-400 text-[8px] font-mono-code px-1 rounded border border-rose-500/40">
-              🚨 ERRATIC MULTI-LANE CUT-IN
+              🚨 HAZMAT / DIESEL SLICK CORRIDOR BREACH
             </div>
           </div>
+          {/* Passing Car Lower */}
           <div 
-            className="absolute border border-amber-400/80 bg-amber-500/10 rounded pointer-events-none"
-            style={{ top: "42%", left: "16%", width: "20%", height: "24%" }}
+            className="absolute border border-emerald-400/80 bg-emerald-500/10 rounded pointer-events-none"
+            style={{ top: "62%", left: "29%", width: "15%", height: "11%" }}
           >
-            <div className="absolute -top-5 left-0 bg-amber-600 text-black font-mono-code font-bold text-[8px] px-1 rounded">
-              PROXIMITY BREACH (0.8s)
+            <div className="absolute -top-5 left-0 bg-emerald-600 text-black font-mono-code font-bold text-[8px] px-1 rounded">
+              PASSING VEHICLE (94%) • 58 km/h
+            </div>
+          </div>
+          {/* Passing Car Bottom */}
+          <div 
+            className="absolute border border-emerald-400/80 bg-emerald-500/10 rounded pointer-events-none"
+            style={{ top: "78%", left: "42%", width: "13%", height: "10%" }}
+          >
+            <div className="absolute -top-5 left-0 bg-emerald-600 text-black font-mono-code font-bold text-[8px] px-1 rounded">
+              PASSING VEHICLE (95%) • 62 km/h
+            </div>
+          </div>
+        </>
+      )}
+
+      {modelName === "waterlogging" && (
+        <>
+          {/* Flooded Commuter Motorbike */}
+          <div 
+            className="absolute border-2 border-cyan-400 bg-cyan-500/15 rounded shadow-lg pointer-events-none animate-pulse"
+            style={{ top: "20%", left: "46%", width: "44%", height: "24%" }}
+          >
+            <div className="absolute -top-6 left-0 bg-cyan-600 text-white font-mono-code font-bold text-[9px] px-1.5 py-0.5 rounded shadow flex items-center gap-1">
+              <span>COMMUTER RISK (97%)</span>
+              <span className="text-cyan-200">Depth &gt; 18cm</span>
+            </div>
+            <div className="absolute bottom-1 right-1 bg-black/85 text-cyan-300 text-[8px] font-mono-code px-1 rounded border border-cyan-500/40">
+              Two-Wheeler Submerged Hub
+            </div>
+          </div>
+          {/* Submerged Auto-rickshaw */}
+          <div 
+            className="absolute border-2 border-amber-400 bg-amber-500/15 rounded shadow-lg pointer-events-none"
+            style={{ top: "6%", left: "4%", width: "44%", height: "26%" }}
+          >
+            <div className="absolute -top-5 left-0 bg-amber-600 text-white font-mono-code font-bold text-[8px] px-1.5 py-0.5 rounded shadow">
+              SUBMERGED AUTO-RICKSHAW (95%)
+            </div>
+          </div>
+          {/* Flooded Car Lower */}
+          <div 
+            className="absolute border border-cyan-400/80 bg-cyan-500/10 rounded pointer-events-none"
+            style={{ top: "50%", left: "4%", width: "90%", height: "46%" }}
+          >
+            <div className="absolute top-2 left-2 bg-black/85 text-cyan-400 font-mono-code font-bold text-[8px] px-1.5 py-0.5 rounded border border-cyan-500/30">
+              FLOOD REACHING SILL (93%) • AQUAPLANING HAZARD
             </div>
           </div>
         </>
@@ -124,13 +262,13 @@ function EdgeMlStreamPlayer({ modelName, confidenceThreshold }) {
 
       {modelName === "anpr" && (
         <>
+          {/* Lead Commercial Truck */}
           <div 
             className="absolute border-2 border-amber-400 bg-amber-500/10 rounded shadow-lg pointer-events-none"
-            style={{ top: "44%", left: "38%", width: "28%", height: "32%" }}
+            style={{ top: "2%", left: "66%", width: "32%", height: "28%" }}
           >
-            {/* Vehicle Tag */}
             <div className="absolute -top-6 left-0 bg-zinc-900 text-white border border-amber-400 font-mono-code font-bold text-[9px] px-1.5 py-0.5 rounded flex items-center gap-1">
-              <span>TARGET VEHICLE: SEDAN</span>
+              <span>TARGET VEHICLE: HEAVY TRUCK</span>
             </div>
             {/* Plate Crop Targeting Inset */}
             <div className="absolute bottom-2 left-2 right-2 bg-black/95 border border-amber-500/80 rounded p-1 flex items-center justify-between font-mono-code shadow-md">
@@ -138,44 +276,51 @@ function EdgeMlStreamPlayer({ modelName, confidenceThreshold }) {
                 <span className="bg-blue-600 text-white font-extrabold text-[8px] px-1 py-0.5 rounded leading-none">IND</span>
                 <span className="text-amber-300 font-bold text-xs tracking-wider">TN 76 AB 7224</span>
               </div>
-              <span className="text-[8px] text-[var(--te-lime)] font-semibold">96% OCR LOCK</span>
-            </div>
-          </div>
-
-          <div 
-            className="absolute border border-blue-400/80 bg-blue-500/10 rounded pointer-events-none"
-            style={{ top: "48%", left: "12%", width: "22%", height: "26%" }}
-          >
-            <div className="absolute -top-5 left-0 bg-blue-600 text-white font-mono-code font-bold text-[8px] px-1 rounded">
-              AP 09 OF 1111 (97%)
+              <span className="text-[8px] text-[var(--te-lime)] font-semibold">98% OCR LOCK</span>
             </div>
           </div>
         </>
       )}
 
-      {modelName === "waterlogging" && (
-        <div 
-          className="absolute border-2 border-cyan-400 bg-cyan-500/15 rounded shadow-lg pointer-events-none animate-pulse"
-          style={{ top: "58%", left: "22%", width: "56%", height: "28%" }}
-        >
-          <div className="absolute -top-6 left-0 bg-cyan-600 text-white font-mono-code font-bold text-[9px] px-1.5 py-0.5 rounded shadow flex items-center gap-1">
-            <span>WATERLOGGING HAZARD (94%)</span>
-            <span className="text-cyan-200">Depth &gt; 12cm</span>
+      {modelName === "coco" && (
+        <>
+          {/* Traffic Fleet Multi-Detection */}
+          <div 
+            className="absolute border-2 border-blue-400 bg-blue-500/15 rounded shadow-lg pointer-events-none"
+            style={{ top: "32%", left: "36%", width: "32%", height: "38%" }}
+          >
+            <div className="absolute -top-5 left-0 bg-blue-600 text-white font-mono-code font-bold text-[8px] px-1.5 py-0.5 rounded shadow">
+              TRUCK (95%) • 44 km/h
+            </div>
           </div>
-          <div className="absolute bottom-2 right-2 bg-black/85 text-cyan-300 text-[8px] font-mono-code px-1.5 py-0.5 rounded border border-cyan-500/40">
-            Transit Lane Submerged: Severe Aquaplaning Risk
+          <div 
+            className="absolute border border-emerald-400/80 bg-emerald-500/10 rounded pointer-events-none"
+            style={{ top: "48%", left: "12%", width: "22%", height: "28%" }}
+          >
+            <div className="absolute -top-5 left-0 bg-emerald-600 text-white font-mono-code font-bold text-[8px] px-1 rounded">
+              CAR (96%)
+            </div>
           </div>
-        </div>
+        </>
       )}
 
-      {/* Top HUD: Status Bar */}
+      {/* Top HUD: Status Bar & Controls */}
       <div className="absolute top-2.5 left-2.5 right-2.5 flex items-center justify-between pointer-events-none z-10 text-[10px] font-mono-code">
         <div className="flex items-center gap-1.5 bg-black/85 px-2.5 py-1 rounded border border-[var(--te-lime-border)] text-[var(--te-lime)] shadow">
           <span className="w-2 h-2 rounded-full bg-[var(--te-lime)] animate-ping"></span>
           <span className="font-bold tracking-wider">LIVE EDGE AI STREAM</span>
         </div>
 
-        <div className="flex items-center gap-2 bg-black/85 px-2.5 py-1 rounded border border-white/20 text-white shadow">
+        <div className="flex items-center gap-2 bg-black/85 px-2.5 py-1 rounded border border-white/20 text-white shadow pointer-events-auto">
+          <button 
+            onClick={togglePlay}
+            className="text-[var(--te-lime)] hover:text-white flex items-center gap-1 text-[10px] font-bold"
+            title={isPlaying ? "Pause Stream" : "Play Stream"}
+          >
+            {isPlaying ? <Pause className="w-3 h-3 fill-current" /> : <Play className="w-3 h-3 fill-current" />}
+            <span>{isPlaying ? "LIVE" : "PAUSED"}</span>
+          </button>
+          <span className="text-zinc-500">|</span>
           <span className="text-[var(--te-lime)] font-bold">{fps} FPS</span>
           <span className="text-zinc-500">|</span>
           <span className="text-zinc-300">{latency} ms</span>
@@ -222,7 +367,7 @@ export default function AiModelPlayground({ onEventTriggered }) {
   const [dispatchedToast, setDispatchedToast] = useState(false);
 
   // Video Inference State
-  const [selectedVideoPath, setSelectedVideoPath] = useState("/videos/gemini-pothole-bus.mp4");
+  const [selectedVideoPath, setSelectedVideoPath] = useState("/videos/pothole-road.mp4");
   const [uploadedVideoFile, setUploadedVideoFile] = useState(null);
   const [videoResult, setVideoResult] = useState(null);
   const [isProcessingVideo, setIsProcessingVideo] = useState(false);
@@ -250,7 +395,7 @@ export default function AiModelPlayground({ onEventTriggered }) {
       fps: "78 FPS",
       size: "121.5 MB",
       samplePath: "/snapshots/test_forensic_snap.jpg",
-      videoPath: "/videos/gemini-pothole-bus.mp4",
+      videoPath: "/videos/pothole-road.mp4",
     },
     {
       id: "incident",
@@ -265,7 +410,7 @@ export default function AiModelPlayground({ onEventTriggered }) {
       fps: "70 FPS",
       size: "121.5 MB",
       samplePath: "/snapshots/test_truck_crash_snap.jpg",
-      videoPath: "/videos/firefly-360-road.mp4",
+      videoPath: "/videos/incident-crash.mp4",
     },
     {
       id: "waterlogging",
@@ -280,7 +425,7 @@ export default function AiModelPlayground({ onEventTriggered }) {
       fps: "76 FPS",
       size: "121.5 MB",
       samplePath: "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?w=600&auto=format&fit=crop&q=80",
-      videoPath: "/videos/gemini-pothole-bus.mp4",
+      videoPath: "/videos/waterlogging-hazard.mp4",
     },
     {
       id: "anpr",
@@ -677,9 +822,11 @@ export default function AiModelPlayground({ onEventTriggered }) {
                       }}
                       className="w-full p-2 bg-[var(--te-panel)] border border-[var(--te-border)] rounded text-xs text-[var(--te-text)] font-mono focus:outline-none focus:border-[var(--te-lime)]"
                     >
-                      <option value="/videos/gemini-pothole-bus.mp4">Pothole Defect Road Stream</option>
-                      <option value="/videos/firefly-360-road.mp4">360° Road Collision Stream</option>
+                      <option value="/videos/pothole-road.mp4">Pothole Defect Road Stream</option>
+                      <option value="/videos/incident-crash.mp4">Highway Collision & Jackknife Incident</option>
+                      <option value="/videos/waterlogging-hazard.mp4">Urban Monsoon Waterlogging Hazard</option>
                       <option value="/videos/bus-cockpit-dashcam.mp4">Bus Cockpit Dashcam (ANPR)</option>
+                      <option value="/videos/road-traffic.mp4">Multi-Lane Highway Traffic Stream</option>
                     </select>
                   </div>
                 )}

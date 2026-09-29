@@ -15,7 +15,8 @@ import {
   fetchEvents, 
   fetchRoadIssues, 
   fetchIncidents, 
-  fetchAnalytics 
+  fetchAnalytics,
+  FALLBACK_INCIDENTS 
 } from "./services/api";
 
 const toArray = (value) => {
@@ -78,7 +79,7 @@ export default function App() {
     { id: "RD-302", location: "Fergusson College (FC) Road", issueType: "Damaged Storm Drain", reports: 9, busesReporting: 4, severity: "HIGH", priorityScore: 78, status: "IN_REVIEW", recommendation: "Repair broken drain cover near Goodluck Chowk.", lastReported: "35 mins ago", latitude: 18.5221, longitude: 73.8415 }
   ]);
 
-  const [incidents, setIncidents] = useState([]);
+  const [incidents, setIncidents] = useState(FALLBACK_INCIDENTS);
 
   const [analytics, setAnalytics] = useState({});
   const [liveToast, setLiveToast] = useState(null);

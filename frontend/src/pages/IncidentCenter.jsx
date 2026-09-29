@@ -16,7 +16,7 @@ import {
   Car,
   CheckCircle2
 } from "lucide-react";
-import { updateIncidentStatus, getApiBase } from "../services/api";
+import { updateIncidentStatus, getApiBase, resolveAssetUrl } from "../services/api";
 
 export default function IncidentCenter({ incidents = [], onIncidentUpdated }) {
   const [updatingId, setUpdatingId] = useState(null);
@@ -95,13 +95,8 @@ export default function IncidentCenter({ incidents = [], onIncidentUpdated }) {
           const t2Val = inc.telemetry?.t2_val || (inc.registrationNumber || "PLATE NOT DETECTED");
           const t2Sensor = inc.telemetry?.t2_sensor || `Dual-Stage RF-DETR + OCR (${((inc.anprConfidence || 0.94) * 100).toFixed(0)}% Match)`;
 
-          const imageUrl = inc.evidenceImage 
-            ? (inc.evidenceImage.startsWith("http") ? inc.evidenceImage : `${getApiBase()}${inc.evidenceImage}`)
-            : "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?w=600&auto=format&fit=crop&q=80";
-
-          const plateUrl = inc.plateImage
-            ? (inc.plateImage.startsWith("http") ? inc.plateImage : `${getApiBase()}${inc.plateImage}`)
-            : null;
+          const imageUrl = resolveAssetUrl(inc.evidenceImage);
+          const plateUrl = inc.plateImage ? resolveAssetUrl(inc.plateImage) : null;
 
           return (
             <div 
@@ -331,7 +326,7 @@ export default function IncidentCenter({ incidents = [], onIncidentUpdated }) {
                 <div className="lg:col-span-7 space-y-3">
                   <div className="relative rounded-lg overflow-hidden border border-[var(--te-border)] bg-black shadow-inner flex items-center justify-center min-h-[300px]">
                     <img 
-                      src={selectedEvidence.evidenceImage ? (selectedEvidence.evidenceImage.startsWith("http") ? selectedEvidence.evidenceImage : `${getApiBase()}${selectedEvidence.evidenceImage}`) : "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?w=600&auto=format&fit=crop&q=80"}
+                      src={resolveAssetUrl(selectedEvidence.evidenceImage)}
                       alt="Full Forensic Evidence"
                       className="w-full h-auto max-h-[440px] object-contain"
                     />
@@ -368,7 +363,7 @@ export default function IncidentCenter({ incidents = [], onIncidentUpdated }) {
                       </div>
                       {selectedEvidence.plateImage && (
                         <img 
-                          src={selectedEvidence.plateImage.startsWith("http") ? selectedEvidence.plateImage : `${getApiBase()}${selectedEvidence.plateImage}`} 
+                          src={resolveAssetUrl(selectedEvidence.plateImage)} 
                           alt="Cropped Plate"
                           className="h-10 w-auto rounded border border-white/20 object-contain bg-black"
                         />

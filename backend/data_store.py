@@ -233,9 +233,9 @@ class DataStore:
             {
                 "id": "INC-701",
                 "type": "Rash Driving & Speed Violation",
-                "vehicle": "White Sedan / SUV",
-                "registrationNumber": "MH12 AB 1234",
-                "anprConfidence": 0.91,
+                "vehicle": "White Sedan (Toyota Corolla)",
+                "registrationNumber": "TN 76 AB 7224",
+                "anprConfidence": 0.94,
                 "busId": "BUS-104",
                 "location": "Karve Road Flyover Corridor",
                 "latitude": 18.5082,
@@ -243,30 +243,58 @@ class DataStore:
                 "timestamp": "2026-09-04T16:25:00Z",
                 "severity": "CRITICAL",
                 "status": "NEW",
-                "evidenceImage": "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?w=600&auto=format&fit=crop&q=80",
-                "details": "High speed weaving detected across 3 lanes. Vehicle ANPR extracted cleanly at 91% match."
+                "evidenceImage": "/outputs/snapshots/test_forensic_snap.jpg",
+                "plateImage": "/outputs/snapshots/plate_tn76ab7224.jpg",
+                "violationCode": "MVA Sec 184 (Dangerous & Reckless Driving)",
+                "fineAmount": "₹5,000 Fine & License Endorsement",
+                "details": "Automated AI Edge Detection: High-velocity erratic lane switching without indicator signaling; severe proximity breach to public transit corridor at 94 km/h.",
+                "telemetry": {
+                    "t0_label": "T0 • Approach Velocity",
+                    "t0_val": "Speed: 94 km/h (+34 km/h Above Urban Limit)",
+                    "t0_sensor": "Rear Radar Sensor",
+                    "t1_label": "T1 • Anomaly Event",
+                    "t1_val": "Erratic Multi-Lane Swerving & Cut-In",
+                    "t1_sensor": "Side Cam Dynamic Tracking",
+                    "t2_label": "T2 • ANPR Locked",
+                    "t2_val": "TN 76 AB 7224",
+                    "t2_sensor": "Dual-Stage RF-DETR + OCR (94% Match)"
+                }
             },
             {
                 "id": "INC-702",
-                "type": "Hit & Run / Guardrail Collision",
-                "vehicle": "Black Hatchback",
-                "registrationNumber": "MH14 DX 8899",
-                "anprConfidence": 0.88,
+                "type": "Crash Collision & Overturn",
+                "vehicle": "Heavy Commercial Semi-Truck",
+                "registrationNumber": "AP 09 OF 1111",
+                "anprConfidence": 0.97,
                 "busId": "BUS-105",
                 "location": "Hinjewadi Phase 1 Bypass",
                 "latitude": 18.5815,
                 "longitude": 73.7482,
                 "timestamp": "2026-09-04T15:10:00Z",
-                "severity": "HIGH",
-                "status": "DISPATCHED",
-                "evidenceImage": "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?w=600&auto=format&fit=crop&q=80",
-                "details": "Collision with road barrier flagged by side camera. Traffic control team dispatched."
+                "severity": "CRITICAL",
+                "status": "NEW",
+                "evidenceImage": "/outputs/snapshots/test_truck_crash_snap.jpg",
+                "plateImage": "/outputs/snapshots/plate_ap09of1111.jpg",
+                "violationCode": "MVA Sec 134 / Sec 184 (Major Collision Obstruction)",
+                "fineAmount": "Court Summon / Impound",
+                "details": "Automated AI Edge Detection: Jackknifed semi-trailer structural rollover detected across transit lanes. Rapid deceleration from 68 km/h to 0 km/h with 7.4G kinetic impact force.",
+                "telemetry": {
+                    "t0_label": "T0 • Approach Velocity",
+                    "t0_val": "Speed: 68 km/h (Emergency Decel -7.9 m/s²)",
+                    "t0_sensor": "Forward Radar",
+                    "t1_label": "T1 • Anomaly Event",
+                    "t1_val": "Jackknife Collision & Rollover (7.4G Impact)",
+                    "t1_sensor": "360° Optical Telemetry",
+                    "t2_label": "T2 • ANPR Locked",
+                    "t2_val": "AP 09 OF 1111",
+                    "t2_sensor": "Dual-Stage RF-DETR + OCR (97% Match)"
+                }
             },
             {
                 "id": "INC-703",
                 "type": "Illegal Parking in Bus Lane",
-                "vehicle": "Commercial Van",
-                "registrationNumber": "MH12 KP 5511",
+                "vehicle": "Commercial Delivery Van",
+                "registrationNumber": "MH 12 KP 5511",
                 "anprConfidence": 0.95,
                 "busId": "BUS-101",
                 "location": "Laxmi Road Commercial Zone",
@@ -276,7 +304,21 @@ class DataStore:
                 "severity": "MEDIUM",
                 "status": "RESOLVED",
                 "evidenceImage": "https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=600&auto=format&fit=crop&q=80",
-                "details": "Blocked public transit lane for > 15 minutes. Towing notice auto-issued."
+                "plateImage": None,
+                "violationCode": "MVA Sec 122 (Obstruction of Transit Lane)",
+                "fineAmount": "₹1,500 Fine Auto-Challan",
+                "details": "Stationary vehicle blocking public transit dedicated corridor for > 15 minutes. Towing notice auto-issued.",
+                "telemetry": {
+                    "t0_label": "T0 • Approach Velocity",
+                    "t0_val": "Speed: 0 km/h (Stationary)",
+                    "t0_sensor": "Forward Cam",
+                    "t1_label": "T1 • Anomaly Event",
+                    "t1_val": "Dedicated Bus Lane Encroachment (>15 min)",
+                    "t1_sensor": "GPS Geofence Match",
+                    "t2_label": "T2 • ANPR Locked",
+                    "t2_val": "MH 12 KP 5511",
+                    "t2_sensor": "Dual-Stage RF-DETR + OCR (95% Match)"
+                }
             }
         ]
 
@@ -497,22 +539,38 @@ class DataStore:
                 })
         
         # If it's a rash driving/ANPR event or has a registration number, create an Incident entry
-        if "Rash Driving" in event.get("type", "") or "ANPR" in event.get("type", "") or event.get("registrationNumber"):
+        if "Rash Driving" in event.get("type", "") or "Accident" in event.get("type", "") or "Collision" in event.get("type", "") or "ANPR" in event.get("type", "") or event.get("registrationNumber"):
+            is_acc = "accident" in event.get("type", "").lower() or "collision" in event.get("type", "").lower()
+            default_telemetry = {
+                "t0_label": "T0 • Approach Velocity",
+                "t0_val": "Speed: 68 km/h (-7.9 m/s²)" if is_acc else "Speed: 94 km/h (+34 km/h)",
+                "t0_sensor": "Forward Radar" if is_acc else "Rear Radar Sensor",
+                "t1_label": "T1 • Anomaly Event",
+                "t1_val": "Jackknife Collision & Rollover (7.4G Impact)" if is_acc else "Erratic Multi-Lane Swerving & Cut-In",
+                "t1_sensor": "360° Optical Telemetry" if is_acc else "Side Cam Dynamic Tracking",
+                "t2_label": "T2 • ANPR Locked",
+                "t2_val": event.get("registrationNumber", "TN 76 AB 7224"),
+                "t2_sensor": f"Dual-Stage RF-DETR + OCR ({int(event.get('anprConfidence', 0.94)*100)}% Match)"
+            }
             inc = {
                 "id": f"INC-{len(self.incidents) + 704}",
-                "type": event.get("type", "Rash Driving & ANPR Tracking"),
-                "vehicle": event.get("vehicleType", "Offending Vehicle"),
+                "type": event.get("type", "Accident Collision & ANPR Tracking"),
+                "vehicle": event.get("vehicleType", "Involved Vehicle"),
                 "registrationNumber": event.get("registrationNumber", "MH12 AB 1234"),
                 "anprConfidence": event.get("anprConfidence", event.get("confidence", 0.95)),
                 "busId": event.get("busId", "BUS-104"),
-                "location": event.get("locationName", "Karve Road Flyover"),
+                "location": event.get("locationName", "Pune Transit Corridor"),
                 "latitude": event.get("latitude", 18.5082),
                 "longitude": event.get("longitude", 73.8361),
                 "timestamp": event.get("timestamp", time.strftime("%Y-%m-%dT%H:%M:%SZ")),
                 "severity": event.get("severity", "CRITICAL"),
                 "status": "NEW",
-                "evidenceImage": "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?w=600&auto=format&fit=crop&q=80",
-                "details": event.get("details", "AI edge camera flagged dangerous driving behavior & extracted registration plate.")
+                "evidenceImage": event.get("evidenceImage") or "/outputs/snapshots/test_forensic_snap.jpg",
+                "plateImage": event.get("plateImage"),
+                "telemetry": event.get("telemetry") or default_telemetry,
+                "violationCode": event.get("violationCode") or ("MVA Sec 134 / Sec 184 (Major Collision Obstruction)" if is_acc else "MVA Sec 184 (Dangerous & Reckless Driving)"),
+                "fineAmount": event.get("fineAmount") or ("Court Summon / Impound" if is_acc else "₹5,000 Fine & License Endorsement"),
+                "details": event.get("details", "AI edge camera flagged incident / reckless driving & extracted registration plate.")
             }
             self.incidents.insert(0, inc)
 

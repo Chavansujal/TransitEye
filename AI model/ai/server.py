@@ -28,11 +28,12 @@ except ImportError:
     RFDETRSmall = None
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-POTHOLE_MODEL_PATH = BASE_DIR / "output" / "pothole_rfdetr_s" / "checkpoint_best_total.pth"
-INCIDENT_MODEL_PATH = BASE_DIR / "output" / "incident_rfdetr_s" / "checkpoint_best_total.pth"
-WATERLOGGING_MODEL_PATH = BASE_DIR / "output" / "waterlogging_rfdetr_s" / "checkpoint_best_total.pth"
-ANPR_MODEL_PATH = BASE_DIR / "output" / "anpr_rfdetr_s" / "checkpoint_best_total.pth"
-OUTPUTS_DIR = BASE_DIR / "outputs"
+OUTPUT_DIR = BASE_DIR / "output" if (BASE_DIR / "output" / "pothole_rfdetr_s").exists() else BASE_DIR.parent / "output"
+POTHOLE_MODEL_PATH = OUTPUT_DIR / "pothole_rfdetr_s" / "checkpoint_best_total.pth"
+INCIDENT_MODEL_PATH = OUTPUT_DIR / "incident_rfdetr_s" / "checkpoint_best_total.pth"
+WATERLOGGING_MODEL_PATH = OUTPUT_DIR / "waterlogging_rfdetr_s" / "checkpoint_best_total.pth"
+ANPR_MODEL_PATH = OUTPUT_DIR / "anpr_rfdetr_s" / "checkpoint_best_total.pth"
+OUTPUTS_DIR = BASE_DIR / "outputs" if (BASE_DIR / "outputs").exists() else BASE_DIR.parent / "outputs"
 FRONTEND_DIR = BASE_DIR / "frontend"
 
 OUTPUTS_DIR.mkdir(parents=True, exist_ok=True)

@@ -25,14 +25,14 @@ import {
   ScanLine,
   Film
 } from "lucide-react";
-import { triggerDemoScenario } from "../services/api";
+import { triggerDemoScenario, getLiveStreamUrl } from "../services/api";
 
 export default function LiveMonitoring({ buses = [], onEventTriggered }) {
   const [selectedBusId, setSelectedBusId] = useState("BUS-104");
   const [activeCamera, setActiveCamera] = useState("front"); // "front", "side_left", "side_right", "rear", "cabin"
   const [currentScenario, setCurrentScenario] = useState("normal");
   const [loadingScenario, setLoadingScenario] = useState(false);
-  const [frontVideoFeed, setFrontVideoFeed] = useState("cockpit"); // "cockpit" (Driver Dashcam), "firefly" (Firefly 360 Continuous), "veo" (Gemini AI Bus), or "traffic" (Highway)
+  const [videoChannel, setVideoChannel] = useState("all"); // "all", "road", "waterlogging", "incident", "dashcam_360", "cockpit", "veo_bus"
   
   // Real-time AI Vision Controls
   const [aiVisionEnabled, setAiVisionEnabled] = useState(true);
@@ -85,7 +85,7 @@ export default function LiveMonitoring({ buses = [], onEventTriggered }) {
   ];
 
   // Initialize camera-specific real-time tracking objects
-  const initTracks = (cam, scenario, videoType = frontVideoFeed) => {
+  const initTracks = (cam, scenario, videoType = "cockpit") => {
     let tracks = [];
 
     if (cam === "front") {
@@ -590,10 +590,10 @@ export default function LiveMonitoring({ buses = [], onEventTriggered }) {
     tracksRef.current = tracks;
   };
 
-  // Sync tracks when camera, scenario, or front video feed toggles
+  // Sync tracks when camera or scenario toggles
   useEffect(() => {
-    initTracks(activeCamera, currentScenario, frontVideoFeed);
-  }, [activeCamera, currentScenario, frontVideoFeed]);
+    initTracks(activeCamera, currentScenario);
+  }, [activeCamera, currentScenario]);
 
   // Real-time Canvas Rendering Animation Loop (60 FPS Native)
   useEffect(() => {
@@ -897,15 +897,6 @@ export default function LiveMonitoring({ buses = [], onEventTriggered }) {
     if (currentScenario === "pedestrian" || currentScenario === "zebra_crossing" || activeCamera === "side_left") {
       return "/videos/pedestrian-flow.mp4";
     }
-    if (activeCamera === "front") {
-      if (frontVideoFeed === "cockpit") return "/videos/bus-cockpit-dashcam.mp4";
-      if (frontVideoFeed === "firefly") return "/videos/firefly-360-road.mp4";
-      if (frontVideoFeed === "veo") return "/videos/gemini-pothole-bus.mp4";
-      return "/videos/road-traffic.mp4";
-    }
-    if (activeCamera === "side_right" || activeCamera === "rear") {
-      return frontVideoFeed === "cockpit" ? "/videos/bus-cockpit-dashcam.mp4" : frontVideoFeed === "firefly" ? "/videos/firefly-360-road.mp4" : "/videos/road-traffic.mp4";
-    }
     return "/videos/bus-cockpit-dashcam.mp4";
   };
 
@@ -1050,79 +1041,36 @@ export default function LiveMonitoring({ buses = [], onEventTriggered }) {
               </div>
 
               {/* Real-time Video Controls */}
-              <div className="flex items-center gap-1.5 flex-wrap text-xs">
-                {/* Front Cam Feed Switcher */}
-                {activeCamera === "front" && (
-                  <div className="flex items-center gap-1 bg-[var(--te-surface)] p-0.5 rounded border border-[var(--te-border)]">
-                    <button
-                      onClick={() => setFrontVideoFeed("cockpit")}
-                      className={`flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold transition ${
-                        frontVideoFeed === "cockpit"
-                          ? "bg-[var(--te-lime-bg)] text-[var(--te-lime)] border border-[var(--te-lime-border)]"
-                          : "text-[var(--te-text-muted)] hover:text-[var(--te-text)]"
-                      }`}
-                      title="Driver Cockpit Dashcam (Vikas Shinde)"
-                    >
-                      <Film className="w-3 h-3 text-[var(--te-lime)]" />
-                      <span>Cockpit</span>
-                    </button>
+              <div className="flex items-center gap-2 flex-wrap text-xs">
+                {/* Live Ensemble Badge */}
+                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-rose-500/15 border border-rose-500/40 text-rose-400 text-[10px] font-bold">
+                  <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span>
+                  <span className="hidden sm:inline">LIVE MULTI-MODEL ENSEMBLE</span>
+                  <span className="sm:hidden">LIVE ENSEMBLE</span>
+                </div>
 
-                    <button
-                      onClick={() => setFrontVideoFeed("firefly")}
-                      className={`flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold transition ${
-                        frontVideoFeed === "firefly"
-                          ? "bg-[var(--te-lime-bg)] text-[var(--te-lime)] border border-[var(--te-lime-border)]"
-                          : "text-[var(--te-text-muted)] hover:text-[var(--te-text)]"
-                      }`}
-                      title="360° Continuous Road Camera Feed"
-                    >
-                      <Film className="w-3 h-3 text-[var(--te-lime)]" />
-                      <span>360° AI</span>
-                    </button>
-
-                    <button
-                      onClick={() => setFrontVideoFeed("veo")}
-                      className={`flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold transition ${
-                        frontVideoFeed === "veo"
-                          ? "bg-[var(--te-lime-bg)] text-[var(--te-lime)] border border-[var(--te-lime-border)]"
-                          : "text-[var(--te-text-muted)] hover:text-[var(--te-text)]"
-                      }`}
-                      title="Google Veo AI Municipal Bus Dashcam"
-                    >
-                      <Film className="w-3 h-3 text-[var(--te-lime)]" />
-                      <span>Veo Bus</span>
-                    </button>
-                  </div>
-                )}
-
-                <button
-                  onClick={() => setAiVisionEnabled(!aiVisionEnabled)}
-                  className={`flex items-center gap-1 px-2 py-0.5 rounded border text-[10px] font-semibold transition ${
-                    aiVisionEnabled
-                      ? "bg-[var(--te-lime-bg)] border-[var(--te-lime-border)] text-[var(--te-lime)]"
-                      : "bg-[var(--te-surface)] border-[var(--te-border)] text-[var(--te-text-muted)] hover:text-[var(--te-text)]"
-                  }`}
-                  title="Toggle Computer Vision Detection Layer"
-                >
-                  <ScanLine className="w-3 h-3" />
-                  <span>Vision: {aiVisionEnabled ? "ON" : "OFF"}</span>
-                </button>
-
-                <button
-                  onClick={() => setShowTrails(!showTrails)}
-                  className={`px-2 py-0.5 rounded border text-[10px] font-semibold transition hidden sm:inline-block ${
-                    showTrails
-                      ? "bg-[var(--te-lime-bg)] border-[var(--te-lime-border)] text-[var(--te-lime)]"
-                      : "bg-[var(--te-surface)] border-[var(--te-border)] text-[var(--te-text-muted)]"
-                  }`}
-                  title="Toggle Object Motion Trails"
-                >
-                  Trails
-                </button>
+                {/* Video Feed / Channel Selector */}
+                <div className="flex items-center gap-1.5 bg-[var(--te-surface)] px-2.5 py-1 rounded border border-[var(--te-border)]">
+                  <Film className="w-3.5 h-3.5 text-[var(--te-lime)] shrink-0" />
+                  <span className="text-[10px] text-[var(--te-text-muted)] uppercase font-semibold hidden md:inline">Feed:</span>
+                  <select
+                    value={videoChannel}
+                    onChange={(e) => setVideoChannel(e.target.value)}
+                    className="bg-transparent text-xs font-mono font-semibold text-[var(--te-lime)] outline-none cursor-pointer"
+                  >
+                    <option value="all" className="bg-[var(--te-surface)] text-[var(--te-text)]">🔄 All Transit Cameras (Auto-Cycle All Videos)</option>
+                    <option value="road" className="bg-[var(--te-surface)] text-[var(--te-text)]">🛣️ Road Defect & Pothole Feed (road.mp4)</option>
+                    <option value="waterlogging" className="bg-[var(--te-surface)] text-[var(--te-text)]">🌊 Underpass Flood & Waterlogging (waterlogging.mp4)</option>
+                    <option value="incident" className="bg-[var(--te-surface)] text-[var(--te-text)]">💥 Collision & Hazard Cam (incident.mp4)</option>
+                    <option value="dashcam_360" className="bg-[var(--te-surface)] text-[var(--te-text)]">🌐 360° Panoramic Sensor (dashcam_360.mp4)</option>
+                    <option value="cockpit" className="bg-[var(--te-surface)] text-[var(--te-text)]">🚌 Driver Cockpit Dashcam (cockpit.mp4)</option>
+                    <option value="veo_bus" className="bg-[var(--te-surface)] text-[var(--te-text)]">🚏 Veo Municipal Transit (veo_bus.mp4)</option>
+                  </select>
+                </div>
 
                 <button
                   onClick={handleSnapshotCapture}
-                  className="flex items-center gap-1 px-2 py-0.5 rounded bg-[var(--te-lime-bg)] hover:bg-[var(--te-lime-border)] border border-[var(--te-lime-border)] text-[var(--te-lime)] text-[10px] font-semibold transition"
+                  className="flex items-center gap-1 px-2.5 py-1 rounded bg-[var(--te-lime-bg)] hover:bg-[var(--te-lime-border)] border border-[var(--te-lime-border)] text-[var(--te-lime)] text-[10px] font-semibold transition"
                   title="Capture Instant Edge Telemetry Snapshot"
                 >
                   <Zap className="w-3 h-3 text-[var(--te-lime)]" />
@@ -1131,33 +1079,27 @@ export default function LiveMonitoring({ buses = [], onEventTriggered }) {
               </div>
             </div>
 
-            {/* Simulated Live Camera Viewport with Real-Time Canvas Overlay */}
+            {/* Live Multi-Model Ensemble Viewport */}
             <div 
               ref={containerRef}
-              className="relative w-full aspect-video bg-black rounded-md overflow-hidden border border-[var(--te-border)] shadow flex items-center justify-center group select-none"
+              className="relative w-full aspect-video bg-black rounded-md overflow-hidden border border-[var(--te-border)] shadow flex items-center justify-center select-none"
             >
-              {/* Background Live Video Stream */}
-              <video
-                ref={videoRef}
-                key={`${activeCamera}-${currentScenario}-${frontVideoFeed}`}
-                autoPlay
-                loop
-                muted
-                playsInline
-                className="absolute inset-0 w-full h-full object-cover opacity-85 scale-105 pointer-events-none"
-                poster={getCameraBg()}
-              >
-                <source src={getCameraVideo()} type="video/mp4" />
-              </video>
-
-              {/* Real-time Computer Vision Tracking Canvas */}
-              <canvas
-                ref={canvasRef}
-                className="absolute inset-0 w-full h-full pointer-events-none z-10"
+              <img
+                key={videoChannel}
+                src={getLiveStreamUrl(videoChannel, 0.35)}
+                alt="Unified Multi-Model Live ML Feed"
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  setTimeout(() => {
+                    if (e.target) {
+                      e.target.src = getLiveStreamUrl(videoChannel, 0.35) + `&_t=${Date.now()}`;
+                    }
+                  }, 2000);
+                }}
               />
 
-              {/* ANPR Camera Laser Scan Line */}
-              <div className="anpr-scan-line z-20"></div>
+              {/* ANPR Laser Scan Line */}
+              <div className="anpr-scan-line z-20 pointer-events-none"></div>
 
               {/* Camera Shutter Snapshot Flash Effect */}
               {snapshotFlash && (
@@ -1172,39 +1114,80 @@ export default function LiveMonitoring({ buses = [], onEventTriggered }) {
                 </div>
               )}
 
-              {/* Top-Left Sleek HUD Pill */}
-              <div className="absolute top-2.5 left-2.5 font-mono-code text-[10px] text-white bg-black/80 px-2.5 py-1 rounded border border-white/20 backdrop-blur shadow flex items-center gap-1.5 z-20">
-                <span className="w-2 h-2 rounded-full bg-[var(--te-lime)] animate-pulse" />
-                <span className="font-bold text-white uppercase">{selectedBus.id}</span>
-                <span className="text-white/40">|</span>
-                <span>{fps} FPS</span>
+              {/* Top-Right Sleek Model Tag: All Models Working Together */}
+              <div className="absolute top-2.5 right-2.5 font-sans text-[10px] bg-black/85 px-2.5 py-1 rounded border border-white/20 text-white backdrop-blur shadow flex items-center gap-2 z-20">
+                <span className="flex items-center gap-1.5 font-mono-code text-[var(--te-lime)] font-bold">
+                  <span className="w-2 h-2 rounded-full bg-[var(--te-lime)] animate-ping" />
+                  ALL 5 MODELS ACTIVE
+                </span>
               </div>
+            </div>
 
-              {/* Top-Right Sleek Model Pill */}
-              <div className="absolute top-2.5 right-2.5 font-sans text-[10px] bg-black/80 px-2.5 py-1 rounded border border-white/20 text-white backdrop-blur shadow flex items-center gap-1.5 z-20">
-                <span className="text-white/70 hidden sm:inline">Urban Vision AI</span>
-                <span className="text-white/40 hidden sm:inline">•</span>
-                <span className="text-[var(--te-lime)] font-semibold uppercase">{currentScenario.replace("_", " ")}</span>
-              </div>
-
-              {/* Source Badge (Bottom Left) */}
-              <div className="absolute bottom-2.5 left-2.5 z-20 bg-black/80 px-2.5 py-1 rounded border border-white/20 text-[10px] font-sans text-white flex items-center gap-1.5 backdrop-blur">
-                <span className="w-1.5 h-1.5 rounded-full bg-[var(--te-lime)] animate-pulse" />
-                <span>{activeCamera === "cabin" ? "Interior Cabin Cam" : activeCamera === "front" && frontVideoFeed === "cockpit" ? "Driver Cockpit" : activeCamera === "front" && frontVideoFeed === "firefly" ? "360° Road Cam" : activeCamera === "front" && frontVideoFeed === "veo" ? "Veo AI Bus Cam" : `${activeCamera.toUpperCase()}`}</span>
-              </div>
-
-              {/* ANPR Reader Box Overlay */}
-              {(currentScenario === "rash_driving" || detectionState.event?.registrationNumber) && (
-                <div className="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 bg-black/90 border border-rose-500 px-4 py-2 rounded backdrop-blur shadow-xl flex items-center gap-3 z-20 max-w-[95%]">
-                  <ShieldAlert className="w-5 h-5 text-rose-400 shrink-0" />
-                  <div className="font-mono-code text-left text-xs">
-                    <div className="text-[9px] text-rose-400 font-bold uppercase tracking-widest">ANPR Plate Extracted</div>
-                    <div className="text-sm font-bold text-white">
-                      REG: <span className="text-amber-300 bg-black/80 px-2 py-0.5 rounded border border-amber-500/50">MH12 AB 1234</span>
-                    </div>
-                  </div>
+            {/* Multi-Model Neural Vision Ensemble Dashboard */}
+            <div className="p-3 rounded-md bg-[var(--te-panel)] border border-[var(--te-border)] mt-3 font-sans">
+              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--te-border)] pb-2 mb-2.5">
+                <div className="flex items-center gap-2">
+                  <Cpu className="w-4 h-4 text-[var(--te-lime)] shrink-0" />
+                  <span className="text-xs font-bold text-[var(--te-text)] uppercase tracking-wider">
+                    Active Multi-Model Ensemble (Simultaneous Real-Time Detection)
+                  </span>
                 </div>
-              )}
+                <span className="text-[10px] font-mono-code bg-[var(--te-lime-bg)] text-[var(--te-lime)] border border-[var(--te-lime-border)] px-2 py-0.5 rounded font-bold">
+                  5 MODELS IN PARALLEL
+                </span>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 text-xs">
+                {/* Model 1: Pothole */}
+                <div className="p-2 rounded bg-black/40 border border-emerald-500/40">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[9px] text-emerald-400 font-mono-code font-bold uppercase">Pothole AI</span>
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                  </div>
+                  <div className="font-bold text-white text-[11px] mt-1">Pothole / Crater</div>
+                  <div className="text-[9px] text-emerald-400 font-mono-code">Emerald Bounding Box</div>
+                </div>
+
+                {/* Model 2: Waterlogging */}
+                <div className="p-2 rounded bg-black/40 border border-amber-500/40">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[9px] text-amber-400 font-mono-code font-bold uppercase">Flood AI</span>
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
+                  </div>
+                  <div className="font-bold text-white text-[11px] mt-1">Waterlogging</div>
+                  <div className="text-[9px] text-amber-400 font-mono-code">Amber Bounding Box</div>
+                </div>
+
+                {/* Model 3: Incident */}
+                <div className="p-2 rounded bg-black/40 border border-rose-500/40">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[9px] text-rose-400 font-mono-code font-bold uppercase">Crash AI</span>
+                    <span className="w-1.5 h-1.5 rounded-full bg-rose-400 animate-pulse"></span>
+                  </div>
+                  <div className="font-bold text-white text-[11px] mt-1">Accident / Hazard</div>
+                  <div className="text-[9px] text-rose-400 font-mono-code">Crimson Bounding Box</div>
+                </div>
+
+                {/* Model 4: ANPR */}
+                <div className="p-2 rounded bg-black/40 border border-purple-500/40">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[9px] text-purple-400 font-mono-code font-bold uppercase">ANPR AI</span>
+                    <span className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse"></span>
+                  </div>
+                  <div className="font-bold text-white text-[11px] mt-1">Plate Recognition</div>
+                  <div className="text-[9px] text-purple-400 font-mono-code">Violet Bounding Box</div>
+                </div>
+
+                {/* Model 5: COCO Fleet */}
+                <div className="p-2 rounded bg-black/40 border border-blue-500/40 col-span-2 sm:col-span-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[9px] text-blue-400 font-mono-code font-bold uppercase">Fleet AI</span>
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse"></span>
+                  </div>
+                  <div className="font-bold text-white text-[11px] mt-1">Traffic & Commuters</div>
+                  <div className="text-[9px] text-blue-400 font-mono-code">Blue Bounding Box</div>
+                </div>
+              </div>
             </div>
 
             {/* Bottom Real-Time Telemetry Bar */}

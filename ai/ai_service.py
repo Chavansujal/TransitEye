@@ -93,43 +93,63 @@ def send_event_to_backend(payload: Dict[str, Any], backend_url: str = "http://12
     print(f"Location                    : {payload.get('locationName')}")
     print("=" * 65)
     
-    # Try requests first
-    if HAS_REQUESTS:
-        try:
-            resp = requests.post(
-                backend_url,
-                json=payload,
-                headers={"Content-Type": "application/json"},
-                timeout=5.0
-            )
-            if resp.status_code in [200, 201]:
-                print(f"[SUCCESS] FastAPI Backend accepted event! Response status: {resp.status_code}")
-                print(f"   Server Response: {resp.json()}")
-                return True
-            else:
-                print(f"[ERROR] FastAPI Backend returned error status code: {resp.status_code}")
-                print(f"   Details: {resp.text}")
-                return False
-        except Exception as e:
-            print(f"[Requests notice] HTTP post error: {e}. Trying urllib fallback...")
+    # Helper function to attempt HTTP POST to a specific target URL
+    def _try_post(url: str) -> bool:
+        if HAS_REQUESTS:
+            try:
+                resp = requests.post(
+                    url,
+                    json=payload,
+                    headers={"Content-Type": "application/json"},
+                    timeout=4.0
+                )
+                if resp.status_code in [200, 201]:
+                    print(f"[SUCCESS] FastAPI Backend accepted event! Response status: {resp.status_code}")
+                    print(f"   Server Response: {resp.json()}")
+                    return True
+                else:
+                    print(f"[ERROR] FastAPI Backend returned error status code: {resp.status_code}")
+                    print(f"   Details: {resp.text}")
+                    return False
+            except Exception:
+                pass
 
-    # Fallback to urllib.request
-    try:
-        req = urllib.request.Request(
-            backend_url,
-            data=json_data,
-            headers={"Content-Type": "application/json"},
-            method="POST"
-        )
-        with urllib.request.urlopen(req, timeout=5.0) as response:
-            res_body = response.read().decode("utf-8")
-            print(f"[SUCCESS] FastAPI Backend accepted event via urllib! Response status: {response.status}")
-            print(f"   Server Response: {res_body}")
-            return True
-    except Exception as e:
-        print(f"[ERROR] Failed to connect to FastAPI backend at '{backend_url}': {e}")
-        print(" -> Make sure your FastAPI backend is running! Command: python -m uvicorn backend.main:app --reload")
+        if HAS_URLLIB:
+            try:
+                req = urllib.request.Request(
+                    url,
+                    data=json_data,
+                    headers={"Content-Type": "application/json"},
+                    method="POST"
+                )
+                with urllib.request.urlopen(req, timeout=4.0) as response:
+                    res_body = response.read().decode("utf-8")
+                    print(f"[SUCCESS] FastAPI Backend accepted event via urllib! Response status: {response.status}")
+                    print(f"   Server Response: {res_body}")
+                    return True
+            except Exception:
+                pass
         return False
+
+    # Attempt primary target
+    if _try_post(backend_url):
+        return True
+
+    # If failed, attempt alternate port (8000 <-> 8001)
+    alternate_url = None
+    if ":8000" in backend_url:
+        alternate_url = backend_url.replace(":8000", ":8001")
+    elif ":8001" in backend_url:
+        alternate_url = backend_url.replace(":8001", ":8000")
+
+    if alternate_url:
+        print(f"[Notice] Retrying event submission on alternate port: {alternate_url}...")
+        if _try_post(alternate_url):
+            return True
+
+    print(f"[ERROR] Failed to connect to FastAPI backend at '{backend_url}' (and alternate port).")
+    print(" -> Make sure your FastAPI backend is running! Command: python -m uvicorn backend.main:app --reload")
+    return False
 
 
 def process_and_post_plate(

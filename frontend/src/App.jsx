@@ -30,7 +30,22 @@ const toArray = (value) => {
 };
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState("overview");
+  const [activeTab, setActiveTab] = useState(() => {
+    if (typeof window !== "undefined" && window.location.hash) {
+      const hash = window.location.hash.replace("#", "");
+      if (["overview", "ai_model", "live", "gis", "fleet", "road_issues", "incidents", "analytics"].includes(hash)) {
+        return hash;
+      }
+    }
+    return "overview";
+  });
+
+  const handleTabChange = (newTab) => {
+    setActiveTab(newTab);
+    if (typeof window !== "undefined") {
+      window.location.hash = newTab;
+    }
+  };
   const [theme, setTheme] = useState(() => {
     if (typeof window === "undefined") return "dark";
     const savedTheme = localStorage.getItem("transiteye-theme");
@@ -63,9 +78,7 @@ export default function App() {
     { id: "RD-302", location: "Fergusson College (FC) Road", issueType: "Damaged Storm Drain", reports: 9, busesReporting: 4, severity: "HIGH", priorityScore: 78, status: "IN_REVIEW", recommendation: "Repair broken drain cover near Goodluck Chowk.", lastReported: "35 mins ago", latitude: 18.5221, longitude: 73.8415 }
   ]);
 
-  const [incidents, setIncidents] = useState([
-    { id: "INC-701", type: "Rash Driving & Speed Violation", vehicle: "White Sedan", registrationNumber: "MH12 AB 1234", anprConfidence: 0.91, busId: "BUS-104", location: "Karve Road Flyover", latitude: 18.5082, longitude: 73.8361, timestamp: "2026-09-04T16:25:00Z", severity: "CRITICAL", status: "NEW", details: "High speed weaving detected. Vehicle ANPR extracted at 91% match." }
-  ]);
+  const [incidents, setIncidents] = useState([]);
 
   const [analytics, setAnalytics] = useState({});
   const [liveToast, setLiveToast] = useState(null);
@@ -214,7 +227,7 @@ export default function App() {
       {/* Editorial Navigation Header */}
       <EditorialNavbar 
         activeTab={activeTab}
-        setActiveTab={setActiveTab}
+        setActiveTab={handleTabChange}
         activeBusesCount={buses.filter(b => b.status === "ONLINE" || b.status === "INCIDENT").length}
         totalBusesCount={buses.length}
         theme={theme}
@@ -229,7 +242,7 @@ export default function App() {
             events={events} 
             roadIssues={roadIssues} 
             incidents={incidents}
-            onNavigate={(tab) => setActiveTab(tab)}
+            onNavigate={handleTabChange}
             theme={theme}
           />
         )}

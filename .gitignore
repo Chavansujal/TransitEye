@@ -15,10 +15,19 @@ frontend/dist/
 build/
 
 # Model outputs & datasets
+output/
+outputs/
+test_videos/
+test_custom/
+test_images/
+*.zip
 AI model/datasets/
+AI model/output
+AI model/outputs
+AI model/test_videos
 AI model/output/
 AI model/outputs/
-AI model/test_videos/*.mp4
+AI model/test_videos/
 
 # Python cache & bytecode
 __pycache__/
